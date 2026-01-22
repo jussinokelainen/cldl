@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+#
+# For this script to work as intended, working directory should
+# should be the directory the script is in.
+
+WORKING_DIR=${PWD##*/}
+SCRIPT_DIR=$(basename "$(cd "$(dirname "$0")" && pwd)")
+
+fatal() {
+	echo '[FATAL]' "$@" >&2
+	exit 1
+}
+
+show-help() {
+	cat <<-EOF
+	
+	 This is a script to build the todo app
+
+	 Available commands:
+	   -h | Show help
+	
+	EOF
+}
+
+main() {
+	if [[ $WORKING_DIR != $SCRIPT_DIR ]]; then
+		fatal 'wrong directory'
+	fi
+	local OPTARG OPTIND opt
+	while getopts 'h' opt; do
+		case "$opt" in
+			h)
+				show-help
+				exit 0
+				;;
+			*) fatal 'Bad option, use -h for help';;
+		esac
+	done
+
+	printf "[\e[35m INFO \e[0m] Building todo..."
+	output=$(go build .)
+	if [[ $? = 0 ]]; then
+		printf "\r\e[0K"
+		printf "[\e[32m OK \e[0m] Building todo done\n"
+	else
+		printf "\r\e[0K"
+		printf "[\e[31m ERROR \e[0m] Building todo failed!\n"
+		sleep .2
+		echo "$output"
+		exit 1
+	fi
+
+	printf "[\e[35m INFO \e[0m] Moving executabe to /dev/bin/"
+	output=$(mv ./todo ~/dev/bin/todo)
+	if [[ $? = 0 ]]; then
+		printf "\r\e[0K"
+		printf "[\e[32m OK \e[0m] Moving done\n"
+	else
+		printf "\r\e[0K"
+		printf "[\e[31m ERROR \e[0m] Moving failed!\n"
+		sleep .2
+		echo "$output"
+		exit 1
+	fi
+
+}
+
+main "$@"
