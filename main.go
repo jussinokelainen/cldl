@@ -8,39 +8,57 @@ import (
 
 var masterDB *sql.DB
 
+func main() {
+	args := os.Args[1:]
+	// If no args given, print usage and exit
+	if len(args) < 1 {
+		mainUsage()
+		return
+	}
+
+	createMasterDB()
+	defer masterDB.Close()
+
+	switch args[0] {
+	case "--help", "-h":
+		mainHelp()
+	case "init":
+		initTodo(args[1:])
+	case "add":
+		if !todoExists() {
+			return
+		}
+		addTodo(args[1:])
+	case "list":
+		listTodo(args[1:])
+	case "rm", "remove", "done":
+		if !todoExists() {
+			return
+		}
+		rmTodo(args[1:])
+	default:
+		errout("Bad arguments")
+		mainUsage()
+	}
+}
+
+func ok(msg string)     { fmt.Println("[\033[32m OK \033[0m] ", msg) }
+func info(msg string)   { fmt.Println("[\033[35m INFO \033[0m] ", msg) }
+func errout(msg string) { fmt.Println("[\033[31m ERROR \033[0m] ", msg) }
+
 func getDbPath() string {
 	cwd, err := os.Getwd()
 	if err != nil {
-		error("Getting db path failed!")
+		errout("Getting db path failed!")
 		panic(err)
 	}
 	return cwd + "/.todoApp.db"
 }
 
-func info(msg string) {
-	fmt.Println("[\033[35m INFO \033[0m] ", msg)
-}
-
-func error(msg string) {
-	fmt.Println("[\033[31m ERROR \033[0m] ", msg)
-}
-
-func printUsage() {
-	fmt.Println("Usage: todo <COMMAND> [<args>]")
-	fmt.Println("  Use todo --help to see arguments")
-}
-
-func printHelp() {
-	fmt.Println("Help for todo:")
-	fmt.Println(" Usage: todo <COMMAND> [<args>]")
-	fmt.Println(" Available commands:")
-	fmt.Println("   init | create new todo in current dir")
-}
-
 func openTodoDB() *sql.DB {
 	db, err := sql.Open("sqlite", getDbPath())
 	if err != nil {
-		error("Opening todo DB failed!")
+		errout("Opening todo DB failed!")
 		panic(err)
 	}
 	return db
@@ -49,59 +67,32 @@ func openTodoDB() *sql.DB {
 func createMasterDB() {
 	homedir, err := os.UserHomeDir()
 	if err != nil {
-		error("Getting homedir failed!")
+		errout("Getting homedir failed!")
 		panic(err)
 	}
-
 	masterDbDIR := homedir + "/.sqlite/todo"
 	err = os.MkdirAll(masterDbDIR, 0755)
 	if err != nil {
-		error("Creating .sqlite/todo dir failed!")
+		errout("Creating .sqlite/todo dir failed!")
 		panic(err)
 	}
 
 	masterDB, err = sql.Open("sqlite", masterDbDIR+"/.todo.db")
 	if err != nil {
-		error("Opening master db failed!")
+		errout("Opening master db failed!")
 		panic(err)
 	}
-
 	_, err = masterDB.Exec(`CREATE TABLE IF NOT EXISTS locations (location VARCHAR UNIQUE);`)
 	if err != nil {
-		error("Creating master db failed!")
+		errout("Creating master db failed!")
 		panic(err)
 	}
 }
 
-func main() {
-	args := os.Args[1:]
-	createMasterDB()
-	defer masterDB.Close()
-
-	// If no args given, print usage and exit
-	if len(args) < 1 {
-		printUsage()
-		return
+func todoExists() bool {
+	if _, err := os.Stat(getDbPath()); os.IsNotExist(err) {
+		errout("No todo exists in current directory!")
+		return false
 	}
-
-	switch args[0] {
-	case "--help":
-		printHelp()
-
-	case "init":
-		initTodo(args[1:])
-
-	case "add":
-		addTodo(args[1:])
-
-	case "list":
-		listTodo(args[1:])
-
-	case "rm":
-		rmTodo(args[1:])
-
-	default:
-		info("Bad arguments")
-		printUsage()
-	}
+	return true
 }
