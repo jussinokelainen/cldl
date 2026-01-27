@@ -10,6 +10,7 @@ import (
 	"github.com/mitchellh/go-wordwrap"
 )
 
+// Maximum width of the text rendered before wrapping it
 var maxWidth = 50
 
 type TodoStruct struct {
@@ -42,10 +43,12 @@ func listTodo(args []string) {
 		printToPager(listAllTodoLocations())
 		return
 	default:
-		usageAdd()
+		usageList()
 	}
 }
 
+// Formats the items in a given slice. Returns a string with all decorations, newlines etc
+// that is ready to be printed as returned
 func formatListItems(todoSlice []TodoStruct) string {
 	current_box := 1
 	var listString strings.Builder
@@ -68,12 +71,12 @@ func formatListItems(todoSlice []TodoStruct) string {
 
 		// Print content
 		if len(row.Content) < maxWidth {
-			listString.WriteString(printContentLine(row.Content))
+			listString.WriteString(formatContentLine(row.Content))
 		} else {
 			contentWrapped := wordwrap.WrapString(row.Content, uint(maxWidth))
 			contentLines := strings.SplitSeq(contentWrapped, "\n")
 			for line := range contentLines {
-				listString.WriteString(printContentLine(line))
+				listString.WriteString(formatContentLine(line))
 			}
 		}
 		fmt.Fprintf(&listString, "\033[35m    ║  %s  ║\033[0m\n", addSpace(maxWidth))
@@ -97,7 +100,8 @@ func formatListItems(todoSlice []TodoStruct) string {
 	return listString.String()
 }
 
-func printContentLine(line string) string {
+// Formats and decorates a single line of a todo entry's content returns it as a string
+func formatContentLine(line string) string {
 	var listString strings.Builder
 	visibleLen := len(line)
 	free := max(maxWidth-visibleLen, 0)
@@ -111,6 +115,8 @@ func printContentLine(line string) string {
 	return listString.String()
 }
 
+// Lists, formats and decorates all locations inside the master database
+// returns a decorated string
 func listAllTodoLocations() string {
 	var listString strings.Builder
 	var locSlice []string
@@ -156,10 +162,12 @@ func listAllTodoLocations() string {
 	return listString.String()
 }
 
+// Simply prints the given content string into less or errors out
 func printToPager(content string) {
 	cmd := exec.Command("/usr/bin/less", "-R")
 	cmd.Stdin = strings.NewReader(content)
 	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
 		errout("Error in running less")
@@ -167,6 +175,8 @@ func printToPager(content string) {
 	}
 }
 
+// Gets and returns the contents of a local todo database,
+// returns an error if the list is empty
 func getTodoSlice() ([]TodoStruct, error) {
 	var todoSlice []TodoStruct
 	todoDB := openTodoDB()
@@ -196,6 +206,8 @@ func getTodoSlice() ([]TodoStruct, error) {
 	return todoSlice, nil
 }
 
+// Formatting helper functions that return a string
+// with a given amount of spaces or lines
 func addLine(length int) string {
 	return strings.Repeat("═", length)
 }

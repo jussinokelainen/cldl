@@ -51,7 +51,7 @@ main() {
 		exit 1
 	fi
 
-	printf "[\e[35m INFO \e[0m] Moving executabe"
+	printf "[\e[35m INFO \e[0m] Moving executable"
 	output=$(mv ./todo ~/dev/bin/todo)
 	if [[ $? = 0 ]]; then
 		printf "\r\e[0K"

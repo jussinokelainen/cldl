@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	_ "modernc.org/sqlite"
 )
 
@@ -20,11 +22,12 @@ func initTodo(args []string) {
 	}
 }
 
+// Create a new todo into cwd if one doesn't exist already
 func createNewTodo() {
 	todoPath := getDbPath()
 	// Check whether current directory already has a list
 	// if it exists, do not create a new one, and just return
-	if todoExists() {
+	if _, err := os.Stat(getDbPath()); !os.IsNotExist(err) {
 		errout("Todo already exists in current directory!")
 		return
 	}

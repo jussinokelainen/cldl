@@ -45,6 +45,9 @@ func rmTodo(args []string) {
 	}
 }
 
+// Deletes the local todo database and removes it from the master list
+// If there is a local file with the exact name that is not a todo database:
+// don't care + didn't ask + skill issue + your file is deleted
 func removeAllData() {
 	todoPath := getDbPath()
 	sqlStatement := `DELETE FROM locations WHERE location = ?;`

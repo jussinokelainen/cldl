@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+// Adds a new todo with a title given as an argument, 'todo add <title>'
+// Unless there is another argument (--help etc) that does something different
 func addTodo(args []string) {
 	if len(args) < 1 {
 		usageAdd()
@@ -39,8 +41,7 @@ func addTodo(args []string) {
 		sqlStatement := `INSERT INTO todo(title, content, time) VALUES($1, $2, $3);`
 		_, err = todoDB.Exec(sqlStatement, title, content, time)
 		if err != nil {
-			errout("Error adding new todo")
-			info("Make sure a todo is initialized and title is unique")
+			errout("Error adding new todo, is a list initialized?")
 			panic(err)
 		}
 		ok("Successfully added new todo " + title)

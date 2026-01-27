@@ -103,3 +103,25 @@ Help for todo list:
 	Show all todo list entries, or all todo lists
 `)
 }
+
+// NOTE: Edit command help and usage functions
+func usageEdit() {
+	fmt.Print(`
+Usage: todo edit [<args>] <title>
+	Use todo edit --help to see arguments
+`)
+}
+func helpEdit() {
+	fmt.Print(`
+Help for todo edit:
+	Available arguments:
+		--help | Show help for todo edit
+		-h     | Same as '--help'
+		--keep | New content gets appended to already existing
+		       | content instead of overriding it
+		-k     | Same as '--keep'
+
+	Edit a todo list entry that already exists
+	with a title given as argument
+`)
+}
