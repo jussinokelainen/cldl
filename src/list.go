@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/mitchellh/go-wordwrap"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // Maximum width of the text rendered before wrapping it
@@ -52,20 +53,28 @@ func listTodo(args []string) {
 func formatListItems(todoSlice []TodoStruct) string {
 	current_box := 1
 	var listString strings.Builder
+	center := func() {
+		fmt.Fprintf(&listString, "%s", centerListToScreen(maxWidth+2))
+	}
 	// Top border and empty row
-	fmt.Fprintf(&listString, "\033[35m    ╔══%s══╗\n", addLine(maxWidth))
-	fmt.Fprintf(&listString, "\033[35m    ║  %s  ║\033[0m", addSpace(maxWidth))
+	center()
+	fmt.Fprintf(&listString, "\033[35m╔══%s══╗\n", addLine(maxWidth))
+	fmt.Fprintf(&listString, "%s", centerListToScreen(maxWidth+2))
+	fmt.Fprintf(&listString, "\033[35m║  %s  ║\033[0m", addSpace(maxWidth))
 
 	for _, row := range todoSlice {
 		// Print title
 		titleSize := len(row.Title)
 		titleLeftPad := maxWidth/2 - titleSize/2
 		titleRightPad := maxWidth/2 - (titleSize+1)/2
-		fmt.Fprintf(&listString, "\n\033[35m    ║%s", addSpace(titleLeftPad+2))
+		fmt.Fprint(&listString, "\n")
+		center()
+		fmt.Fprintf(&listString, "\033[35m║%s", addSpace(titleLeftPad+2))
 		fmt.Fprintf(&listString, "\033[36m%s", row.Title)
 		fmt.Fprintf(&listString, "\033[35m%s║\n", addSpace(titleRightPad+2))
 
-		fmt.Fprintf(&listString, "\033[35m    ║%s", addSpace(titleLeftPad))
+		center()
+		fmt.Fprintf(&listString, "\033[35m║%s", addSpace(titleLeftPad))
 		fmt.Fprintf(&listString, "\033[36m══%s══", addLine(titleSize))
 		fmt.Fprintf(&listString, "\033[35m%s║\n", addSpace(titleRightPad))
 
@@ -79,21 +88,26 @@ func formatListItems(todoSlice []TodoStruct) string {
 				listString.WriteString(formatContentLine(line))
 			}
 		}
-		fmt.Fprintf(&listString, "\033[35m    ║  %s  ║\033[0m\n", addSpace(maxWidth))
+		center()
+		fmt.Fprintf(&listString, "\033[35m║  %s  ║\033[0m\n", addSpace(maxWidth))
 
 		// Print creation timestamp
 		timeString := "Created: " + time.Time.String(time.Unix(row.Time, 0).UTC())
 		timePadding := maxWidth/2 - len(timeString)/2
-		fmt.Fprintf(&listString, "\033[35m    ║%s", addSpace(timePadding+2))
+		center()
+		fmt.Fprintf(&listString, "\033[35m║%s", addSpace(timePadding+2))
 		fmt.Fprintf(&listString, "\033[38;5;8m%s", timeString)
 		fmt.Fprintf(&listString, "%s\033[35m║\n", addSpace(timePadding+2))
 
 		// Print borders that continue into the next box if not last box
 		if current_box < len(todoSlice) {
-			fmt.Fprintf(&listString, "\033[35m    ╠══%s══╣\033[0m\n", addLine(maxWidth))
-			fmt.Fprintf(&listString, "\033[35m    ║  %s  ║\033[0m", addSpace(maxWidth))
+			center()
+			fmt.Fprintf(&listString, "\033[35m╠══%s══╣\033[0m\n", addLine(maxWidth))
+			center()
+			fmt.Fprintf(&listString, "\033[35m║  %s  ║\033[0m", addSpace(maxWidth))
 		} else {
-			fmt.Fprintf(&listString, "\033[35m    ╚══%s══╝\n", addLine(maxWidth))
+			center()
+			fmt.Fprintf(&listString, "\033[35m╚══%s══╝\n", addLine(maxWidth))
 		}
 		current_box++
 	}
@@ -108,7 +122,8 @@ func formatContentLine(line string) string {
 	left := free / 2
 	right := free - left
 
-	fmt.Fprintf(&listString, "\033[35m    ║%s", addSpace(left+2))
+	fmt.Fprintf(&listString, "%s", centerListToScreen(maxWidth+2))
+	fmt.Fprintf(&listString, "\033[35m║%s", addSpace(left+2))
 	fmt.Fprintf(&listString, "\033[32m%s", line)
 	fmt.Fprintf(&listString, "\033[35m%s║\n", addSpace(right+2))
 
@@ -146,18 +161,22 @@ func listAllTodoLocations() string {
 		}
 	}
 
-	fmt.Fprintf(&listString, "\n%s\033[36m    All todo list locations\033[0m\n",
+	fmt.Fprintf(&listString, "\n%s", centerListToScreen(longestLoc+2))
+	fmt.Fprintf(&listString, "%s\033[36mAll todo list locations\033[0m\n",
 		addSpace((longestLoc/2)-9))
-	fmt.Fprintf(&listString, "\033[35m    ╔══%s══╗\n", addLine(longestLoc))
+	fmt.Fprintf(&listString, "%s", centerListToScreen(longestLoc+2))
+	fmt.Fprintf(&listString, "\033[35m╔══%s══╗\n", addLine(longestLoc))
 
 	for _, loc := range locSlice {
 		lenDiff := longestLoc - len(loc)
-		fmt.Fprintf(&listString, "\033[35m    ║%s", addSpace(lenDiff/2+2))
+		fmt.Fprintf(&listString, "%s", centerListToScreen(longestLoc+2))
+		fmt.Fprintf(&listString, "\033[35m║%s", addSpace(lenDiff/2+2))
 		fmt.Fprintf(&listString, "\033[36m%s", loc)
 		fmt.Fprintf(&listString, "\033[35m%s║\n", addSpace((lenDiff+1)/2+2))
 	}
 
-	fmt.Fprintf(&listString, "\033[35m    ╚══%s══╝\033[0m\n", addLine(longestLoc))
+	fmt.Fprintf(&listString, "%s", centerListToScreen(longestLoc+2))
+	fmt.Fprintf(&listString, "\033[35m╚══%s══╝\033[0m\n", addLine(longestLoc))
 
 	return listString.String()
 }
@@ -204,6 +223,18 @@ func getTodoSlice() ([]TodoStruct, error) {
 	}
 
 	return todoSlice, nil
+}
+
+func centerListToScreen(contentWidth int) string {
+	spacerSize := 1
+	width, _, err := terminal.GetSize(int(os.Stdout.Fd()))
+	if err == nil {
+		terminalMid := width / 2
+		contentMid := contentWidth / 2
+		spacerSize = terminalMid - contentMid
+	}
+
+	return strings.Repeat(" ", spacerSize)
 }
 
 // Formatting helper functions that return a string
