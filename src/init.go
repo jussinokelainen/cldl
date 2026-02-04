@@ -6,24 +6,7 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-func initTodo(args []string) {
-	if len(args) < 1 {
-		createNewTodo()
-		return
-	}
-
-	switch args[0] {
-	case "--help", "-h":
-		helpInit()
-		return
-	default:
-		errout("Invalid arguments")
-		usageInit()
-	}
-}
-
-// Create a new todo into cwd if one doesn't exist already
-func createNewTodo() {
+func initTodo() {
 	todoPath := getDbPath()
 	// Check whether current directory already has a list
 	// if it exists, do not create a new one, and just return

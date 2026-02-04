@@ -9,28 +9,12 @@ import (
 	"github.com/mitchellh/go-wordwrap"
 )
 
-func editTodo(args []string) {
-	if len(args) < 1 {
+func editTodo(title string, keep bool) {
+	if title == "" {
 		usageEdit()
 		return
 	}
 
-	switch args[0] {
-	case "--help", "-h":
-		helpEdit()
-		return
-	case "--keep", "-k":
-		changeContent(true, args[1])
-		return
-	default:
-		changeContent(false, args[0])
-		return
-	}
-}
-
-// Change the contents of a todo entry with given title, either keep the existing content or
-// overwrite it depending on whether 'keep' is true or false
-func changeContent(keep bool, title string) {
 	content, err := getIfEntryExists(title)
 	if err != nil {
 		errout("No todo list entry found with title " + title)

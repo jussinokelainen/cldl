@@ -38,7 +38,7 @@ func helpInit() {
 Help for todo init:
 	Available arguments:
 		--help | Show help for todo init
-		-h	   | Same as '--help'
+		-h     | Same as '--help'
 
 	Initialize a local todo list in current directory
 `)
@@ -95,10 +95,12 @@ func helpList() {
 	fmt.Print(`
 Help for todo list:
 	Available arguments:
-		--help | Show help for todo list
-		-h     | Same as '--help'
-		--all  | List all locations with todo's
-		-a     | Same as '--all'
+		--help      | Show help for todo list
+		-h          | Same as '--help'
+		--all       | List all locations with todo's
+		-a          | Same as '--all'
+		--pager     | ONLY with --all, sends the list to a pager
+		--no-pager  | Don't use a pager for printing the local list
 
 	Show all todo list entries, or all todo lists
 `)

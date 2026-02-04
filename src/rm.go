@@ -2,46 +2,37 @@ package main
 
 import "os"
 
-func rmTodo(args []string) {
-	if !todoExists() {
+func rmTodo(title string, rmAll bool) {
+	if rmAll {
+		removeAllData()
 		return
 	}
 
-	if len(args) < 1 {
+	if title == "" {
 		usageRm()
 		return
 	}
 
-	switch args[0] {
-	case "--help", "-h":
-		helpRm()
-		return
-	case "--all", "-a":
-		removeAllData()
-		return
-	default:
-		title := args[0]
-		todoDB := openTodoDB()
-		defer todoDB.Close()
+	todoDB := openTodoDB()
+	defer todoDB.Close()
 
-		sqlStatement := `DELETE FROM todo WHERE title= ?;`
-		res, err := todoDB.Exec(sqlStatement, title)
-		if err != nil {
-			errout("Error removing entry")
-			panic(err)
-		}
+	sqlStatement := `DELETE FROM todo WHERE title= ?;`
+	res, err := todoDB.Exec(sqlStatement, title)
+	if err != nil {
+		errout("Error removing entry")
+		panic(err)
+	}
 
-		rowsAffected, err := res.RowsAffected()
-		if err != nil {
-			errout("Error getting affected rows")
-			panic(err)
-		}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		errout("Error getting affected rows")
+		panic(err)
+	}
 
-		if rowsAffected == 0 {
-			errout("No entry found with title " + title)
-		} else {
-			ok("Succesfully removed entry " + title)
-		}
+	if rowsAffected == 0 {
+		errout("No entry found with title " + title)
+	} else {
+		ok("Succesfully removed entry " + title)
 	}
 }
 

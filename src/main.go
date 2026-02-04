@@ -2,8 +2,10 @@ package main
 
 import (
 	"database/sql"
+	"flag"
 	"fmt"
 	"os"
+	"strings"
 )
 
 var masterDB *sql.DB
@@ -23,24 +25,117 @@ func main() {
 	case "--help", "-h":
 		mainHelp()
 	case "init":
-		initTodo(args[1:])
+		initFlags := flag.NewFlagSet("initFlags", flag.ExitOnError)
+		help := initFlags.Bool("h", false, "show help for todo init")
+		helpLong := initFlags.Bool("help", false, "show help for todo init")
+		initFlags.Usage = usageInit
+		err := initFlags.Parse(args[1:])
+		if err != nil {
+			os.Exit(1)
+		}
+		if *help || *helpLong {
+			helpInit()
+			return
+		}
+		if len(initFlags.Args()) > 0 {
+			fmt.Println("Bad Arguments")
+			initFlags.Usage()
+			os.Exit(1)
+		}
+		initTodo()
+
 	case "add":
+		addFlags := flag.NewFlagSet("addFlags", flag.ExitOnError)
+		help := addFlags.Bool("h", false, "show help for todo add")
+		helpLong := addFlags.Bool("help", false, "show help for todo add")
+		addFlags.Usage = usageAdd
+		err := addFlags.Parse(args[1:])
+		if err != nil {
+			os.Exit(1)
+		}
+		if *help || *helpLong {
+			helpAdd()
+			return
+		}
 		if !todoExists() {
 			return
 		}
-		addTodo(args[1:])
+		title := strings.Join(addFlags.Args(), " ")
+		addTodo(title)
+
 	case "list":
-		listTodo(args[1:])
+		listFlags := flag.NewFlagSet("listFlags", flag.ExitOnError)
+		help := listFlags.Bool("h", false, "show help for todo list")
+		helpLong := listFlags.Bool("help", false, "show help for todo list")
+		pager := listFlags.Bool("pager", false, "Do not send local list to pager")
+		all := listFlags.Bool("a", false, "List all todo list locations")
+		allLong := listFlags.Bool("all", false, "List all todo list locations")
+		listFlags.Usage = usageList
+		err := listFlags.Parse(args[1:])
+		if err != nil {
+			os.Exit(1)
+		}
+		if *help || *helpLong {
+			helpList()
+			return
+		}
+		listAll := false
+		if *all || *allLong {
+			listAll = true
+		}
+		// Reverse value since bool flags don't automatically toggle to false
+		listTodo(listAll, !*pager)
+
 	case "rm", "remove", "done":
 		if !todoExists() {
 			return
 		}
-		rmTodo(args[1:])
+		rmFlags := flag.NewFlagSet("rmFlags", flag.ExitOnError)
+		help := rmFlags.Bool("h", false, "show help for todo rm")
+		helpLong := rmFlags.Bool("help", false, "show help for todo rm")
+		all := rmFlags.Bool("a", false, "List all todo list locations")
+		allLong := rmFlags.Bool("all", false, "List all todo list locations")
+		rmFlags.Usage = usageRm
+		err := rmFlags.Parse(args[1:])
+		if err != nil {
+			os.Exit(1)
+		}
+		if *help || *helpLong {
+			helpRm()
+			return
+		}
+		rmAll := false
+		if *all || *allLong {
+			rmAll = true
+		}
+		title := strings.Join(rmFlags.Args(), " ")
+		rmTodo(title, rmAll)
+
 	case "edit":
 		if !todoExists() {
 			return
 		}
-		editTodo(args[1:])
+		editFlags := flag.NewFlagSet("editFlags", flag.ExitOnError)
+		help := editFlags.Bool("h", false, "show help for todo edit")
+		helpLong := editFlags.Bool("help", false, "show help for todo edit")
+		keep := editFlags.Bool("k", false, "List all todo list locations")
+		keepLong := editFlags.Bool("keep", false, "List all todo list locations")
+		editFlags.Usage = usageEdit
+		err := editFlags.Parse(args[1:])
+		if err != nil {
+			os.Exit(1)
+		}
+		if *help || *helpLong {
+			helpEdit()
+			return
+		}
+		keepContent := false
+		if *keep || *keepLong {
+			keepContent = true
+		}
+		title := strings.Join(editFlags.Args(), " ")
+		editTodo(title, keepContent)
+
 	default:
 		errout("Bad arguments")
 		mainUsage()
