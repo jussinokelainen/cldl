@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"fmt"
@@ -20,7 +20,7 @@ type TodoStruct struct {
 	Time    int64  `json:"time"`
 }
 
-func listTodo(all bool, pager bool) {
+func ListTodo(all bool, pager bool) {
 	printList := func(listString string, page bool) {
 		if page {
 			printToPager(listString)
@@ -30,7 +30,7 @@ func listTodo(all bool, pager bool) {
 	}
 
 	getIfExists := func() []TodoStruct {
-		if !todoExists() {
+		if !TodoExists() {
 			return nil
 		}
 
@@ -48,7 +48,6 @@ func listTodo(all bool, pager bool) {
 		printList(listAllTodoLocations(), !pager)
 		return
 	} else {
-		fmt.Println(pager)
 		applyPadding = pager
 		printList(formatListItems(getIfExists()), pager)
 		return
@@ -140,7 +139,7 @@ func listAllTodoLocations() string {
 	var listString strings.Builder
 	var locSlice []string
 
-	rows, err := masterDB.Query(`SELECT * FROM locations;`)
+	rows, err := MasterDB.Query(`SELECT * FROM locations;`)
 	if err != nil {
 		errout("Failed getting all locations")
 		panic(err)
@@ -165,6 +164,7 @@ func listAllTodoLocations() string {
 		}
 	}
 
+	fmt.Fprint(&listString, "\n")
 	padContentToCenter(&listString, longestLoc+2)
 	fmt.Fprintf(&listString, "%s\033[36mAll todo list locations\033[0m\n",
 		addSpace((longestLoc/2)-9))

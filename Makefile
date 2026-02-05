@@ -10,7 +10,7 @@ build:
 	@mkdir -p bin
 
 	@printf "\e[36m==> \e[0mCompiling binaries...\n"
-	go build -o ./bin/$(APP) ./src/
+	go build -o ./bin/$(APP) ./
 
 	@printf "[\e[32m OK \e[0m] Build complete\n"
 

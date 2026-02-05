@@ -1,39 +1,15 @@
-package main
+package cmd
 
 import "fmt"
 
-// NOTE: Main help and usage functions
-func mainUsage() {
-	fmt.Print(`
-Usage: todo <COMMAND> [<args>]
-	Use todo --help to see available commands and arguments
-`)
-}
-func mainHelp() {
-	fmt.Print(`
-Help for todo:
-	Available commands:
-		--help		   | Show help message
-		-h			   | Same as '--help'
-		init		   | Create new todo in current dir
-		list		   | List all todo list entries
-		add			   | Add new entry into todo list
-		rm <title>	   | Remove todo list entry or entire list, see 'todo rm --help'
-		remove <title> | Same as 'rm'
-		done <title>   | Same as 'rm'
-
-	Todo application that creates local per-directory todo-lists with sqlite
-`)
-}
-
 // NOTE: Init help and usage functions
-func usageInit() {
+func UsageInit() {
 	fmt.Print(`
 Usage: todo init [<args>]
 	Use todo init --help to see arguments
 `)
 }
-func helpInit() {
+func HelpInit() {
 	fmt.Print(`
 Help for todo init:
 	Available arguments:
@@ -45,13 +21,13 @@ Help for todo init:
 }
 
 // NOTE: Remove command help and usage functions
-func usageRm() {
+func UsageRm() {
 	fmt.Print(`
 Usage: todo rm [<args>] <title>
 	Use todo rm --help to see arguments
 `)
 }
-func helpRm() {
+func HelpRm() {
 	fmt.Print(`
 Help for todo rm:
 	Available arguments:
@@ -66,13 +42,13 @@ Help for todo rm:
 }
 
 // NOTE: Add command help and usage functions
-func usageAdd() {
+func UsageAdd() {
 	fmt.Print(`
 Usage: todo add [<args>] <title>
 	Use todo add --help to see arguments
 `)
 }
-func helpAdd() {
+func HelpAdd() {
 	fmt.Print(`
 Help for todo add:
 	Available arguments:
@@ -85,13 +61,13 @@ Help for todo add:
 }
 
 // NOTE: List command help and usage functions
-func usageList() {
+func UsageList() {
 	fmt.Print(`
 Usage: todo list [<args>]
 	Use todo list --help to see arguments
 `)
 }
-func helpList() {
+func HelpList() {
 	fmt.Print(`
 Help for todo list:
 	Available arguments:
@@ -107,13 +83,13 @@ Help for todo list:
 }
 
 // NOTE: Edit command help and usage functions
-func usageEdit() {
+func UsageEdit() {
 	fmt.Print(`
 Usage: todo edit [<args>] <title>
 	Use todo edit --help to see arguments
 `)
 }
-func helpEdit() {
+func HelpEdit() {
 	fmt.Print(`
 Help for todo edit:
 	Available arguments:

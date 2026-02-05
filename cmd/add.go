@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"bufio"
@@ -9,7 +9,7 @@ import (
 )
 
 // Adds a new todo with a title given as an argument, 'todo add <title>'
-func addTodo(title string) {
+func AddTodo(title string) {
 
 	todoDB := openTodoDB()
 	defer todoDB.Close()

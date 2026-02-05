@@ -1,14 +1,12 @@
 package main
 
 import (
-	"database/sql"
 	"flag"
 	"fmt"
 	"os"
 	"strings"
+	"todo/cmd"
 )
-
-var masterDB *sql.DB
 
 func main() {
 	args := os.Args[1:]
@@ -17,9 +15,8 @@ func main() {
 		mainUsage()
 		return
 	}
-
-	createMasterDB()
-	defer masterDB.Close()
+	cmd.CreateMasterDB()
+	defer cmd.MasterDB.Close()
 
 	switch args[0] {
 	case "--help", "-h":
@@ -28,13 +25,13 @@ func main() {
 		initFlags := flag.NewFlagSet("initFlags", flag.ExitOnError)
 		help := initFlags.Bool("h", false, "show help for todo init")
 		helpLong := initFlags.Bool("help", false, "show help for todo init")
-		initFlags.Usage = usageInit
+		initFlags.Usage = cmd.UsageInit
 		err := initFlags.Parse(args[1:])
 		if err != nil {
 			os.Exit(1)
 		}
 		if *help || *helpLong {
-			helpInit()
+			cmd.HelpInit()
 			return
 		}
 		if len(initFlags.Args()) > 0 {
@@ -42,26 +39,26 @@ func main() {
 			initFlags.Usage()
 			os.Exit(1)
 		}
-		initTodo()
+		cmd.InitTodo()
 
 	case "add":
 		addFlags := flag.NewFlagSet("addFlags", flag.ExitOnError)
 		help := addFlags.Bool("h", false, "show help for todo add")
 		helpLong := addFlags.Bool("help", false, "show help for todo add")
-		addFlags.Usage = usageAdd
+		addFlags.Usage = cmd.UsageAdd
 		err := addFlags.Parse(args[1:])
 		if err != nil {
 			os.Exit(1)
 		}
 		if *help || *helpLong {
-			helpAdd()
+			cmd.HelpAdd()
 			return
 		}
-		if !todoExists() {
+		if !cmd.TodoExists() {
 			return
 		}
 		title := strings.Join(addFlags.Args(), " ")
-		addTodo(title)
+		cmd.AddTodo(title)
 
 	case "list":
 		listFlags := flag.NewFlagSet("listFlags", flag.ExitOnError)
@@ -70,13 +67,13 @@ func main() {
 		pager := listFlags.Bool("pager", false, "Do not send local list to pager")
 		all := listFlags.Bool("a", false, "List all todo list locations")
 		allLong := listFlags.Bool("all", false, "List all todo list locations")
-		listFlags.Usage = usageList
+		listFlags.Usage = cmd.UsageList
 		err := listFlags.Parse(args[1:])
 		if err != nil {
 			os.Exit(1)
 		}
 		if *help || *helpLong {
-			helpList()
+			cmd.HelpList()
 			return
 		}
 		listAll := false
@@ -84,10 +81,10 @@ func main() {
 			listAll = true
 		}
 		// Reverse value since bool flags don't automatically toggle to false
-		listTodo(listAll, !*pager)
+		cmd.ListTodo(listAll, !*pager)
 
 	case "rm", "remove", "done":
-		if !todoExists() {
+		if !cmd.TodoExists() {
 			return
 		}
 		rmFlags := flag.NewFlagSet("rmFlags", flag.ExitOnError)
@@ -95,13 +92,13 @@ func main() {
 		helpLong := rmFlags.Bool("help", false, "show help for todo rm")
 		all := rmFlags.Bool("a", false, "List all todo list locations")
 		allLong := rmFlags.Bool("all", false, "List all todo list locations")
-		rmFlags.Usage = usageRm
+		rmFlags.Usage = cmd.UsageRm
 		err := rmFlags.Parse(args[1:])
 		if err != nil {
 			os.Exit(1)
 		}
 		if *help || *helpLong {
-			helpRm()
+			cmd.HelpRm()
 			return
 		}
 		rmAll := false
@@ -109,10 +106,10 @@ func main() {
 			rmAll = true
 		}
 		title := strings.Join(rmFlags.Args(), " ")
-		rmTodo(title, rmAll)
+		cmd.RmTodo(title, rmAll)
 
 	case "edit":
-		if !todoExists() {
+		if !cmd.TodoExists() {
 			return
 		}
 		editFlags := flag.NewFlagSet("editFlags", flag.ExitOnError)
@@ -120,13 +117,13 @@ func main() {
 		helpLong := editFlags.Bool("help", false, "show help for todo edit")
 		keep := editFlags.Bool("k", false, "List all todo list locations")
 		keepLong := editFlags.Bool("keep", false, "List all todo list locations")
-		editFlags.Usage = usageEdit
+		editFlags.Usage = cmd.UsageEdit
 		err := editFlags.Parse(args[1:])
 		if err != nil {
 			os.Exit(1)
 		}
 		if *help || *helpLong {
-			helpEdit()
+			cmd.HelpEdit()
 			return
 		}
 		keepContent := false
@@ -134,7 +131,7 @@ func main() {
 			keepContent = true
 		}
 		title := strings.Join(editFlags.Args(), " ")
-		editTodo(title, keepContent)
+		cmd.EditTodo(title, keepContent)
 
 	default:
 		errout("Bad arguments")
@@ -147,61 +144,26 @@ func ok(msg string)     { fmt.Println("[\033[32m OK \033[0m] ", msg) }
 func info(msg string)   { fmt.Println("[\033[35m INFO \033[0m] ", msg) }
 func errout(msg string) { fmt.Println("[\033[31m ERROR \033[0m] ", msg) }
 
-// Get the path of a local todo database, returns the path as a string
-func getDbPath() string {
-	cwd, err := os.Getwd()
-	if err != nil {
-		errout("Getting db path failed!")
-		panic(err)
-	}
-	return cwd + "/.todoApp.db"
+// NOTE: Main help and usage functions
+func mainUsage() {
+	fmt.Print(`
+Usage: todo <COMMAND> [<args>]
+	Use todo --help to see available commands and arguments
+`)
 }
+func mainHelp() {
+	fmt.Print(`
+Help for todo:
+	Available commands:
+		--help		   | Show help message
+		-h			   | Same as '--help'
+		init		   | Create new todo in current dir
+		list		   | List all todo list entries
+		add			   | Add new entry into todo list
+		rm <title>	   | Remove todo list entry or entire list, see 'todo rm --help'
+		remove <title> | Same as 'rm'
+		done <title>   | Same as 'rm'
 
-// Open a connection to a local database, returns a pointer to it
-func openTodoDB() *sql.DB {
-	db, err := sql.Open("sqlite", getDbPath())
-	if err != nil {
-		errout("Opening todo DB failed!")
-		panic(err)
-	}
-	return db
-}
-
-// Creates a 'master' database that holds all the locations to
-// local databases if one does not yet exist
-func createMasterDB() {
-	homedir, err := os.UserHomeDir()
-	if err != nil {
-		errout("Getting homedir failed!")
-		panic(err)
-	}
-	masterDbDIR := homedir + "/.sqlite/todo"
-	err = os.MkdirAll(masterDbDIR, 0755)
-	if err != nil {
-		errout("Creating .sqlite/todo dir failed!")
-		panic(err)
-	}
-
-	masterDB, err = sql.Open("sqlite", masterDbDIR+"/.todo.db")
-	if err != nil {
-		errout("Opening master db failed!")
-		panic(err)
-	}
-	_, err = masterDB.Exec(`CREATE TABLE IF NOT EXISTS locations (location VARCHAR UNIQUE);`)
-	if err != nil {
-		errout("Creating master db failed!")
-		panic(err)
-	}
-}
-
-// Checks whether a local todo exists in the current directory,
-// might give an erroneus result if some other file is named
-// exactly as the todo database should be,
-// in which case errors that might come are a skill issue
-func todoExists() bool {
-	if _, err := os.Stat(getDbPath()); os.IsNotExist(err) {
-		errout("No todo exists in current directory!")
-		return false
-	}
-	return true
+	Todo application that creates local per-directory todo-lists with sqlite
+`)
 }

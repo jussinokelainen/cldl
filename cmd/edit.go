@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"bufio"
@@ -9,9 +9,9 @@ import (
 	"github.com/mitchellh/go-wordwrap"
 )
 
-func editTodo(title string, keep bool) {
+func EditTodo(title string, keep bool) {
 	if title == "" {
-		usageEdit()
+		errout("Title required")
 		return
 	}
 

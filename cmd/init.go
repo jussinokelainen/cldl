@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"os"
@@ -6,11 +6,11 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-func initTodo() {
-	todoPath := getDbPath()
+func InitTodo() {
+	todoPath := GetDbPath()
 	// Check whether current directory already has a list
 	// if it exists, do not create a new one, and just return
-	if _, err := os.Stat(getDbPath()); !os.IsNotExist(err) {
+	if _, err := os.Stat(GetDbPath()); !os.IsNotExist(err) {
 		errout("Todo already exists in current directory!")
 		return
 	}
@@ -29,7 +29,7 @@ func initTodo() {
 
 	// Add new todo location into list location database
 	sqlStatement := `INSERT INTO locations(location) VALUES($1);`
-	_, err = masterDB.Exec(sqlStatement, todoPath)
+	_, err = MasterDB.Exec(sqlStatement, todoPath)
 	if err != nil {
 		errout("Adding to master DB failed!")
 		panic(err)

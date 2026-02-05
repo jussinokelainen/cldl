@@ -1,15 +1,15 @@
-package main
+package cmd
 
 import "os"
 
-func rmTodo(title string, rmAll bool) {
+func RmTodo(title string, rmAll bool) {
 	if rmAll {
 		removeAllData()
 		return
 	}
 
 	if title == "" {
-		usageRm()
+		UsageRm()
 		return
 	}
 
@@ -40,9 +40,9 @@ func rmTodo(title string, rmAll bool) {
 // If there is a local file with the exact name that is not a todo database:
 // don't care + didn't ask + skill issue + your file is deleted
 func removeAllData() {
-	todoPath := getDbPath()
+	todoPath := GetDbPath()
 	sqlStatement := `DELETE FROM locations WHERE location = ?;`
-	_, err := masterDB.Exec(sqlStatement, todoPath)
+	_, err := MasterDB.Exec(sqlStatement, todoPath)
 	if err != nil {
 		errout("Error removing from master db")
 		panic(err)
