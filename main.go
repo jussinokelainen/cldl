@@ -64,7 +64,8 @@ func main() {
 		listFlags := flag.NewFlagSet("listFlags", flag.ExitOnError)
 		help := listFlags.Bool("h", false, "show help for todo list")
 		helpLong := listFlags.Bool("help", false, "show help for todo list")
-		pager := listFlags.Bool("pager", false, "Do not send local list to pager")
+		pagerLong := listFlags.Bool("pager", false, "Do not send local list to pager")
+		pager := listFlags.Bool("p", false, "Do not send local list to pager")
 		all := listFlags.Bool("a", false, "List all todo list locations")
 		allLong := listFlags.Bool("all", false, "List all todo list locations")
 		listFlags.Usage = cmd.UsageList
@@ -80,8 +81,13 @@ func main() {
 		if *all || *allLong {
 			listAll = true
 		}
+
+		pagerList := true
+		if *pager || *pagerLong {
+			pagerList = false
+		}
 		// Reverse value since bool flags don't automatically toggle to false
-		cmd.ListTodo(listAll, !*pager)
+		cmd.ListTodo(listAll, pagerList)
 
 	case "rm", "remove", "done":
 		if !cmd.TodoExists() {

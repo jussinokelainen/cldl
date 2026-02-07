@@ -20,7 +20,7 @@ type TodoStruct struct {
 	Time    int64  `json:"time"`
 }
 
-func ListTodo(all bool, pager bool) {
+func ListTodo(listLocations bool, pager bool) {
 	printList := func(listString string, page bool) {
 		if page {
 			printToPager(listString)
@@ -29,27 +29,24 @@ func ListTodo(all bool, pager bool) {
 		}
 	}
 
-	getIfExists := func() []TodoStruct {
-		if !TodoExists() {
-			return nil
-		}
-
-		todoSlice, err := getTodoSlice()
-		if err != nil {
-			info("Todo list empty!")
-			return nil
-		}
-		return todoSlice
-	}
-
-	if all {
-		// Default pagering behavior is opposite, so use opposite values
+	if listLocations {
+		// Default pagering behavior is opposite to normal listing, so use opposite values
 		applyPadding = !pager
 		printList(listAllTodoLocations(), !pager)
 		return
 	} else {
+		if !TodoExists() {
+			return
+		}
 		applyPadding = pager
-		printList(formatListItems(getIfExists()), pager)
+
+		todoSlice, err := getTodoSlice()
+		if err != nil {
+			info("Todo list empty!")
+			return
+		}
+
+		printList(formatListItems(todoSlice), pager)
 		return
 	}
 }
@@ -82,14 +79,10 @@ func formatListItems(todoSlice []TodoStruct) string {
 		fmt.Fprintf(&listString, "\033[35m%s║\n", addSpace(titleRightPad))
 
 		// Print content
-		if len(row.Content) < maxWidth {
-			listString.WriteString(formatContentLine(row.Content))
-		} else {
-			contentWrapped := wordwrap.WrapString(row.Content, uint(maxWidth))
-			contentLines := strings.SplitSeq(contentWrapped, "\n")
-			for line := range contentLines {
-				listString.WriteString(formatContentLine(line))
-			}
+		contentWrapped := wordwrap.WrapString(row.Content, uint(maxWidth))
+		contentLines := strings.SplitSeq(contentWrapped, "\n")
+		for line := range contentLines {
+			listString.WriteString(formatContentLine(line))
 		}
 		padContentToCenter(&listString, maxWidth+2)
 		fmt.Fprintf(&listString, "\033[35m║  %s  ║\033[0m\n", addSpace(maxWidth))
