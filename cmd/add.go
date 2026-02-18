@@ -10,11 +10,21 @@ import (
 
 // Adds a new todo with a title given as an argument, 'todo add <title>'
 func AddTodo(title string) {
+	if !TodoExists() {
+		fmt.Print("[\033[35m INFO \033[0m] No todo currently exists in this directory.\n")
+		answer := askIfInit()
+		if answer {
+			InitTodo()
+			fmt.Print("\n")
+		} else {
+			return
+		}
+	}
+
+	reader := bufio.NewReader(os.Stdin)
 
 	todoDB := openTodoDB()
 	defer todoDB.Close()
-
-	reader := bufio.NewReader(os.Stdin)
 
 	time := time.Now().Unix()
 
@@ -34,4 +44,24 @@ func AddTodo(title string) {
 		panic(err)
 	}
 	ok("Successfully added new todo " + title)
+}
+
+func askIfInit() bool {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Do you want to initialize a new one? [y/n]: ")
+	answer, err := reader.ReadString('\n')
+	if err != nil {
+		errout("Error reading input")
+		panic(err)
+	}
+	answer = strings.TrimSpace(answer)
+	switch answer {
+	case "y":
+		return true
+	case "n":
+		return false
+	default:
+		fmt.Print("Invalid answer, try again.\n")
+		return askIfInit()
+	}
 }

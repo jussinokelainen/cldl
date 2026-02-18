@@ -61,7 +61,6 @@ func openTodoDB() *sql.DB {
 // in which case errors that might come are a skill issue
 func TodoExists() bool {
 	if _, err := os.Stat(GetDbPath()); os.IsNotExist(err) {
-		errout("No todo exists in current directory!")
 		return false
 	}
 	return true

@@ -36,6 +36,7 @@ func ListTodo(listLocations bool, pager bool) {
 		return
 	} else {
 		if !TodoExists() {
+			errout("No todo exists in current directory!")
 			return
 		}
 		applyPadding = pager

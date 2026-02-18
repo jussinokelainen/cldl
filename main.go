@@ -54,9 +54,6 @@ func main() {
 			cmd.HelpAdd()
 			return
 		}
-		if !cmd.TodoExists() {
-			return
-		}
 		title := strings.Join(addFlags.Args(), " ")
 		cmd.AddTodo(title)
 
@@ -91,6 +88,7 @@ func main() {
 
 	case "rm", "remove", "done":
 		if !cmd.TodoExists() {
+			errout("No todo exists in current directory!")
 			return
 		}
 		rmFlags := flag.NewFlagSet("rmFlags", flag.ExitOnError)
@@ -116,6 +114,7 @@ func main() {
 
 	case "edit":
 		if !cmd.TodoExists() {
+			errout("No todo exists in current directory!")
 			return
 		}
 		editFlags := flag.NewFlagSet("editFlags", flag.ExitOnError)
