@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"local/flagger/flagger"
 	"os"
 	"strings"
 	"todo/cmd"
@@ -170,5 +171,12 @@ Help for todo:
 		done <title>   | Same as 'rm'
 
 	Todo application that creates local per-directory todo-lists with sqlite
+	List entry titles are case-insensitive when editing or removing them,
+	so be careful naming them. Adding multiple entries with the same name
+	might result to undefined behavior (maybe fixed later), and trying to
+	remove one of them most likely removes all.
+
+	If a panic error occurs, most likely something went wrong when interacting
+	with the sqlite databases (although it is not the only way panics can occur)
 `)
 }

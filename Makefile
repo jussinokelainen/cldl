@@ -23,6 +23,6 @@ clean:
 
 install: build
 	@printf "\e[32m==> \e[0mCopying required files and binaries...\n"
-	cp ./bin/$(APP) ~/dev/bin/$(APP)
+	cp ./bin/$(APP) ~/bin/$(APP)
 
 	@printf "[\e[32m OK \e[0m] Installing complete\n"

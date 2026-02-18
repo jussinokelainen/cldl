@@ -20,6 +20,7 @@ func EditTodo(title string, keep bool) {
 		errout("No todo list entry found with title " + title)
 		return
 	}
+
 	content = wordwrap.WrapString(content, uint(maxWidth))
 	fmt.Printf("\033[36mOld content for %s:\n", title)
 	fmt.Printf("\033[32m%s\033[0m\n\n", content)
@@ -34,8 +35,9 @@ func EditTodo(title string, keep bool) {
 	fmt.Print("\033[35m❯ \033[0m")
 	newContent, err := reader.ReadString('\n')
 	if err != nil {
-		errout("Error reading input")
-		panic(err)
+		errout("Error reading input, did text end with a newline?")
+		UsageEdit()
+		return
 	}
 	newContent = strings.TrimSpace(newContent)
 	if keep {
@@ -49,10 +51,10 @@ func getIfEntryExists(title string) (string, error) {
 	todoDB := openTodoDB()
 	defer todoDB.Close()
 
-	sqlStatement := `SELECT content from todo WHERE title = $1;`
+	sqlStatement := `SELECT content from todo WHERE UPPER(title) = UPPER($1);`
 	res, err := todoDB.Query(sqlStatement, title)
 	if err != nil {
-		errout("Failed checking entry!")
+		errout("Failed checking entry in database!")
 		panic(err)
 	}
 	defer res.Close()
@@ -61,7 +63,7 @@ func getIfEntryExists(title string) (string, error) {
 	for res.Next() {
 		err = res.Scan(&content)
 		if err != nil {
-			errout("Row scanning failed")
+			errout("Failed scanning existing entry content")
 			panic(err)
 		}
 	}
@@ -77,7 +79,7 @@ func changeEntryContent(newContent string, title string) {
 	todoDB := openTodoDB()
 	defer todoDB.Close()
 
-	sqlStatement := `UPDATE todo SET content = $1 WHERE title = $2`
+	sqlStatement := `UPDATE todo SET content = $1 WHERE UPPER(title) = UPPER($2);`
 	_, err := todoDB.Exec(sqlStatement, newContent, title)
 	if err != nil {
 		errout("Failed to edit todo content")
@@ -87,4 +89,28 @@ func changeEntryContent(newContent string, title string) {
 	fmt.Print("\n")
 	ok("Successfully changed content for " + title)
 
+}
+
+// NOTE: Edit command help and usage functions
+func UsageEdit() {
+	fmt.Print(`
+Usage: todo edit [<args>] <title>
+	Use 'todo edit -help' to see arguments
+`)
+}
+func HelpEdit() {
+	fmt.Print(`
+Help for todo edit:
+	Available arguments:
+		-help  | Show help for todo edit
+		-h     | Same as '--help'
+		-keep  | New content gets appended to already existing
+		       | content instead of overriding it
+		-k     | Same as '--keep'
+
+	Edit an existing todo list entry with a given title.
+
+	Same text inputting rules apply for editing as adding a new entry,
+	Check 'todo add -h'.
+`)
 }

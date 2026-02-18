@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	_ "modernc.org/sqlite"
@@ -36,4 +37,22 @@ func InitTodo() {
 	}
 
 	ok("New todo created!")
+}
+
+// NOTE: Init help and usage functions
+func UsageInit() {
+	fmt.Print(`
+Default usage: todo init
+	Use 'todo init -help' to see more
+`)
+}
+func HelpInit() {
+	fmt.Print(`
+Help for todo init:
+	Available arguments:
+		-help  | Show help for todo init
+		-h     | Same as '-help'
+
+	Initialize a local todo list in current directory
+`)
 }

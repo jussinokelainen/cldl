@@ -19,18 +19,18 @@ func CreateMasterDB() {
 	masterDbDIR := homedir + "/.sqlite/todo"
 	err = os.MkdirAll(masterDbDIR, 0755)
 	if err != nil {
-		errout("Creating .sqlite/todo dir failed!")
+		errout("Creating .sqlite/todo directory failed!")
 		panic(err)
 	}
 
 	MasterDB, err = sql.Open("sqlite", masterDbDIR+"/.todo.db")
 	if err != nil {
-		errout("Opening master db failed!")
+		errout("Opening master database failed!")
 		panic(err)
 	}
 	_, err = MasterDB.Exec(`CREATE TABLE IF NOT EXISTS locations (location VARCHAR UNIQUE);`)
 	if err != nil {
-		errout("Creating master db failed!")
+		errout("Creating master database failed!")
 		panic(err)
 	}
 }

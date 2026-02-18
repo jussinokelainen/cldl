@@ -39,13 +39,21 @@ func ListTodo(listLocations bool, pager bool) {
 			errout("No todo exists in current directory!")
 			return
 		}
-		applyPadding = pager
 
 		todoSlice, err := getTodoSlice()
 		if err != nil {
 			info("Todo list empty!")
 			return
 		}
+		if len(todoSlice) == 1 {
+			pager = !pager
+			applyPadding = pager
+		}
+
+		if len(todoSlice) == 1 {
+			pager = !pager
+		}
+		applyPadding = pager
 
 		printList(formatListItems(todoSlice), pager)
 		return
@@ -104,7 +112,7 @@ func formatListItems(todoSlice []TodoStruct) string {
 			fmt.Fprintf(&listString, "\033[35m║  %s  ║\033[0m", addSpace(maxWidth))
 		} else {
 			padContentToCenter(&listString, maxWidth+2)
-			fmt.Fprintf(&listString, "\033[35m╚══%s══╝\n", addLine(maxWidth))
+			fmt.Fprintf(&listString, "\033[35m╚══%s══╝\033[0m\n", addLine(maxWidth))
 		}
 		current_box++
 	}
@@ -132,6 +140,8 @@ func formatContentLine(line string) string {
 func listAllTodoLocations() string {
 	var listString strings.Builder
 	var locSlice []string
+	homeDir, _ := os.UserHomeDir()
+	longestLoc := 0
 
 	rows, err := MasterDB.Query(`SELECT * FROM locations;`)
 	if err != nil {
@@ -144,18 +154,16 @@ func listAllTodoLocations() string {
 		var location string
 		err = rows.Scan(&location)
 		if err != nil {
-			errout("Row scanning failed")
+			errout("Failed scanning entry content")
 			panic(err)
 		}
-		locSlice = append(locSlice, location)
-	}
-
-	longestLoc := 0
-	for _, loc := range locSlice {
-		iLen := len(loc)
-		if iLen > longestLoc {
-			longestLoc = iLen
+		shortenedString := strings.Replace(location, homeDir, "~", 1)
+		strLen := len(shortenedString)
+		if strLen > longestLoc {
+			longestLoc = strLen
 		}
+
+		locSlice = append(locSlice, shortenedString)
 	}
 
 	fmt.Fprint(&listString, "\n")
@@ -187,8 +195,8 @@ func printToPager(content string) {
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		errout("Error in running less")
-		panic(err)
+		errout("Error in running less, is it installed?")
+		os.Exit(1)
 	}
 }
 
@@ -225,7 +233,7 @@ func getTodoSlice() ([]TodoStruct, error) {
 		var row TodoStruct
 		err = rows.Scan(&row.Title, &row.Content, &row.Time)
 		if err != nil {
-			errout("Row scanning failed")
+			errout("Failed scanning entry content")
 			panic(err)
 		}
 		todoSlice = append(todoSlice, row)
@@ -241,8 +249,41 @@ func getTodoSlice() ([]TodoStruct, error) {
 // Formatting helper functions that return a string
 // with a given amount of spaces or lines
 func addLine(length int) string {
-	return strings.Repeat("═", length)
+	if length > 0 {
+		return strings.Repeat("═", length)
+	} else {
+		return ""
+	}
 }
+
 func addSpace(length int) string {
-	return strings.Repeat(" ", length)
+	if length > 0 {
+		return strings.Repeat(" ", length)
+	} else {
+		return ""
+	}
+}
+
+// NOTE: List command help and usage functions
+func UsageList() {
+	fmt.Print(`
+Usage: todo list [<args>]
+	Use 'todo list -help' to see arguments
+`)
+}
+func HelpList() {
+	fmt.Print(`
+Help for todo list:
+	Available arguments:
+		-help       | Show help for todo list
+		-h          | Same as '-help'
+		-all        | List all locations with todo's
+		-a          | Same as '-all'
+		-pager      | Toggle pagering behavior, by default normal lists
+		            | get pagered, locations don't
+		-p          | Same as '-pager'
+
+	Show content in a local todo list, or alternatively with '-all'
+	show all locations with todo lists
+`)
 }
