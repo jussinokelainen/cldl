@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"local/flagger/flagger"
 	"os"
@@ -10,6 +9,7 @@ import (
 )
 
 func main() {
+	var flags flagger.Flagset
 	args := os.Args[1:]
 	// If no args given, print usage and exit
 	if len(args) < 1 {
@@ -23,68 +23,83 @@ func main() {
 	case "--help", "-h":
 		mainHelp()
 	case "init":
-		initFlags := flag.NewFlagSet("initFlags", flag.ExitOnError)
-		help := initFlags.Bool("h", false, "show help for todo init")
-		helpLong := initFlags.Bool("help", false, "show help for todo init")
-		initFlags.Usage = cmd.UsageInit
-		err := initFlags.Parse(args[1:])
+		flags.Flags = []string{
+			"h",
+			"help",
+		}
+		flags.Valued_flags = nil
+		flags.Optional_value = nil
+		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
+			errout("Bad Arguments")
+			cmd.UsageInit()
 			os.Exit(1)
 		}
-		if *help || *helpLong {
-			cmd.HelpInit()
-			return
+
+		for _, flag := range parsedArgs.Flags {
+			switch flag {
+			case "h", "help":
+				cmd.HelpInit()
+				return
+			}
 		}
-		if len(initFlags.Args()) > 0 {
-			fmt.Println("Bad Arguments")
-			initFlags.Usage()
-			os.Exit(1)
-		}
+
 		cmd.InitTodo()
 
 	case "add":
-		addFlags := flag.NewFlagSet("addFlags", flag.ExitOnError)
-		help := addFlags.Bool("h", false, "show help for todo add")
-		helpLong := addFlags.Bool("help", false, "show help for todo add")
-		addFlags.Usage = cmd.UsageAdd
-		err := addFlags.Parse(args[1:])
+		flags.Flags = []string{
+			"h",
+			"help",
+		}
+		flags.Valued_flags = nil
+		flags.Optional_value = nil
+		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
+			errout("Bad Arguments")
+			cmd.UsageAdd()
 			os.Exit(1)
 		}
-		if *help || *helpLong {
-			cmd.HelpAdd()
-			return
+
+		for _, flag := range parsedArgs.Flags {
+			switch flag {
+			case "h", "help":
+				cmd.HelpAdd()
+				return
+			}
 		}
-		title := strings.Join(addFlags.Args(), " ")
+
+		title := strings.Join(parsedArgs.NormalStr, " ")
 		cmd.AddTodo(title)
 
 	case "list":
-		listFlags := flag.NewFlagSet("listFlags", flag.ExitOnError)
-		help := listFlags.Bool("h", false, "show help for todo list")
-		helpLong := listFlags.Bool("help", false, "show help for todo list")
-		pagerLong := listFlags.Bool("pager", false, "Do not send local list to pager")
-		pager := listFlags.Bool("p", false, "Do not send local list to pager")
-		all := listFlags.Bool("a", false, "List all todo list locations")
-		allLong := listFlags.Bool("all", false, "List all todo list locations")
-		listFlags.Usage = cmd.UsageList
-		err := listFlags.Parse(args[1:])
+		flags.Flags = []string{
+			"a", "all",
+			"p", "pager",
+			"h", "help",
+		}
+		flags.Valued_flags = nil
+		flags.Optional_value = nil
+		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
+			errout("Bad Arguments")
+			cmd.UsageList()
 			os.Exit(1)
 		}
-		if *help || *helpLong {
-			cmd.HelpList()
-			return
-		}
+
 		listAll := false
-		if *all || *allLong {
-			listAll = true
+		pagerList := true
+		for _, flag := range parsedArgs.Flags {
+			switch flag {
+			case "a", "all":
+				listAll = true
+			case "p", "pager":
+				pagerList = false
+			case "h", "help":
+				cmd.HelpList()
+				return
+			}
 		}
 
-		pagerList := true
-		if *pager || *pagerLong {
-			pagerList = false
-		}
-		// Reverse value since bool flags don't automatically toggle to false
 		cmd.ListTodo(listAll, pagerList)
 
 	case "rm", "remove", "done":
@@ -92,25 +107,32 @@ func main() {
 			errout("No todo exists in current directory!")
 			return
 		}
-		rmFlags := flag.NewFlagSet("rmFlags", flag.ExitOnError)
-		help := rmFlags.Bool("h", false, "show help for todo rm")
-		helpLong := rmFlags.Bool("help", false, "show help for todo rm")
-		all := rmFlags.Bool("a", false, "List all todo list locations")
-		allLong := rmFlags.Bool("all", false, "List all todo list locations")
-		rmFlags.Usage = cmd.UsageRm
-		err := rmFlags.Parse(args[1:])
+
+		flags.Flags = []string{
+			"a", "all",
+			"h", "help",
+		}
+		flags.Valued_flags = nil
+		flags.Optional_value = nil
+		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
+			errout("Bad Arguments")
+			cmd.UsageRm()
 			os.Exit(1)
 		}
-		if *help || *helpLong {
-			cmd.HelpRm()
-			return
-		}
+
 		rmAll := false
-		if *all || *allLong {
-			rmAll = true
+		for _, flag := range parsedArgs.Flags {
+			switch flag {
+			case "a", "all":
+				rmAll = true
+			case "h", "help":
+				cmd.HelpRm()
+				return
+			}
 		}
-		title := strings.Join(rmFlags.Args(), " ")
+
+		title := strings.Join(parsedArgs.NormalStr, " ")
 		cmd.RmTodo(title, rmAll)
 
 	case "edit":
@@ -118,25 +140,36 @@ func main() {
 			errout("No todo exists in current directory!")
 			return
 		}
-		editFlags := flag.NewFlagSet("editFlags", flag.ExitOnError)
-		help := editFlags.Bool("h", false, "show help for todo edit")
-		helpLong := editFlags.Bool("help", false, "show help for todo edit")
-		keep := editFlags.Bool("k", false, "List all todo list locations")
-		keepLong := editFlags.Bool("keep", false, "List all todo list locations")
-		editFlags.Usage = cmd.UsageEdit
-		err := editFlags.Parse(args[1:])
+
+		flags.Flags = []string{
+			"k", "keep",
+			"h", "help",
+		}
+		flags.Valued_flags = nil
+		flags.Optional_value = nil
+		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
+			errout("Bad Arguments")
+			cmd.UsageRm()
 			os.Exit(1)
 		}
-		if *help || *helpLong {
-			cmd.HelpEdit()
-			return
-		}
+
 		keepContent := false
-		if *keep || *keepLong {
-			keepContent = true
+		for _, flag := range parsedArgs.Flags {
+			switch flag {
+			case "k", "keep":
+				keepContent = true
+			case "h", "help":
+				cmd.HelpEdit()
+				return
+			default:
+				errout("Bad Arguments")
+				cmd.UsageEdit()
+				os.Exit(1)
+			}
 		}
-		title := strings.Join(editFlags.Args(), " ")
+
+		title := strings.Join(parsedArgs.NormalStr, " ")
 		cmd.EditTodo(title, keepContent)
 
 	default:

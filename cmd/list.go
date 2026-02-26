@@ -45,10 +45,6 @@ func ListTodo(listLocations bool, pager bool) {
 			info("Todo list empty!")
 			return
 		}
-		if len(todoSlice) == 1 {
-			pager = !pager
-			applyPadding = pager
-		}
 
 		if len(todoSlice) == 1 {
 			pager = !pager

@@ -18,7 +18,7 @@ build:
 clean:
 	@printf "\e[32m==> \e[0mRemoving files and binaries...\n"
 	rm -rf ./bin
-	rm ~/dev/bin/$(APP)
+	rm ~/bin/$(APP)
 	@printf "[\e[32m OK \e[0m] Removing complete\n"
 
 install: build
