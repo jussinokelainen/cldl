@@ -86,7 +86,7 @@ func main() {
 		title := strings.Join(parsedArgs.NormalStr, " ")
 		cmd.AddTodo(title, conf.Auto_init)
 
-	case "list":
+	case "list", "ls":
 		flags.Flags = []string{
 			"a", "all",
 			"p", "pager",
@@ -208,32 +208,33 @@ Usage: todo <COMMAND> [<args>]
 func mainHelp() {
 	fmt.Print(`
 Help for todo:
-	Available commands:
-		--help		    Show help message
-		-h			    Same as '--help'
-		init		    Create new todo in current dir
-		list		    List all todo list entries
-		add			    Add new entry into todo list
-		rm <title>	    Remove todo list entry or entire list, see 'todo rm --help'
-		remove <title>  Same as 'rm'
-		done <title>    Same as 'rm'
+  Available commands:
+      --help          Show help message
+      -h              Same as '--help'
+      init            Create new todo in current dir
+      list            List all todo list entries
+      ls              Same as 'list'
+      add             Add new entry into todo list
+      rm <title>      Remove todo list entry or entire list, see 'todo rm --help'
+      remove <title>  Same as 'rm'
+      done <title>    Same as 'rm'
 
-	Todo application that creates local per-directory todo-lists with sqlite
-	List entry titles are case-insensitive when editing or removing them,
-	so be careful naming them. Adding multiple entries with the same name
-	might result to undefined behavior (maybe fixed later), and trying to
-	remove one of them most likely removes all.
+  Todo application that creates local per-directory todo-lists with sqlite
+  List entry titles are case-insensitive when editing or removing them,
+  so be careful naming them. Adding multiple entries with the same name
+  might result to undefined behavior (maybe fixed later), and trying to
+  remove one of them most likely removes all.
 
-	If a panic error occurs, most likely something went wrong when interacting
-	with the sqlite databases (although it is not the only way panics can occur)
+  If a panic error occurs, most likely something went wrong when interacting
+  with the sqlite databases (although it is not the only way panics can occur)
 
-	Usable config options:
-		auto_init   = bool  | automatically initialize a new local todo if it
-						    | doesn't exist, or ask [y/n] to initialize
-						    | [Default: false]
+  Usable config options:
+      auto_init   = bool  | automatically initialize a new local todo if it
+                          | doesn't exist, or ask [y/n] to initialize
+                          | [Default: false]
 
-		ask_full_rm = bool  | Ask to fully remove the local database when the
-						    | last entry gets deleted [Default: false]
+      ask_full_rm = bool  | Ask to fully remove the local database when the
+                          | last entry gets deleted [Default: false]
 
 `)
 }
