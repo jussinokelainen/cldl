@@ -11,18 +11,21 @@ var MasterDB *sql.DB
 /*
 Struct to hold all config options for this application.
 
-Auto_init   |  Supposed to be given to AddTodo function only
-Ask_full_rm |  Supposed to be given to RmTodo function only
+Auto_init       |  Supposed to be given to AddTodo function only
+Ask_full_rm     |  Supposed to be given to RmTodo function only
+Ask_rm_on_check |  Supposed to be given to CheckTodo function only
 */
 type Config struct {
-	Auto_init   bool
-	Ask_full_rm bool
+	Auto_init       bool
+	Ask_full_rm     bool
+	Ask_rm_on_check bool
 }
 
 func DefaultConfig() Config {
 	var conf Config
 	conf.Auto_init = false
 	conf.Ask_full_rm = false
+	conf.Ask_rm_on_check = true
 
 	return conf
 }
@@ -72,6 +75,15 @@ func openTodoDB() *sql.DB {
 		panic(err)
 	}
 	return db
+}
+
+func remove_master_entry(todoPath string) {
+	sqlStatement := `DELETE FROM locations WHERE location = ?;`
+	_, err := MasterDB.Exec(sqlStatement, todoPath)
+	if err != nil {
+		errout("Error removing from master db")
+		panic(err)
+	}
 }
 
 // Checks whether a local todo exists in the current directory,

@@ -70,7 +70,7 @@ func ask_full_rm() bool {
 	answer, err := reader.ReadString('\n')
 	if err != nil {
 		errout("Error reading input")
-		return askIfInit()
+		return ask_full_rm()
 	}
 	answer = strings.TrimSpace(answer)
 	switch answer {
@@ -80,7 +80,7 @@ func ask_full_rm() bool {
 		return false
 	default:
 		fmt.Print("Invalid answer, try again.\n")
-		return askIfInit()
+		return ask_full_rm()
 	}
 }
 
@@ -89,13 +89,8 @@ func ask_full_rm() bool {
 // don't care + didn't ask + skill issue + your file is deleted
 func removeAllData() {
 	todoPath := GetDbPath()
-	sqlStatement := `DELETE FROM locations WHERE location = ?;`
-	_, err := MasterDB.Exec(sqlStatement, todoPath)
-	if err != nil {
-		errout("Error removing from master db")
-		panic(err)
-	}
-	err = os.Remove(todoPath)
+	remove_master_entry(todoPath)
+	err := os.Remove(todoPath)
 	if err != nil {
 		errout("Failed removing local db")
 		panic(err)

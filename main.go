@@ -16,6 +16,8 @@ func main() {
 		errout("Failed to get config")
 		return
 	}
+	cmd.CreateMasterDB()
+	defer cmd.MasterDB.Close()
 
 	conf := cmd.DefaultConfig()
 	configFile := configDir + "/todo/config.toml"
@@ -31,12 +33,34 @@ func main() {
 		mainUsage()
 		return
 	}
-	cmd.CreateMasterDB()
-	defer cmd.MasterDB.Close()
 
 	switch args[0] {
 	case "--help", "-h":
 		mainHelp()
+	case "check":
+		flags.Flags = []string{
+			"h",
+			"help",
+		}
+		flags.Valued_flags = nil
+		flags.Optional_value = nil
+		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
+		if err != nil {
+			errout("Bad Arguments")
+			cmd.UsageCheck()
+			os.Exit(1)
+		}
+
+		for _, flag := range parsedArgs.Flags {
+			switch flag {
+			case "h", "help":
+				cmd.HelpCheck()
+				return
+			}
+		}
+
+		cmd.CheckTodos(conf.Ask_rm_on_check)
+
 	case "init":
 		flags.Flags = []string{
 			"h",
@@ -229,12 +253,14 @@ Help for todo:
   with the sqlite databases (although it is not the only way panics can occur)
 
   Usable config options:
-      auto_init   = bool  | automatically initialize a new local todo if it
-                          | doesn't exist, or ask [y/n] to initialize
-                          | [Default: false]
+      auto_init   = bool      | automatically initialize a new local todo if it
+                              | doesn't exist, or ask [y/n] to initialize
+                              | [Default: false]
 
-      ask_full_rm = bool  | Ask to fully remove the local database when the
-                          | last entry gets deleted [Default: false]
+      ask_full_rm = bool      | Ask to fully remove the local database when the
+                              | last entry gets deleted [Default: false]
 
+      ask_rm_on_check = bool  | Ask before removing an erroneus todo location
+                              | when using 'todo check' [Default: true]
 `)
 }
