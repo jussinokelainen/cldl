@@ -1,11 +1,13 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
-func RmTodo(title string, rmAll bool) {
+func RmTodo(title string, rmAll bool, ask_rm_all bool) {
 	if rmAll {
 		removeAllData()
 		return
@@ -31,6 +33,54 @@ func RmTodo(title string, rmAll bool) {
 		errout("No entry found with title " + title)
 	} else {
 		ok("Succesfully removed entry " + title)
+		if ask_rm_all && getEntryCount() == 0 {
+			info("The last entry of this todo-list was removed.")
+			if ask_full_rm() {
+				removeAllData()
+			}
+		}
+	}
+}
+
+func getEntryCount() int {
+	var count int
+	todoDB := openTodoDB()
+	defer todoDB.Close()
+
+	res, err := todoDB.Query(`SELECT COUNT(*) FROM todo;`)
+	if err != nil {
+		panic(err)
+	}
+	defer res.Close()
+
+	for res.Next() {
+		err = res.Scan(&count)
+		if err != nil {
+			errout("Failed scanning existing entry content")
+			panic(err)
+		}
+	}
+
+	return count
+}
+
+func ask_full_rm() bool {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Do you want to fully remove the list? [y/n]: ")
+	answer, err := reader.ReadString('\n')
+	if err != nil {
+		errout("Error reading input")
+		return askIfInit()
+	}
+	answer = strings.TrimSpace(answer)
+	switch answer {
+	case "y":
+		return true
+	case "n":
+		return false
+	default:
+		fmt.Print("Invalid answer, try again.\n")
+		return askIfInit()
 	}
 }
 

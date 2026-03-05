@@ -8,6 +8,25 @@ import (
 
 var MasterDB *sql.DB
 
+/*
+Struct to hold all config options for this application.
+
+Auto_init   |  Supposed to be given to AddTodo function only
+Ask_full_rm |  Supposed to be given to RmTodo function only
+*/
+type Config struct {
+	Auto_init   bool
+	Ask_full_rm bool
+}
+
+func DefaultConfig() Config {
+	var conf Config
+	conf.Auto_init = false
+	conf.Ask_full_rm = false
+
+	return conf
+}
+
 // Creates a 'master' database that holds all the locations to
 // local databases if one does not yet exist
 func CreateMasterDB() {

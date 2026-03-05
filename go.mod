@@ -7,6 +7,7 @@ require local/flagger v0.0.0
 replace local/flagger => /localgomodules/flagger/
 
 require (
+	github.com/BurntSushi/toml v1.6.0
 	github.com/mitchellh/go-wordwrap v1.0.1
 	golang.org/x/term v0.39.0
 	modernc.org/sqlite v1.44.3

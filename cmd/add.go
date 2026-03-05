@@ -9,10 +9,15 @@ import (
 )
 
 // Adds a new todo with a title given as an argument, if title is not duplicate
-func AddTodo(title string) {
+func AddTodo(title string, auto_init bool) {
 	if !TodoExists() {
-		fmt.Print("[\033[35m INFO \033[0m] No todo currently exists in this directory.\n")
-		answer := askIfInit()
+		var answer bool
+		if auto_init {
+			answer = true
+		} else {
+			fmt.Print("[\033[35m INFO \033[0m] No todo currently exists in this directory.\n")
+			answer = askIfInit()
+		}
 		if answer {
 			InitTodo()
 			fmt.Print("\n")
