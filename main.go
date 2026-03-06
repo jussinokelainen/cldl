@@ -16,6 +16,9 @@ func main() {
 		errout("Failed to get config directory")
 		return
 	}
+
+	// NOTE: Any calls to functions that might interact with the MasterDB
+	// have to be called after this
 	cmd.CreateMasterDB()
 	defer cmd.MasterDB.Close()
 
@@ -29,7 +32,7 @@ func main() {
 
 	var flags flagger.Flagset
 	args := os.Args[1:]
-	// If no args given, print usage and exit
+	// If no args given, print usage and exit since given nothing to do
 	if len(args) < 1 {
 		mainUsage()
 		return
@@ -124,8 +127,8 @@ func main() {
 				case "false":
 					conf.Auto_init = false
 				default:
-					conf.Auto_init = true
-					parsedArgs.NormalStr = append([]string{flag[1]}, parsedArgs.NormalStr...)
+					errout("Bad value for auto-init: " + flag[1])
+					return
 				}
 			}
 		}
@@ -256,15 +259,15 @@ func mainHelp() {
 	fmt.Print(`
 Help for todo:
   Available commands:
-      --help          Show help message
-      -h              Same as '--help'
-      init            Create new todo in current dir
-      list            List all todo list entries
-      ls              Same as 'list'
-      add             Add new entry into todo list
-      rm <title>      Remove todo list entry or entire list, see 'todo rm --help'
-      remove <title>  Same as 'rm'
-      done <title>    Same as 'rm'
+      --help            | Show help message
+      -h                | Same as '--help'
+      init              | Create new todo in current dir
+      check             | Check all locations saved by the program whether
+                        | the list actually exists
+      list, ls          | List all todo list entries
+      add               | Add new entry into todo list
+      rm, remove, done  | Remove todo list entry or entire list
+      edit              | Edit an existing todo entry
 
   Todo application that creates local per-directory todo-lists with sqlite
   List entry titles are case-insensitive when editing or removing them,
@@ -274,6 +277,9 @@ Help for todo:
 
   If a panic error occurs, most likely something went wrong when interacting
   with the sqlite databases (although it is not the only way panics can occur)
+
+  Configuration expect a file 'UserConfigDir/todo/config.toml'
+  For example on a real OS the filepath is '~/.config/todo/config.toml'.
 
   Usable config options:
       auto_init = bool        | automatically initialize a new local todo if it

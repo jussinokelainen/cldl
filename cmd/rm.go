@@ -110,13 +110,14 @@ func HelpRm() {
 	fmt.Print(`
 Help for todo rm / done:
 	Available arguments:
-		--help | Show help for todo rm
-		-h     | Same as '--help'
-		--all  | Fully remove todo list from current directory
-		-a     | Same as '--all'
+		--help, -h  | Show help for todo rm
+		--all, -a   | Fully remove todo list from current directory
 
 	Rm and done are the same command with a different name.
 	Use 'todo rm <title>' where <title> is the title
 	for the list entry to be deleted.
+
+    Config option 'ask_full_rm' can determine whether removing the local
+    database on the removal of the last entry in it gets asked or not
 `)
 }

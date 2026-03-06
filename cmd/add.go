@@ -90,17 +90,22 @@ func HelpAdd() {
 	fmt.Print(`
 Help for todo add:
 	Available arguments:
-		--help      | Show help for todo add
-		-h          | Same as '--help'
+		--help, -h  | Show help for todo add
 		--auto-init | Automatically initialize a new todo when adding
                     | an entry and a list doesn't exist yet.
                     | Can be used without a value to set auto-init
 					| to true, or with a true/false to set the value
+                    | (If used without giving the value, it must be after
+                    | the title of the entry, otherwise the first word of
+                    | the title is interpreted as the value)
 
 	Use 'todo add <title>' where <title> is what you want as
 	a title for the new todo entry.
 
 	Inputting content will be finished by inputting a newline,
-	(most likely by pressing 'enter'), Errors may otherwise
+	(most likely by pressing 'enter'), Errors may otherwise occur
+
+    Config option 'auto_init' Determines whether a new local database is
+    created automatically or asked before doing it
 `)
 }

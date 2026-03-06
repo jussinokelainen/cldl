@@ -74,14 +74,14 @@ func HelpCheck() {
 	fmt.Print(`
 Help for todo check:
     Available arguments:
-        --help       | Show help for todo check
-        -h           | Same as '--help'
+        --help, -h   | Show help for todo check
         --no-confirm | Don't ask for confirmation before deleting
                        local databases, regardless of what configs have
 
     Checks all the saved locations of local todo lists and looks
     for locations that do not have the corresponding list files.
-    Depending on configs, either asks before removing the entry
-    from the list, or removes it without asking
+
+    Config option 'ask_rm_on_check' determines whether excess locations
+    are automatically removed or prompted
 `)
 }

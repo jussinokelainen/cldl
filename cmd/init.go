@@ -50,9 +50,10 @@ func HelpInit() {
 	fmt.Print(`
 Help for todo init:
 	Available arguments:
-		--help  | Show help for todo init
-		-h      | Same as '--help'
+		--help, -h  | Show help for todo init
 
 	Initialize a local todo list in current directory
+    Might be a useless command, since initialization can also
+    be done when adding an entry
 `)
 }
