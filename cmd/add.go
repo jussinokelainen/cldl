@@ -90,8 +90,12 @@ func HelpAdd() {
 	fmt.Print(`
 Help for todo add:
 	Available arguments:
-		-help  | Show help for todo add
-		-h     | Same as '-help'
+		--help      | Show help for todo add
+		-h          | Same as '--help'
+		--auto-init | Automatically initialize a new todo when adding
+                    | an entry and a list doesn't exist yet.
+                    | Can be used without a value to set auto-init
+					| to true, or with a true/false to set the value
 
 	Use 'todo add <title>' where <title> is what you want as
 	a title for the new todo entry.

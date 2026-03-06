@@ -102,11 +102,11 @@ func HelpEdit() {
 	fmt.Print(`
 Help for todo edit:
 	Available arguments:
-		-help  | Show help for todo edit
-		-h     | Same as '--help'
-		-keep  | New content gets appended to already existing
-		       | content instead of overriding it
-		-k     | Same as '--keep'
+		--help  | Show help for todo edit
+		-h      | Same as '--help'
+		--keep  | New content gets appended to already existing
+		        | content instead of overriding it
+		-k      | Same as '--keep'
 
 	Edit an existing todo list entry with a given title.
 

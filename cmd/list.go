@@ -271,13 +271,13 @@ func HelpList() {
 	fmt.Print(`
 Help for todo list:
 	Available arguments:
-		-help       | Show help for todo list
-		-h          | Same as '-help'
-		-all        | List all locations with todo's
-		-a          | Same as '-all'
-		-pager      | Toggle pagering behavior, by default normal lists
-		            | get pagered, locations don't
-		-p          | Same as '-pager'
+		--help   | Show help for todo list
+		-h       | Same as '-help'
+		--all    | List all locations with todo's
+		-a       | Same as '-all'
+		--pager  | Toggle pagering behavior, by default normal lists
+		         | get pagered, locations don't
+		-p       | Same as '-pager'
 
 	Show content in a local todo list, or alternatively with '-all'
 	show all locations with todo lists

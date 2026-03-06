@@ -110,9 +110,9 @@ func HelpRm() {
 	fmt.Print(`
 Help for todo rm / done:
 	Available arguments:
-		-help  | Show help for todo rm
+		--help | Show help for todo rm
 		-h     | Same as '--help'
-		-all   | Fully remove todo list from current directory
+		--all  | Fully remove todo list from current directory
 		-a     | Same as '--all'
 
 	Rm and done are the same command with a different name.

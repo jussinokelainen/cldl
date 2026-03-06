@@ -13,7 +13,7 @@ import (
 func main() {
 	configDir, err := os.UserConfigDir()
 	if err != nil {
-		errout("Failed to get config")
+		errout("Failed to get config directory")
 		return
 	}
 	cmd.CreateMasterDB()
@@ -23,7 +23,8 @@ func main() {
 	configFile := configDir + "/todo/config.toml"
 	_, err = toml.DecodeFile(configFile, &conf)
 	if err != nil {
-		panic(err)
+		errout("Failed to get configs, using defaults")
+		conf = cmd.DefaultConfig()
 	}
 
 	var flags flagger.Flagset
@@ -41,6 +42,7 @@ func main() {
 		flags.Flags = []string{
 			"h",
 			"help",
+			"no-confirm",
 		}
 		flags.Valued_flags = nil
 		flags.Optional_value = nil
@@ -56,6 +58,8 @@ func main() {
 			case "h", "help":
 				cmd.HelpCheck()
 				return
+			case "no-confirm":
+				conf.Ask_rm_on_check = false
 			}
 		}
 
@@ -91,7 +95,9 @@ func main() {
 			"help",
 		}
 		flags.Valued_flags = nil
-		flags.Optional_value = nil
+		flags.Optional_value = []string{
+			"auto-init",
+		}
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
 			errout("Bad Arguments")
@@ -104,6 +110,23 @@ func main() {
 			case "h", "help":
 				cmd.HelpAdd()
 				return
+			case "auto-init":
+				conf.Auto_init = true
+			}
+		}
+
+		for _, flag := range parsedArgs.ValueFlags {
+			switch flag[0] {
+			case "auto-init":
+				switch flag[1] {
+				case "true":
+					conf.Auto_init = true
+				case "false":
+					conf.Auto_init = false
+				default:
+					conf.Auto_init = true
+					parsedArgs.NormalStr = append([]string{flag[1]}, parsedArgs.NormalStr...)
+				}
 			}
 		}
 
@@ -253,14 +276,17 @@ Help for todo:
   with the sqlite databases (although it is not the only way panics can occur)
 
   Usable config options:
-      auto_init   = bool      | automatically initialize a new local todo if it
+      auto_init = bool        | automatically initialize a new local todo if it
                               | doesn't exist, or ask [y/n] to initialize
                               | [Default: false]
 
       ask_full_rm = bool      | Ask to fully remove the local database when the
-                              | last entry gets deleted [Default: false]
+                              | last entry gets deleted. If set to false,
+                              | the database will not be removed
+                              | [Default: false]
 
       ask_rm_on_check = bool  | Ask before removing an erroneus todo location
-                              | when using 'todo check' [Default: true]
+                              | when using 'todo check'
+                              | [Default: true]
 `)
 }
