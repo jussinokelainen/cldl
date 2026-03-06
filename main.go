@@ -5,6 +5,7 @@ import (
 	"local/flagger/flagger"
 	"os"
 	"strings"
+	"time"
 	"todo/cmd"
 
 	"github.com/BurntSushi/toml"
@@ -165,7 +166,12 @@ func main() {
 			}
 		}
 
-		cmd.ListTodo(listAll, pagerList)
+		timeZoneFormatted, err := time.LoadLocation(strings.TrimSpace(conf.Timezone))
+		if err != nil {
+			errout("Failed to parse timezone")
+			os.Exit(1)
+		}
+		cmd.ListTodo(listAll, pagerList, timeZoneFormatted)
 
 	case "rm", "remove", "done":
 		if !cmd.TodoExists() {
@@ -219,11 +225,10 @@ func main() {
 			os.Exit(1)
 		}
 
-		keepContent := false
 		for _, flag := range parsedArgs.Flags {
 			switch flag {
 			case "k", "keep":
-				keepContent = true
+				conf.Keep_on_edit = !conf.Keep_on_edit
 			case "h", "help":
 				cmd.HelpEdit()
 				return
@@ -235,7 +240,7 @@ func main() {
 		}
 
 		title := strings.Join(parsedArgs.NormalStr, " ")
-		cmd.EditTodo(title, keepContent)
+		cmd.EditTodo(title, conf.Keep_on_edit)
 
 	default:
 		errout("Bad arguments")
@@ -294,5 +299,12 @@ Help for todo:
       ask_rm_on_check = bool  | Ask before removing an erroneus todo location
                               | when using 'todo check'
                               | [Default: true]
+
+      keep_on_edit = bool     | Either keep the content and add new content
+                              | with a 'New edit' tag, or override entry content
+                              | [Default: false]
+
+      timezone = string       | Set the timezone used when displaying dates,
+                              | By default uses current local timezone
 `)
 }

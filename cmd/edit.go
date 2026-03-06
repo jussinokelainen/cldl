@@ -103,12 +103,15 @@ func HelpEdit() {
 Help for todo edit:
 	Available arguments:
 		--help, -h  | Show help for todo edit
-		--keep, -k  | New content gets appended to already existing
-		            | content instead of overriding it
+		--keep, -k  | Toggles the behavior of keeping on edit
 
 	Edit an existing todo list entry with a given title.
 
 	Same text inputting rules apply for editing as adding a new entry,
 	Check 'todo add --help'.
+
+    Config option 'keep_on_edit' can be set to determine the default keep
+    behavior when editing, false to override content by default, true to
+    keep by default
 `)
 }

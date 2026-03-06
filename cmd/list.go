@@ -20,7 +20,7 @@ type TodoStruct struct {
 	Time    int64  `json:"time"`
 }
 
-func ListTodo(listLocations bool, pager bool) {
+func ListTodo(listLocations bool, pager bool, timeZone *time.Location) {
 	printList := func(listString string, page bool) {
 		if page {
 			printToPager(listString)
@@ -51,14 +51,14 @@ func ListTodo(listLocations bool, pager bool) {
 		}
 		applyPadding = pager
 
-		printList(formatListItems(todoSlice), pager)
+		printList(formatListItems(todoSlice, timeZone), pager)
 		return
 	}
 }
 
 // Formats the items in a given slice. Returns a string with all decorations, newlines etc
 // that is ready to be printed as returned
-func formatListItems(todoSlice []TodoStruct) string {
+func formatListItems(todoSlice []TodoStruct, timeZone *time.Location) string {
 	current_box := 1
 	var listString strings.Builder
 	// Top border and empty row
@@ -93,7 +93,7 @@ func formatListItems(todoSlice []TodoStruct) string {
 		fmt.Fprintf(&listString, "\033[35m║  %s  ║\033[0m\n", addSpace(maxWidth))
 
 		// Print creation timestamp
-		timeString := "Created: " + time.Time.String(time.Unix(row.Time, 0).UTC())
+		timeString := "Created: " + time.Time.String(time.Unix(row.Time, 0).In(timeZone))
 		timePadding := maxWidth/2 - len(timeString)/2
 		padContentToCenter(&listString, maxWidth+2)
 		fmt.Fprintf(&listString, "\033[35m║%s", addSpace(timePadding+2))
