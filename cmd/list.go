@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/mitchellh/go-wordwrap"
 	"golang.org/x/term"
@@ -69,7 +70,7 @@ func formatListItems(todoSlice []TodoStruct, timeZone *time.Location) string {
 
 	for _, row := range todoSlice {
 		// Print title
-		titleSize := len(row.Title)
+		titleSize := utf8.RuneCountInString(row.Title)
 		titleLeftPad := maxWidth/2 - titleSize/2
 		titleRightPad := maxWidth/2 - (titleSize+1)/2
 		fmt.Fprint(&listString, "\n")
@@ -87,6 +88,9 @@ func formatListItems(todoSlice []TodoStruct, timeZone *time.Location) string {
 		contentWrapped := wordwrap.WrapString(row.Content, uint(maxWidth))
 		contentLines := strings.SplitSeq(contentWrapped, "\n")
 		for line := range contentLines {
+			if len(line)%2 != 0 && titleSize%2 != 0 {
+				line = " " + line
+			}
 			listString.WriteString(formatContentLine(line))
 		}
 		padContentToCenter(&listString, maxWidth+2)
@@ -118,7 +122,7 @@ func formatListItems(todoSlice []TodoStruct, timeZone *time.Location) string {
 // Formats and decorates a single line of a todo entry's content returns it as a string
 func formatContentLine(line string) string {
 	var listString strings.Builder
-	visibleLen := len(line)
+	visibleLen := utf8.RuneCountInString(line)
 	free := max(maxWidth-visibleLen, 0)
 	left := free / 2
 	right := free - left
