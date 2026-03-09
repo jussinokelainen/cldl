@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	configDir, err := os.UserConfigDir()
+	configDir, err := os.UserHomeDir()
 	if err != nil {
 		errout("Failed to get config directory")
 		return
@@ -24,7 +24,7 @@ func main() {
 	defer cmd.MasterDB.Close()
 
 	conf := cmd.DefaultConfig()
-	configFile := configDir + "/todo/config.toml"
+	configFile := configDir + "/.config/todo/config.toml"
 	_, err = toml.DecodeFile(configFile, &conf)
 	if err != nil {
 		errout("Failed to get configs, using defaults")
