@@ -241,6 +241,32 @@ func main() {
 
 		title := strings.Join(parsedArgs.NormalStr, " ")
 		cmd.EditTodo(title, conf.Keep_on_edit)
+	case "relocate":
+		flags.Flags = []string{
+			"h",
+			"help",
+		}
+		flags.Valued_flags = nil
+		flags.Optional_value = nil
+		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
+		if err != nil {
+			errout("Bad Arguments")
+			cmd.UsageRelocate()
+			os.Exit(1)
+		}
+
+		for _, flag := range parsedArgs.Flags {
+			switch flag {
+			case "h", "help":
+				cmd.HelpRelocate()
+				return
+			}
+		}
+		if !cmd.TodoExists() {
+			errout("No todo exists in current directory!")
+			return
+		}
+		cmd.RelocateTodo(conf.Ask_rm_on_check)
 
 	default:
 		errout("Bad arguments")
@@ -269,10 +295,13 @@ Help for todo:
       init              | Create new todo in current dir
       check             | Check all locations saved by the program whether
                         | the list actually exists
+      relocate          | Add todo missing from location list
       list, ls          | List all todo list entries
       add               | Add new entry into todo list
       rm, remove, done  | Remove todo list entry or entire list
       edit              | Edit an existing todo entry
+
+  For more info about subcommands, use 'todo <subcommand> --help'
 
   Todo application that creates local per-directory todo-lists with sqlite
   List entry titles are case-insensitive when editing or removing them,

@@ -13,7 +13,7 @@ Struct to hold all config options for this application.
 
 Auto_init       |  Supposed to be given to AddTodo function only
 Ask_full_rm     |  Supposed to be given to RmTodo function only
-Ask_rm_on_check |  Supposed to be given to CheckTodo function only
+Ask_rm_on_check |  Supposed to be given to CheckTodo and RelocateTodo functions
 Keep_on_edit    |  Supposed to be given to EditTodo function only
 Timezone        |  Has to be formatted to *time.Location before usage
 */
@@ -34,6 +34,16 @@ func DefaultConfig() Config {
 	conf.Timezone = "Local"
 
 	return conf
+}
+
+func addToMasterDB(path string) {
+	// Add new todo location into list location database
+	sqlStatement := `INSERT INTO locations(location) VALUES($1);`
+	_, err := MasterDB.Exec(sqlStatement, path)
+	if err != nil {
+		errout("Adding to master DB failed!")
+		panic(err)
+	}
 }
 
 // Creates a 'master' database that holds all the locations to

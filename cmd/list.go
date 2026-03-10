@@ -210,6 +210,9 @@ func padContentToCenter(listString *strings.Builder, contentWidth int) {
 			spacerSize = terminalMid - contentMid
 		}
 
+		if spacerSize < 0 {
+			spacerSize = 0
+		}
 		spacerString := strings.Repeat(" ", spacerSize)
 		fmt.Fprintf(listString, "%s", spacerString)
 	}

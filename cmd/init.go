@@ -28,13 +28,7 @@ func InitTodo() {
 		panic(err)
 	}
 
-	// Add new todo location into list location database
-	sqlStatement := `INSERT INTO locations(location) VALUES($1);`
-	_, err = MasterDB.Exec(sqlStatement, todoPath)
-	if err != nil {
-		errout("Adding to master DB failed!")
-		panic(err)
-	}
+	addToMasterDB(todoPath)
 
 	ok("New todo created!")
 }
@@ -43,7 +37,7 @@ func InitTodo() {
 func UsageInit() {
 	fmt.Print(`
 Default usage: todo init
-	Use 'todo init -help' to see more
+	Use 'todo init --help' to see more
 `)
 }
 func HelpInit() {
