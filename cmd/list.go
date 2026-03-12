@@ -22,7 +22,8 @@ type TodoStruct struct {
 	Priority int64  `json:"priority"`
 }
 
-func ListTodo(listLocations bool, pager bool, timeZone *time.Location, urgentPrio int) {
+func ListTodo(listLocations bool, pager bool, timeZone *time.Location, urgentPrio int, wipPrio int, colors ColorConf) {
+	SetColorScheme(colors)
 	printList := func(listString string, page bool) {
 		if page {
 			printToPager(listString)
@@ -53,25 +54,33 @@ func ListTodo(listLocations bool, pager bool, timeZone *time.Location, urgentPri
 		}
 		applyPadding = pager
 
-		printList(formatListItems(todoSlice, timeZone, urgentPrio), pager)
+		printList(formatListItems(todoSlice, timeZone, urgentPrio, wipPrio), pager)
 		return
 	}
 }
 
 // Formats the items in a given slice. Returns a string with all decorations, newlines etc
 // that is ready to be printed as returned
-func formatListItems(todoSlice []TodoStruct, timeZone *time.Location, urgentPrio int) string {
+func formatListItems(todoSlice []TodoStruct, timeZone *time.Location, urgentPrio int, wipPrio int) string {
 	current_box := 1
 	var listString strings.Builder
 	// Top border and empty row
 	padContentToCenter(&listString, maxWidth+2)
-	fmt.Fprintf(&listString, "\033[35m╔══%s══╗\n", addLine(maxWidth))
+	fmt.Fprintf(&listString, "%s╔══%s══╗\n", borderColor, addLine(maxWidth))
 	padContentToCenter(&listString, maxWidth+2)
-	fmt.Fprintf(&listString, "\033[35m║  %s  ║\033[0m", addSpace(maxWidth))
+	fmt.Fprintf(&listString, "%s║  %s  ║\033[0m", borderColor, addSpace(maxWidth))
 
 	for _, row := range todoSlice {
+		var priorityColor string
+		if row.Priority >= int64(wipPrio) {
+			priorityColor = wipColor
+		} else if row.Priority >= int64(urgentPrio) {
+			priorityColor = urgentColor
+		} else {
+			priorityColor = defaultColor
+		}
 		// Print title
-		listString.WriteString(makeTitleLine(row.Title))
+		listString.WriteString(makeTitleLine(row.Title, priorityColor))
 
 		// Print content
 		contentWrapped := wordwrap.WrapString(row.Content, uint(maxWidth))
@@ -83,42 +92,44 @@ func formatListItems(todoSlice []TodoStruct, timeZone *time.Location, urgentPrio
 			listString.WriteString(formatContentLine(line))
 		}
 		padContentToCenter(&listString, maxWidth+2)
-		fmt.Fprintf(&listString, "\033[35m║  %s  ║\033[0m\n", addSpace(maxWidth))
+		fmt.Fprintf(&listString, "%s║  %s  ║\033[0m\n", borderColor, addSpace(maxWidth))
 
 		// Print time stamp and priority level
+		listString.WriteString(makePriorityLine(int(row.Priority), priorityColor))
 		listString.WriteString(makeTimeStampLine(row.Time, timeZone))
-		listString.WriteString(makePriorityLine(int(row.Priority), urgentPrio))
 
 		// Print borders that continue into the next box if not last box
 		if current_box < len(todoSlice) {
 			padContentToCenter(&listString, maxWidth+2)
-			fmt.Fprintf(&listString, "\033[35m╠══%s══╣\033[0m\n", addLine(maxWidth))
+			fmt.Fprintf(&listString, "%s╠══%s══╣\033[0m\n", borderColor, addLine(maxWidth))
 			padContentToCenter(&listString, maxWidth+2)
-			fmt.Fprintf(&listString, "\033[35m║  %s  ║\033[0m", addSpace(maxWidth))
+			fmt.Fprintf(&listString, "%s║  %s  ║\033[0m", borderColor, addSpace(maxWidth))
 		} else {
 			padContentToCenter(&listString, maxWidth+2)
-			fmt.Fprintf(&listString, "\033[35m╚══%s══╝\033[0m\n", addLine(maxWidth))
+			fmt.Fprintf(&listString, "%s╚══%s══╝\033[0m\n", borderColor, addLine(maxWidth))
 		}
 		current_box++
 	}
 	return listString.String()
 }
 
-func makeTitleLine(title string) string {
+func makeTitleLine(title string, priorityColor string) string {
 	var titleStr strings.Builder
+
 	titleSize := utf8.RuneCountInString(title)
 	titleLeftPad := maxWidth/2 - titleSize/2
 	titleRightPad := maxWidth/2 - (titleSize+1)/2
 	fmt.Fprint(&titleStr, "\n")
-	padContentToCenter(&titleStr, maxWidth+2)
-	fmt.Fprintf(&titleStr, "\033[35m║%s", addSpace(titleLeftPad+2))
-	fmt.Fprintf(&titleStr, "\033[36m%s", title)
-	fmt.Fprintf(&titleStr, "\033[35m%s║\n", addSpace(titleRightPad+2))
 
 	padContentToCenter(&titleStr, maxWidth+2)
-	fmt.Fprintf(&titleStr, "\033[35m║%s", addSpace(titleLeftPad))
-	fmt.Fprintf(&titleStr, "\033[36m══%s══", addLine(titleSize))
-	fmt.Fprintf(&titleStr, "\033[35m%s║\n", addSpace(titleRightPad))
+	fmt.Fprintf(&titleStr, "%s║%s", borderColor, addSpace(titleLeftPad+2))
+	fmt.Fprintf(&titleStr, "%s%s", priorityColor, title)
+	fmt.Fprintf(&titleStr, "%s%s║\n", borderColor, addSpace(titleRightPad+2))
+
+	padContentToCenter(&titleStr, maxWidth+2)
+	fmt.Fprintf(&titleStr, "%s║%s", borderColor, addSpace(titleLeftPad))
+	fmt.Fprintf(&titleStr, "%s══%s══", priorityColor, addLine(titleSize))
+	fmt.Fprintf(&titleStr, "%s%s║\n", borderColor, addSpace(titleRightPad))
 
 	return titleStr.String()
 }
@@ -130,15 +141,18 @@ func makeTimeStampLine(timestamp int64, timeZone *time.Location) string {
 	timeString := "Created: " + time.Time.String(time.Unix(timestamp, 0).In(timeZone))
 	timePadding := maxWidth/2 - len(timeString)/2
 	padContentToCenter(&timeStr, maxWidth+2)
-	fmt.Fprintf(&timeStr, "\033[35m║%s", addSpace(timePadding+2))
-	fmt.Fprintf(&timeStr, "\033[38;5;8m%s", timeString)
-	fmt.Fprintf(&timeStr, "%s\033[35m║\n", addSpace(timePadding+2))
+	fmt.Fprintf(&timeStr, "%s║%s", borderColor, addSpace(timePadding+2))
+	fmt.Fprintf(&timeStr, "%s%s", dimColor, timeString)
+	fmt.Fprintf(&timeStr, "%s%s║\n", borderColor, addSpace(timePadding+2))
 
 	return timeStr.String()
 }
 
-func makePriorityLine(priority int, urgentPrio int) string {
+func makePriorityLine(priority int, priorityColor string) string {
 	var prioStr strings.Builder
+	if priorityColor == defaultColor {
+		priorityColor = dimColor
+	}
 	// Print Priority
 	prioString := "Priority: " + fmt.Sprint(priority)
 	visiblePrioLen := utf8.RuneCountInString(prioString)
@@ -146,13 +160,9 @@ func makePriorityLine(priority int, urgentPrio int) string {
 	prioLeft := free / 2
 	prioRight := free - prioLeft
 	padContentToCenter(&prioStr, maxWidth+2)
-	fmt.Fprintf(&prioStr, "\033[35m║%s", addSpace(prioLeft+2))
-	if priority >= urgentPrio {
-		fmt.Fprintf(&prioStr, "\033[31m%s", prioString)
-	} else {
-		fmt.Fprintf(&prioStr, "\033[38;5;8m%s", prioString)
-	}
-	fmt.Fprintf(&prioStr, "%s\033[35m║\n", addSpace(prioRight+2))
+	fmt.Fprintf(&prioStr, "%s║%s", borderColor, addSpace(prioLeft+2))
+	fmt.Fprintf(&prioStr, "%s%s", priorityColor, prioString)
+	fmt.Fprintf(&prioStr, "%s%s║\n", borderColor, addSpace(prioRight+2))
 
 	return prioStr.String()
 }
@@ -166,9 +176,9 @@ func formatContentLine(line string) string {
 	right := free - left
 
 	padContentToCenter(&listString, maxWidth+2)
-	fmt.Fprintf(&listString, "\033[35m║%s", addSpace(left+2))
-	fmt.Fprintf(&listString, "\033[32m%s", line)
-	fmt.Fprintf(&listString, "\033[35m%s║\n", addSpace(right+2))
+	fmt.Fprintf(&listString, "%s║%s", borderColor, addSpace(left+2))
+	fmt.Fprintf(&listString, "%s%s", contentColor, line)
+	fmt.Fprintf(&listString, "%s%s║\n", borderColor, addSpace(right+2))
 
 	return listString.String()
 }
@@ -206,21 +216,21 @@ func listAllTodoLocations() string {
 
 	fmt.Fprint(&listString, "\n")
 	padContentToCenter(&listString, longestLoc+2)
-	fmt.Fprintf(&listString, "%s\033[36mAll todo list locations\033[0m\n",
-		addSpace((longestLoc/2)-9))
+	fmt.Fprintf(&listString, "%s%sAll todo list locations\033[0m\n",
+		addSpace((longestLoc/2)-9), defaultColor)
 	padContentToCenter(&listString, longestLoc+2)
-	fmt.Fprintf(&listString, "\033[35m╔══%s══╗\n", addLine(longestLoc))
+	fmt.Fprintf(&listString, "%s╔══%s══╗\n", borderColor, addLine(longestLoc))
 
 	for _, loc := range locSlice {
 		lenDiff := longestLoc - len(loc)
 		padContentToCenter(&listString, longestLoc+2)
-		fmt.Fprintf(&listString, "\033[35m║%s", addSpace(lenDiff/2+2))
-		fmt.Fprintf(&listString, "\033[36m%s", loc)
-		fmt.Fprintf(&listString, "\033[35m%s║\n", addSpace((lenDiff+1)/2+2))
+		fmt.Fprintf(&listString, "%s║%s", borderColor, addSpace(lenDiff/2+2))
+		fmt.Fprintf(&listString, "%s%s", contentColor, loc)
+		fmt.Fprintf(&listString, "%s%s║\n", borderColor, addSpace((lenDiff+1)/2+2))
 	}
 
 	padContentToCenter(&listString, longestLoc+2)
-	fmt.Fprintf(&listString, "\033[35m╚══%s══╝\033[0m\n", addLine(longestLoc))
+	fmt.Fprintf(&listString, "%s╚══%s══╝\033[0m\n", borderColor, addLine(longestLoc))
 
 	return listString.String()
 }
@@ -263,7 +273,7 @@ func getTodoSlice() ([]TodoStruct, error) {
 	todoDB := openTodoDB()
 	defer todoDB.Close()
 
-	rows, err := todoDB.Query(`SELECT * FROM todo ORDER BY priority, time ASC;`)
+	rows, err := todoDB.Query(`SELECT * FROM todo ORDER BY priority DESC, time ASC;`)
 	if err != nil {
 		errout("Failed getting todo list")
 		panic(err)

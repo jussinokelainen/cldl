@@ -183,7 +183,7 @@ func main() {
 			errout("Failed to parse timezone")
 			os.Exit(1)
 		}
-		cmd.ListTodo(listAll, pagerList, timeZoneFormatted, conf.Urgent_priority)
+		cmd.ListTodo(listAll, pagerList, timeZoneFormatted, conf.Urgent_priority, conf.In_progress_priority, conf.Colors)
 
 	case "rm", "remove", "done":
 		if !cmd.TodoExists() {
@@ -375,6 +375,10 @@ Help for todo:
                               | when using 'todo check'
                               | [Default: true]
 
+      Ask_priority            | Asks for the priority that will be set to when
+                              | adding new list entry.
+                              | [Default: false]
+
       keep_on_edit = bool     | Either keep the content and add new content
                               | with a 'New edit' tag, or override entry content
                               | [Default: false]
@@ -386,11 +390,22 @@ Help for todo:
                               | [Default: 0]
 
       urgent_priority         | Priority number after which entries are
-                              | considered to be urgent
+                              | considered to be urgent (title printed in orange)
                               | [Default: 10]
 
-      Ask_priority            | Asks for the priority that will be set to when
-                              | adding new list entry.
-                              | [Default: false]
+      in_progress_priority    | Priority number after which entries are
+                              | considered to be WIP (title printed in green)
+                              | This value should be set to something bigger
+                              | than urgent priority
+                              | [Default: 100]
+
+      [colors]                | Set custom colors for different elements.
+        default               | Colors must be a string of numbers (e.g. "123")
+        urgent                | between 0-255, using the corresponding value 
+        wip                   | from the 256 color table
+        content
+        border
+        dim
+
 `)
 }
