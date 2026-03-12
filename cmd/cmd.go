@@ -11,18 +11,24 @@ var MasterDB *sql.DB
 /*
 Struct to hold all config options for this application.
 
-Auto_init       |  Supposed to be given to AddTodo function only
-Ask_full_rm     |  Supposed to be given to RmTodo function only
-Ask_rm_on_check |  Supposed to be given to CheckTodo and RelocateTodo functions
-Keep_on_edit    |  Supposed to be given to EditTodo function only
-Timezone        |  Has to be formatted to *time.Location before usage
+Auto_init        |  Supposed to be given to AddTodo function only
+Ask_full_rm      |  Supposed to be given to RmTodo function only
+Ask_rm_on_check  |  Supposed to be given to CheckTodo and RelocateTodo functions
+Keep_on_edit     |  Supposed to be given to EditTodo function only
+Timezone         |  Has to be formatted to *time.Location before usage
+Default_priority |  Priority that gets set to new entries, and null values
+Urgent_priority  |  Priority value after which a list item is considered urgent
+Ask_priority     |  Whether priority is asked for when adding list entry
 */
 type Config struct {
-	Auto_init       bool
-	Ask_full_rm     bool
-	Ask_rm_on_check bool
-	Keep_on_edit    bool
-	Timezone        string
+	Auto_init        bool
+	Ask_full_rm      bool
+	Ask_rm_on_check  bool
+	Keep_on_edit     bool
+	Timezone         string
+	Default_priority int
+	Urgent_priority  int
+	Ask_priority     bool
 }
 
 func DefaultConfig() Config {
@@ -32,6 +38,9 @@ func DefaultConfig() Config {
 	conf.Ask_rm_on_check = true
 	conf.Keep_on_edit = false
 	conf.Timezone = "Local"
+	conf.Default_priority = 0
+	conf.Urgent_priority = 10
+	conf.Ask_priority = false
 
 	return conf
 }
@@ -100,6 +109,34 @@ func remove_master_entry(todoPath string) {
 		errout("Error removing from master db")
 		panic(err)
 	}
+}
+
+// Get the existing content of a todo entry if it exists, returns an error if it doesn't exist
+func getIfEntryExists(title string) (string, error) {
+	todoDB := openTodoDB()
+	defer todoDB.Close()
+
+	sqlStatement := `SELECT content from todo WHERE UPPER(title) = UPPER($1);`
+	res, err := todoDB.Query(sqlStatement, title)
+	if err != nil {
+		errout("Failed checking entry in database!")
+		panic(err)
+	}
+	defer res.Close()
+
+	var content string
+	for res.Next() {
+		err = res.Scan(&content)
+		if err != nil {
+			errout("Failed scanning existing entry content")
+			panic(err)
+		}
+	}
+	if content == "" {
+		return content, fmt.Errorf("No content found")
+	}
+
+	return content, nil
 }
 
 // Checks whether a local todo exists in the current directory,

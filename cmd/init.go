@@ -19,9 +19,10 @@ func InitTodo() {
 	todoDB := openTodoDB()
 	defer todoDB.Close()
 	_, err := todoDB.Exec(`CREATE TABLE todo(
-		title VARCHAR UNIQUE,
-		content VARCHAR,
-		time INTEGER
+		title VARCHAR UNIQUE NOT NULL,
+		content VARCHAR NOT NULL,
+		time INTEGER NOT NULL,
+		priority INTEGER NOT NULL
 		);`)
 	if err != nil {
 		errout("Creating new todo failed!")

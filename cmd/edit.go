@@ -46,34 +46,6 @@ func EditTodo(title string, keep bool) {
 	changeEntryContent(newContent, title)
 }
 
-// Get the existing content of a todo entry if it exists, returns an error if it doesn't exist
-func getIfEntryExists(title string) (string, error) {
-	todoDB := openTodoDB()
-	defer todoDB.Close()
-
-	sqlStatement := `SELECT content from todo WHERE UPPER(title) = UPPER($1);`
-	res, err := todoDB.Query(sqlStatement, title)
-	if err != nil {
-		errout("Failed checking entry in database!")
-		panic(err)
-	}
-	defer res.Close()
-
-	var content string
-	for res.Next() {
-		err = res.Scan(&content)
-		if err != nil {
-			errout("Failed scanning existing entry content")
-			panic(err)
-		}
-	}
-	if content == "" {
-		return content, fmt.Errorf("No content found")
-	}
-
-	return content, nil
-}
-
 // Send the new content of an entry into the database
 func changeEntryContent(newContent string, title string) {
 	todoDB := openTodoDB()

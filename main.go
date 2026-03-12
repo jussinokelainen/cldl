@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"local/flagger/flagger"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 	"todo/cmd"
@@ -31,7 +32,6 @@ func main() {
 		conf = cmd.DefaultConfig()
 	}
 
-	var flags flagger.Flagset
 	args := os.Args[1:]
 	// If no args given, print usage and exit since given nothing to do
 	if len(args) < 1 {
@@ -39,9 +39,9 @@ func main() {
 		return
 	}
 
+	var flags flagger.Flagset
+
 	switch args[0] {
-	case "--help", "-h":
-		mainHelp()
 	case "check":
 		flags.Flags = []string{
 			"h",
@@ -67,6 +67,9 @@ func main() {
 			}
 		}
 
+		if cmd.TodoExists() {
+			cmd.AddPriorityColumnIfNotExist(conf.Default_priority)
+		}
 		cmd.CheckTodos(conf.Ask_rm_on_check)
 
 	case "init":
@@ -95,10 +98,11 @@ func main() {
 
 	case "add":
 		flags.Flags = []string{
-			"h",
-			"help",
+			"h", "help",
 		}
-		flags.Valued_flags = nil
+		flags.Valued_flags = []string{
+			"p", "priority",
+		}
 		flags.Optional_value = []string{
 			"auto-init",
 		}
@@ -121,6 +125,14 @@ func main() {
 
 		for _, flag := range parsedArgs.ValueFlags {
 			switch flag[0] {
+			case "p", "priority":
+				newPrio, err := strconv.Atoi(flag[1])
+				if err != nil {
+					errout("Priority value must be integer")
+					return
+				}
+				conf.Default_priority = newPrio
+				conf.Ask_priority = false
 			case "auto-init":
 				switch flag[1] {
 				case "true":
@@ -135,7 +147,7 @@ func main() {
 		}
 
 		title := strings.Join(parsedArgs.NormalStr, " ")
-		cmd.AddTodo(title, conf.Auto_init)
+		cmd.AddTodo(title, conf.Auto_init, conf.Default_priority, conf.Ask_priority)
 
 	case "list", "ls":
 		flags.Flags = []string{
@@ -171,7 +183,7 @@ func main() {
 			errout("Failed to parse timezone")
 			os.Exit(1)
 		}
-		cmd.ListTodo(listAll, pagerList, timeZoneFormatted)
+		cmd.ListTodo(listAll, pagerList, timeZoneFormatted, conf.Urgent_priority)
 
 	case "rm", "remove", "done":
 		if !cmd.TodoExists() {
@@ -269,8 +281,40 @@ func main() {
 		cmd.RelocateTodo(conf.Ask_rm_on_check)
 
 	default:
-		errout("Bad arguments")
-		mainUsage()
+		flags.Flags = []string{
+			"h", "help",
+		}
+		flags.Valued_flags = []string{
+			"p", "priority",
+		}
+		flags.Optional_value = nil
+		mainFlags, err := flagger.ParseFlags(args, flags)
+		if err != nil || (len(mainFlags.Flags) < 1 && len(mainFlags.ValueFlags) < 1) {
+			errout("Bad arguments")
+			mainUsage()
+			os.Exit(1)
+		}
+
+		for _, flag := range mainFlags.Flags {
+			switch flag {
+			case "h", "help":
+				mainHelp()
+				return
+			}
+		}
+
+		for _, vflag := range mainFlags.ValueFlags {
+			switch vflag[0] {
+			case "p", "priority":
+				title := strings.Join(mainFlags.NormalStr, " ")
+				newPrio, err := strconv.Atoi(vflag[1])
+				if err != nil {
+					errout("Invalid number for flag priority")
+					os.Exit(1)
+				}
+				cmd.EditPriority(title, newPrio)
+			}
+		}
 	}
 }
 
@@ -290,11 +334,13 @@ func mainHelp() {
 	fmt.Print(`
 Help for todo:
   Available commands:
-      --help            | Show help message
-      -h                | Same as '--help'
+      --help, -h        | Show this message
+      --priority, -p    | Set the priority of a todo entry, usage
+                        | [todo <title> -p <int>] or [todo -p <int> <title>]
       init              | Create new todo in current dir
       check             | Check all locations saved by the program whether
-                        | the list actually exists
+                        | the list actually exists. Also checks that a local
+                        | todo has the right columns
       relocate          | Add todo missing from location list
       list, ls          | List all todo list entries
       add               | Add new entry into todo list
@@ -335,5 +381,16 @@ Help for todo:
 
       timezone = string       | Set the timezone used when displaying dates,
                               | By default uses current local timezone
+
+      default_priority        | Priority that gets set to new list entries
+                              | [Default: 0]
+
+      urgent_priority         | Priority number after which entries are
+                              | considered to be urgent
+                              | [Default: 10]
+
+      Ask_priority            | Asks for the priority that will be set to when
+                              | adding new list entry.
+                              | [Default: false]
 `)
 }

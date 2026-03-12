@@ -4,18 +4,19 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
 
 // Adds a new todo with a title given as an argument, if title is not duplicate
-func AddTodo(title string, auto_init bool) {
+func AddTodo(title string, auto_init bool, priority int, shouldAskPriority bool) {
 	if !TodoExists() {
 		var answer bool
 		if auto_init {
 			answer = true
 		} else {
-			fmt.Print("[\033[35m INFO \033[0m] No todo currently exists in this directory.\n")
+			info("Not todo currently exists in this directory")
 			answer = askIfInit()
 		}
 		if answer {
@@ -50,13 +51,35 @@ func AddTodo(title string, auto_init bool) {
 	}
 	content = strings.TrimSpace(content)
 
-	sqlStatement := `INSERT INTO todo(title, content, time) VALUES($1, $2, $3);`
-	_, err = todoDB.Exec(sqlStatement, title, content, time)
+	if shouldAskPriority {
+		priority = askPriority()
+	}
+
+	sqlStatement := `INSERT INTO todo(title, content, time, priority) VALUES($1, $2, $3, $4);`
+	_, err = todoDB.Exec(sqlStatement, title, content, time, priority)
 	if err != nil {
 		errout("Error adding new todo, executing database query failed")
 		panic(err)
 	}
 	ok("Successfully added new todo " + title)
+}
+
+func askPriority() int {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("\033[35mEnter priority to be set for this entry\033[0m: ")
+	answer, err := reader.ReadString('\n')
+	if err != nil {
+		errout("Error reading input")
+		return askPriority()
+	}
+	answer = strings.TrimSpace(answer)
+
+	answerInt, err := strconv.Atoi(answer)
+	if err != nil {
+		errout("Input must be an integer")
+		return askPriority()
+	}
+	return answerInt
 }
 
 func askIfInit() bool {
@@ -90,14 +113,17 @@ func HelpAdd() {
 	fmt.Print(`
 Help for todo add:
 	Available arguments:
-		--help, -h  | Show help for todo add
-		--auto-init | Automatically initialize a new todo when adding
-                    | an entry and a list doesn't exist yet.
-                    | Can be used without a value to set auto-init
-					| to true, or with a true/false to set the value
-                    | (If used without giving the value, it must be after
-                    | the title of the entry, otherwise the first word of
-                    | the title is interpreted as the value)
+		--help, -h     | Show help for todo add
+		--auto-init    | Automatically initialize a new todo when adding
+                       | an entry and a list doesn't exist yet.
+                       | Can be used without a value to set auto-init
+					   | to true, or with a true/false to set the value
+                       | (If used without giving the value, it must be after
+                       | the title of the entry, otherwise the first word of
+                       | the title is interpreted as the value)
+		--priority, -p | Specify the priority that will be set for this entry
+	                   | regardless of default_priority, and it will not be
+                       | asked later regardless of ask_priority
 
 	Use 'todo add <title>' where <title> is what you want as
 	a title for the new todo entry.
