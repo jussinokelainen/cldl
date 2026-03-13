@@ -42,6 +42,67 @@ func main() {
 	var flags flagger.Flagset
 
 	switch args[0] {
+	case "fix":
+		if !cmd.TodoExists() {
+			errout("No todo exists in current directory!")
+			return
+		}
+
+		flags.Flags = []string{
+			"h",
+			"help",
+		}
+		flags.Valued_flags = nil
+		flags.Optional_value = nil
+		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
+		if err != nil {
+			errout("Bad Arguments")
+			cmd.UsageFix()
+			os.Exit(1)
+		}
+
+		for _, flag := range parsedArgs.Flags {
+			switch flag {
+			case "h", "help":
+				cmd.HelpFix()
+				return
+			}
+		}
+
+		cmd.FixTodoTable(conf.Default_priority)
+	case "set-priority", "set-p":
+		if !cmd.TodoExists() {
+			errout("No todo exists in current directory!")
+			return
+		}
+
+		flags.Flags = []string{
+			"h",
+			"help",
+		}
+		flags.Valued_flags = nil
+		flags.Optional_value = nil
+		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
+		if err != nil {
+			errout("Bad Arguments")
+			cmd.UsagePriority()
+			os.Exit(1)
+		}
+
+		for _, flag := range parsedArgs.Flags {
+			switch flag {
+			case "h", "help":
+				cmd.HelpPriority()
+				return
+			}
+		}
+		title := strings.Join(parsedArgs.NormalStr[1:], " ")
+		newPrio, err := strconv.Atoi(parsedArgs.NormalStr[0])
+		if err != nil {
+			errout("Invalid number for flag priority")
+			os.Exit(1)
+		}
+		cmd.EditPriority(title, newPrio)
 	case "check":
 		flags.Flags = []string{
 			"h",
@@ -67,9 +128,6 @@ func main() {
 			}
 		}
 
-		if cmd.TodoExists() {
-			cmd.AddPriorityColumnIfNotExist(conf.Default_priority)
-		}
 		cmd.CheckTodos(conf.Ask_rm_on_check)
 
 	case "init":
@@ -284,9 +342,7 @@ func main() {
 		flags.Flags = []string{
 			"h", "help",
 		}
-		flags.Valued_flags = []string{
-			"p", "priority",
-		}
+		flags.Valued_flags = nil
 		flags.Optional_value = nil
 		mainFlags, err := flagger.ParseFlags(args, flags)
 		if err != nil || (len(mainFlags.Flags) < 1 && len(mainFlags.ValueFlags) < 1) {
@@ -300,19 +356,6 @@ func main() {
 			case "h", "help":
 				mainHelp()
 				return
-			}
-		}
-
-		for _, vflag := range mainFlags.ValueFlags {
-			switch vflag[0] {
-			case "p", "priority":
-				title := strings.Join(mainFlags.NormalStr, " ")
-				newPrio, err := strconv.Atoi(vflag[1])
-				if err != nil {
-					errout("Invalid number for flag priority")
-					os.Exit(1)
-				}
-				cmd.EditPriority(title, newPrio)
 			}
 		}
 	}
@@ -334,18 +377,19 @@ func mainHelp() {
 	fmt.Print(`
 Help for todo:
   Available commands:
-      --help, -h        | Show this message
-      --priority, -p    | Set the priority of a todo entry, usage
-                        | [todo <title> -p <int>] or [todo -p <int> <title>]
-      init              | Create new todo in current dir
-      check             | Check all locations saved by the program whether
-                        | the list actually exists. Also checks that a local
-                        | todo has the right columns
-      relocate          | Add todo missing from location list
-      list, ls          | List all todo list entries
-      add               | Add new entry into todo list
-      rm, remove, done  | Remove todo list entry or entire list
-      edit              | Edit an existing todo entry
+      --help, -h           | Show this message
+      set-priority, set-p  | Set the priority of a todo entry, usage
+                           | [todo <title> -p <int>] or [todo -p <int> <title>]
+      init                 | Create new todo in current dir
+      check                | Check all locations saved by the program whether
+                           | the list actually exists. Also checks that a local
+                           | todo has the right columns
+      relocate             | Add todo missing from location list
+      list, ls             | List all todo list entries
+      add                  | Add new entry into todo list
+      rm, remove, done     | Remove todo list entry or entire list
+      edit                 | Edit an existing todo entry
+      fix                  | Fixes the todo table, useful after breaking changes
 
   For more info about subcommands, use 'todo <subcommand> --help'
 
