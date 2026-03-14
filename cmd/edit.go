@@ -66,24 +66,21 @@ func changeEntryContent(newContent string, title string) {
 // NOTE: Edit command help and usage functions
 func UsageEdit() {
 	fmt.Print(`
-Usage: todo edit [<args>] <title>
-	Use 'todo edit -help' to see arguments
+Usage: todo edit [-h | --help] [-k | --keep] <title>
+    Use 'todo edit --help' to see more
 `)
 }
 func HelpEdit() {
 	fmt.Print(`
 Help for todo edit:
-	Available arguments:
-		--help, -h  | Show help for todo edit
-		--keep, -k  | Toggles the behavior of keeping on edit
+    Available arguments:
+        --help, -h  | Show this message
+        --keep, -k  | Toggles the behavior of keeping on edit
 
-	Edit an existing todo list entry with a given title.
+    Edit an existing todo list entry with a given title. Can be configured
+    to either keep the existing content or override it by default
 
-	Same text inputting rules apply for editing as adding a new entry,
-	Check 'todo add --help'.
-
-    Config option 'keep_on_edit' can be set to determine the default keep
-    behavior when editing, false to override content by default, true to
-    keep by default
+    Same text inputting rules apply for editing as adding a new entry,
+    Check 'todo add --help'.
 `)
 }

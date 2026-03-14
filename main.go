@@ -6,7 +6,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 	"todo/cmd"
 
 	"github.com/BurntSushi/toml"
@@ -19,8 +18,6 @@ func main() {
 		return
 	}
 
-	// NOTE: Any calls to functions that might interact with the MasterDB
-	// have to be called after this
 	cmd.CreateMasterDB()
 	defer cmd.MasterDB.Close()
 
@@ -32,14 +29,28 @@ func main() {
 		conf = cmd.DefaultConfig()
 	}
 
+	handleParsing(conf)
+}
+
+/*
+Handles the main parsing of flags, arguments and subcommands, and then calls
+required subcommand functions.
+*/
+func handleParsing(conf cmd.Config) {
+
 	args := os.Args[1:]
-	// If no args given, print usage and exit since given nothing to do
+	// If no args given, print usage and exit since there is nothing to do
 	if len(args) < 1 {
 		mainUsage()
 		return
 	}
 
+	// Initialize flags, all subcommands will have --help and -h, so they
+	// can be added here
 	var flags flagger.Flagset
+	flags.Flags = []string{"h", "help"}
+	flags.Valued_flags = []string{}
+	flags.Optional_value = []string{}
 
 	switch args[0] {
 	case "fix":
@@ -48,12 +59,6 @@ func main() {
 			return
 		}
 
-		flags.Flags = []string{
-			"h",
-			"help",
-		}
-		flags.Valued_flags = nil
-		flags.Optional_value = nil
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
 			errout("Bad Arguments")
@@ -70,47 +75,46 @@ func main() {
 		}
 
 		cmd.FixTodoTable(conf.Default_priority)
-	case "set-priority", "set-p":
+	case "set":
 		if !cmd.TodoExists() {
 			errout("No todo exists in current directory!")
 			return
 		}
 
-		flags.Flags = []string{
-			"h",
-			"help",
-		}
-		flags.Valued_flags = nil
-		flags.Optional_value = nil
+		additionalValued := []string{"p", "priority"}
+		flags.Valued_flags = append(flags.Valued_flags, additionalValued...)
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
 			errout("Bad Arguments")
-			cmd.UsagePriority()
+			cmd.UsageSet()
+			os.Exit(1)
+		}
+		if len(parsedArgs.Flags) < 1 && len(parsedArgs.ValueFlags) < 1 {
+			cmd.UsageSet()
 			os.Exit(1)
 		}
 
 		for _, flag := range parsedArgs.Flags {
 			switch flag {
 			case "h", "help":
-				cmd.HelpPriority()
+				cmd.HelpSet()
 				return
 			}
 		}
-		title := strings.Join(parsedArgs.NormalStr[1:], " ")
-		newPrio, err := strconv.Atoi(parsedArgs.NormalStr[0])
-		if err != nil {
-			errout("Invalid number for flag priority")
-			os.Exit(1)
+		for _, flag := range parsedArgs.ValueFlags {
+			switch flag[0] {
+			case "p", "priority":
+				title := strings.Join(parsedArgs.NormalStr, " ")
+				newPrio, err := strconv.Atoi(flag[1])
+				if err != nil {
+					errout("Invalid number for flag priority")
+					os.Exit(1)
+				}
+				cmd.EditPriority(title, newPrio)
+			}
 		}
-		cmd.EditPriority(title, newPrio)
 	case "check":
-		flags.Flags = []string{
-			"h",
-			"help",
-			"no-confirm",
-		}
-		flags.Valued_flags = nil
-		flags.Optional_value = nil
+		flags.Flags = append(flags.Flags, "no-confirm")
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
 			errout("Bad Arguments")
@@ -131,12 +135,6 @@ func main() {
 		cmd.CheckTodos(conf.Ask_rm_on_check)
 
 	case "init":
-		flags.Flags = []string{
-			"h",
-			"help",
-		}
-		flags.Valued_flags = nil
-		flags.Optional_value = nil
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
 			errout("Bad Arguments")
@@ -155,15 +153,9 @@ func main() {
 		cmd.InitTodo()
 
 	case "add":
-		flags.Flags = []string{
-			"h", "help",
-		}
-		flags.Valued_flags = []string{
-			"p", "priority",
-		}
-		flags.Optional_value = []string{
-			"auto-init",
-		}
+		additionalValued := []string{"p", "priority"}
+		flags.Valued_flags = append(flags.Valued_flags, additionalValued...)
+		flags.Optional_value = append(flags.Optional_value, "auto-init")
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
 			errout("Bad Arguments")
@@ -205,16 +197,14 @@ func main() {
 		}
 
 		title := strings.Join(parsedArgs.NormalStr, " ")
-		cmd.AddTodo(title, conf.Auto_init, conf.Default_priority, conf.Ask_priority)
+		cmd.AddTodo(title, conf)
 
 	case "list", "ls":
-		flags.Flags = []string{
+		additionalFlags := []string{
 			"a", "all",
 			"p", "pager",
-			"h", "help",
 		}
-		flags.Valued_flags = nil
-		flags.Optional_value = nil
+		flags.Flags = append(flags.Flags, additionalFlags...)
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
 			errout("Bad Arguments")
@@ -236,12 +226,7 @@ func main() {
 			}
 		}
 
-		timeZoneFormatted, err := time.LoadLocation(strings.TrimSpace(conf.Timezone))
-		if err != nil {
-			errout("Failed to parse timezone")
-			os.Exit(1)
-		}
-		cmd.ListTodo(listAll, pagerList, timeZoneFormatted, conf.Urgent_priority, conf.In_progress_priority, conf.Colors)
+		cmd.ListTodo(listAll, pagerList, conf)
 
 	case "rm", "remove", "done":
 		if !cmd.TodoExists() {
@@ -249,12 +234,8 @@ func main() {
 			return
 		}
 
-		flags.Flags = []string{
-			"a", "all",
-			"h", "help",
-		}
-		flags.Valued_flags = nil
-		flags.Optional_value = nil
+		additionalFlags := []string{"a", "all"}
+		flags.Flags = append(flags.Flags, additionalFlags...)
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
 			errout("Bad Arguments")
@@ -274,7 +255,7 @@ func main() {
 		}
 
 		title := strings.Join(parsedArgs.NormalStr, " ")
-		cmd.RmTodo(title, rmAll, conf.Ask_full_rm)
+		cmd.RmTodo(title, rmAll, conf.Ask_full_rm, conf.Always_confirm_full_rm)
 
 	case "edit":
 		if !cmd.TodoExists() {
@@ -282,12 +263,8 @@ func main() {
 			return
 		}
 
-		flags.Flags = []string{
-			"k", "keep",
-			"h", "help",
-		}
-		flags.Valued_flags = nil
-		flags.Optional_value = nil
+		additionalFlags := []string{"k", "keep"}
+		flags.Flags = append(flags.Flags, additionalFlags...)
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
 			errout("Bad Arguments")
@@ -312,12 +289,6 @@ func main() {
 		title := strings.Join(parsedArgs.NormalStr, " ")
 		cmd.EditTodo(title, conf.Keep_on_edit)
 	case "relocate":
-		flags.Flags = []string{
-			"h",
-			"help",
-		}
-		flags.Valued_flags = nil
-		flags.Optional_value = nil
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
 			errout("Bad Arguments")
@@ -339,11 +310,6 @@ func main() {
 		cmd.RelocateTodo(conf.Ask_rm_on_check)
 
 	default:
-		flags.Flags = []string{
-			"h", "help",
-		}
-		flags.Valued_flags = nil
-		flags.Optional_value = nil
 		mainFlags, err := flagger.ParseFlags(args, flags)
 		if err != nil || (len(mainFlags.Flags) < 1 && len(mainFlags.ValueFlags) < 1) {
 			errout("Bad arguments")
@@ -369,18 +335,19 @@ func errout(msg string) { fmt.Println("[\033[31m ERROR \033[0m] ", msg) }
 // NOTE: Main help and usage functions
 func mainUsage() {
 	fmt.Print(`
-Usage: todo <COMMAND> [<args>]
-	Use todo --help to see available commands and arguments
+Usage: todo [-h | --help] <command> [<args>]
+    Use todo --help to see available commands
 `)
 }
 func mainHelp() {
 	fmt.Print(`
 Help for todo:
-  Available commands:
+  Flags:
       --help, -h           | Show this message
-      set-priority, set-p  | Set the priority of a todo entry, usage
-                           | [todo <title> -p <int>] or [todo -p <int> <title>]
-      init                 | Create new todo in current dir
+
+  Available commands:
+      set                  | Set some values of todo entries, see todo set --help
+      init                 | Create new todo in current directory
       check                | Check all locations saved by the program whether
                            | the list actually exists. Also checks that a local
                            | todo has the right columns
@@ -391,7 +358,7 @@ Help for todo:
       edit                 | Edit an existing todo entry
       fix                  | Fixes the todo table, useful after breaking changes
 
-  For more info about subcommands, use 'todo <subcommand> --help'
+  For more info about commands, use 'todo <command> --help'
 
   Todo application that creates local per-directory todo-lists with sqlite
   List entry titles are case-insensitive when editing or removing them,
@@ -402,8 +369,7 @@ Help for todo:
   If a panic error occurs, most likely something went wrong when interacting
   with the sqlite databases (although it is not the only way panics can occur)
 
-  Configuration expect a file 'UserConfigDir/todo/config.toml'
-  For example on a real OS the filepath is '~/.config/todo/config.toml'.
+  Configuration expect a file as '~/.config/todo/config.toml'.
 
   Usable config options:
       auto_init = bool        | automatically initialize a new local todo if it
@@ -443,7 +409,7 @@ Help for todo:
                               | than urgent priority
                               | [Default: 100]
 
-      [colors]                | Set custom colors for different elements.
+      [colors]  default val   | Set custom colors for different elements.
         default  [#99FFFF]    | Color must be a hex number (e.g. "#FFFFFF")
         urgent   [#FF8000]
         wip      [#66FF66]

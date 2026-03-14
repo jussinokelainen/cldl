@@ -1,8 +1,6 @@
 package cmd
 
-import (
-	"fmt"
-)
+import "fmt"
 
 func EditPriority(title string, newPrio int) {
 	todoDB := openTodoDB()
@@ -23,19 +21,20 @@ func EditPriority(title string, newPrio int) {
 	}
 }
 
-func UsagePriority() {
+func UsageSet() {
 	fmt.Print(`
-Usage: todo set-priority <number> <title>
-	Use 'todo priority --help' to see more
+Usage: todo set [-h | --help] [-p | --priority] <title>
+    Use 'todo set --help' to see more
 `)
 }
-func HelpPriority() {
+func HelpSet() {
 	fmt.Print(`
-Help for todo priority:
-	Available arguments:
-		--help, -h   | Show this message
+Help for todo set:
+    Available arguments:
+        --help, -h     | Show this message
+        --priority, -p | Set the priority of an entry
 
-    Set the priority of a todo entry
+    Set various things in already existing entries
 `)
 
 }

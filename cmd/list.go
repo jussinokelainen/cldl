@@ -22,7 +22,15 @@ type TodoStruct struct {
 	Priority int64  `json:"priority"`
 }
 
-func ListTodo(listLocations bool, pager bool, timeZone *time.Location, urgentPrio int, wipPrio int, colors ColorConf) {
+func ListTodo(listLocations bool, pager bool, config Config) {
+	timeZone, err := time.LoadLocation(strings.TrimSpace(config.Timezone))
+	if err != nil {
+		errout("Failed to parse timezone")
+		os.Exit(1)
+	}
+	urgentPrio := config.Urgent_priority
+	wipPrio := config.In_progress_priority
+	colors := config.Colors
 	setColorScheme(colors)
 	printList := func(listString string, page bool) {
 		if page {
@@ -318,20 +326,20 @@ func addSpace(length int) string {
 // NOTE: List command help and usage functions
 func UsageList() {
 	fmt.Print(`
-Usage: todo list [<args>]
-	Use 'todo list -help' to see arguments
+Usage: todo list [-h | --help] [-a | --all] [-p | --pager]
+    Use 'todo list --help' to see more
 `)
 }
 func HelpList() {
 	fmt.Print(`
 Help for todo list:
-	Available arguments:
-		--help, -h   | Show help for todo list
-		--all, -a    | List all locations with todo's
-		--pager, -p  | Toggle pagering behavior, by default normal lists
-		             | get pagered, locations don't
+    Available arguments:
+        --help, -h   | Show this message
+        --all, -a    | List all locations with todo's
+        --pager, -p  | Toggle pagering behavior, by default normal lists
+                     | get pagered, location lists don't
 
-	Show content in a local todo list, or alternatively with '-all'
-	show all locations with todo lists
+    Show content in a local todo list, or alternatively with '--all'
+    show all locations with todo lists
 `)
 }

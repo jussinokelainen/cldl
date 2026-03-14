@@ -33,11 +33,11 @@ func CheckTodos(confirm_rm bool) {
 			info("This todo does not exist: \n\033[35m  " + location + "\033[0m")
 			if confirm_rm {
 				if confirmMasterRm() {
-					remove_master_entry(location)
+					removeFromMasterDB(location)
 				}
 
 			} else {
-				remove_master_entry(location)
+				removeFromMasterDB(location)
 			}
 		}
 	}
@@ -66,22 +66,19 @@ func confirmMasterRm() bool {
 // NOTE: Check command help and usage functions
 func UsageCheck() {
 	fmt.Print(`
-Usage: todo check
-    Use 'todo check -help' to see more
+Usage: todo check [-h | --help] [--no-confirm]
+    Use 'todo check --help' to see more
 `)
 }
 func HelpCheck() {
 	fmt.Print(`
 Help for todo check:
     Available arguments:
-        --help, -h   | Show help for todo check
+        --help, -h   | Show this message
         --no-confirm | Don't ask for confirmation before deleting
                        local databases, regardless of what configs have
 
-    Checks all the saved locations of local todo lists and looks
-    for locations that do not have the corresponding list files.
-
-    Config option 'ask_rm_on_check' determines whether excess locations
-    are automatically removed or prompted
+    Checks all the saved locations of local todo lists and looks for locations
+    that do not have the corresponding list files, and asks to delete them
 `)
 }

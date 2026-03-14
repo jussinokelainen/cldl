@@ -78,6 +78,9 @@ func FixTodoTable(defaultPriority int) {
 	DefaultNullPriorities(defaultPriority)
 }
 
+// This function will be more and more useless as time goes on, but since when
+// The priority column was first added it was able to have null values, this
+// function might be required sometimes, so it has to be in the fix subcommand
 func DefaultNullPriorities(defaultPriority int) {
 	todoDB := openTodoDB()
 	defer todoDB.Close()
@@ -93,20 +96,19 @@ func DefaultNullPriorities(defaultPriority int) {
 
 func UsageFix() {
 	fmt.Print(`
-Usage: todo fix
-	Use 'todo fix --help' to see more
+Usage: todo fix [-h | --help]
+    Use 'todo fix --help' to see more
 `)
 }
 func HelpFix() {
 	fmt.Print(`
 Help for todo fix:
-	Available arguments:
-		--help, -h   | Show this message
+    Available arguments:
+        --help, -h   | Show this message
 
     This command will be useful after making breaking
-    changes to the program and its databases. It whether
-    a local todo list has all the required columns, and
-    adds them if they don't exist.
+    changes to the program and its databases. It checks
+    whether a local todo list has all the required columns,
+    and adds them if they don't exist.
 `)
-
 }

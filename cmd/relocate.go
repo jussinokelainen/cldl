@@ -32,17 +32,17 @@ func RelocateTodo(ask_rm_on_check bool) {
 // NOTE: Init help and usage functions
 func UsageRelocate() {
 	fmt.Print(`
-Default usage: todo relocate
-	Use 'todo relocate --help' to see more
+Default usage: todo relocate [-h | --help]
+    Use 'todo relocate --help' to see more
 `)
 }
 func HelpRelocate() {
 	fmt.Print(`
 Help for todo relocate:
-	Available arguments:
-		--help, -h  | Show this message
+    Available arguments:
+        --help, -h  | Show this message
 
-	If a todo list exists in current location but
+    If a todo list exists in current location but
     it isn't present in the location list, adds
     it and checks the location list for non-existent
     locations.

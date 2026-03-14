@@ -7,9 +7,20 @@ import (
 	"strings"
 )
 
-func RmTodo(title string, rmAll bool, ask_rm_all bool) {
+func RmTodo(title string, rmAll bool, ask_rm_all bool, always_conf_full bool) {
 	if rmAll {
-		removeAllData()
+		if getEntryCount() != 0 {
+			info("The list is not empty!")
+			if ask_full_rm("Do you still want to remove it?") {
+				removeAllData()
+			}
+		} else if always_conf_full {
+			if ask_full_rm("Are you sure?") {
+				removeAllData()
+			}
+		} else {
+			removeAllData()
+		}
 		return
 	}
 
@@ -35,7 +46,7 @@ func RmTodo(title string, rmAll bool, ask_rm_all bool) {
 		ok("Succesfully removed entry " + title)
 		if ask_rm_all && getEntryCount() == 0 {
 			info("The last entry of this todo-list was removed.")
-			if ask_full_rm() {
+			if ask_full_rm("Do you want to fully remove the list?") {
 				removeAllData()
 			}
 		}
@@ -64,13 +75,13 @@ func getEntryCount() int {
 	return count
 }
 
-func ask_full_rm() bool {
+func ask_full_rm(question string) bool {
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Do you want to fully remove the list? [y/n]: ")
+	fmt.Print(question + " [y/n]: ")
 	answer, err := reader.ReadString('\n')
 	if err != nil {
 		errout("Error reading input")
-		return ask_full_rm()
+		return ask_full_rm(question)
 	}
 	answer = strings.TrimSpace(answer)
 	switch answer {
@@ -80,7 +91,7 @@ func ask_full_rm() bool {
 		return false
 	default:
 		fmt.Print("Invalid answer, try again.\n")
-		return ask_full_rm()
+		return ask_full_rm(question)
 	}
 }
 
@@ -89,35 +100,32 @@ func ask_full_rm() bool {
 // don't care + didn't ask + skill issue + your file is deleted
 func removeAllData() {
 	todoPath := GetDbPath()
-	remove_master_entry(todoPath)
+	removeFromMasterDB(todoPath)
 	err := os.Remove(todoPath)
 	if err != nil {
 		errout("Failed removing local db")
 		panic(err)
 	}
 
-	ok("Succesfully removed database!")
+	ok("Succesfully removed local database!")
 }
 
 // NOTE: Remove command help and usage functions
 func UsageRm() {
 	fmt.Print(`
-Usage: todo rm [<args>] <title>
-	Use 'todo rm --help' to see arguments
+Usage: todo rm [-h | --help] [-a | --all] <title>
+    Use 'todo rm --help' to see more
 `)
 }
 func HelpRm() {
 	fmt.Print(`
 Help for todo rm / done:
-	Available arguments:
-		--help, -h  | Show help for todo rm
-		--all, -a   | Fully remove todo list from current directory
+    Available arguments:
+        --help, -h  | Show help for todo rm
+        --all, -a   | Fully remove todo list from current directory
 
-	Rm and done are the same command with a different name.
-	Use 'todo rm <title>' where <title> is the title
-	for the list entry to be deleted.
-
-    Config option 'ask_full_rm' can determine whether removing the local
-    database on the removal of the last entry in it gets asked or not
+    Rm and done are the same command with a different name.
+    Use 'todo rm <title>' where <title> is the title
+    for the list entry to be deleted.
 `)
 }

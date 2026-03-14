@@ -37,12 +37,13 @@ In_progress_priority  |  Priority value after which a list item is considered in
 Colors  |  Set colorscheme
 */
 type Config struct {
-	Auto_init       bool
-	Ask_full_rm     bool
-	Ask_rm_on_check bool
-	Ask_priority    bool
-	Keep_on_edit    bool
-	Timezone        string
+	Auto_init              bool
+	Ask_full_rm            bool
+	Ask_rm_on_check        bool
+	Always_confirm_full_rm bool
+	Ask_priority           bool
+	Keep_on_edit           bool
+	Timezone               string
 
 	Default_priority     int
 	Urgent_priority      int
@@ -74,6 +75,7 @@ func DefaultConfig() Config {
 	conf.Ask_full_rm = false
 	conf.Ask_rm_on_check = true
 	conf.Keep_on_edit = false
+	conf.Always_confirm_full_rm = true
 	conf.Timezone = "Local"
 	conf.Default_priority = 0
 	conf.Urgent_priority = 10
@@ -142,14 +144,24 @@ func hexToRgbString(hex string) (string, error) {
 	return fmt.Sprintf("\033[38;2;%d;%d;%dm", r, g, b), nil
 }
 
-func addToMasterDB(path string) {
-	// Add new todo location into list location database
-	sqlStatement := `INSERT INTO locations(location) VALUES($1);`
-	_, err := MasterDB.Exec(sqlStatement, path)
+// Get the path of a local todo database, returns the path as a string
+func GetDbPath() string {
+	cwd, err := os.Getwd()
 	if err != nil {
-		errout("Adding to master DB failed!")
+		errout("Getting db path failed!")
 		panic(err)
 	}
+	return cwd + "/.todoApp.db"
+}
+
+// Open a connection to a local database, returns a pointer to it
+func openTodoDB() *sql.DB {
+	db, err := sql.Open("sqlite", GetDbPath())
+	if err != nil {
+		errout("Opening todo DB failed!")
+		panic(err)
+	}
+	return db
 }
 
 // Creates a 'master' database that holds all the locations to
@@ -179,33 +191,24 @@ func CreateMasterDB() {
 	}
 }
 
-// Get the path of a local todo database, returns the path as a string
-func GetDbPath() string {
-	cwd, err := os.Getwd()
+func addToMasterDB(path string) {
+	// Add new todo location into list location database
+	sqlStatement := `INSERT INTO locations(location) VALUES($1);`
+	_, err := MasterDB.Exec(sqlStatement, path)
 	if err != nil {
-		errout("Getting db path failed!")
+		errout("Adding to master DB failed!")
 		panic(err)
 	}
-	return cwd + "/.todoApp.db"
 }
 
-// Open a connection to a local database, returns a pointer to it
-func openTodoDB() *sql.DB {
-	db, err := sql.Open("sqlite", GetDbPath())
-	if err != nil {
-		errout("Opening todo DB failed!")
-		panic(err)
-	}
-	return db
-}
-
-func remove_master_entry(todoPath string) {
+func removeFromMasterDB(todoPath string) {
 	sqlStatement := `DELETE FROM locations WHERE location = ?;`
 	_, err := MasterDB.Exec(sqlStatement, todoPath)
 	if err != nil {
 		errout("Error removing from master db")
 		panic(err)
 	}
+	ok("Removed \033[35m" + todoPath + "\033[0m from location list")
 }
 
 // Get the existing content of a todo entry if it exists, returns an error if it doesn't exist
