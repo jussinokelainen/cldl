@@ -10,7 +10,7 @@ import (
 func CheckTodos(confirm_rm bool) {
 	var locSlice []string
 
-	rows, err := MasterDB.Query(`SELECT * FROM locations;`)
+	rows, err := MasterDB.Query(`SELECT location FROM locations;`)
 	if err != nil {
 		errout("Failed getting all locations")
 		panic(err)

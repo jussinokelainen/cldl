@@ -191,7 +191,7 @@ func listAllTodoLocations() string {
 	homeDir, _ := os.UserHomeDir()
 	longestLoc := 0
 
-	rows, err := MasterDB.Query(`SELECT * FROM locations;`)
+	rows, err := MasterDB.Query(`SELECT location FROM locations;`)
 	if err != nil {
 		errout("Failed getting all locations")
 		panic(err)
@@ -273,7 +273,7 @@ func getTodoSlice() ([]TodoStruct, error) {
 	todoDB := openTodoDB()
 	defer todoDB.Close()
 
-	rows, err := todoDB.Query(`SELECT * FROM todo ORDER BY priority DESC, time ASC;`)
+	rows, err := todoDB.Query(`SELECT title, content, time, priority FROM todo ORDER BY priority DESC, time ASC;`)
 	if err != nil {
 		errout("Failed getting todo list")
 		panic(err)
