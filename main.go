@@ -444,12 +444,12 @@ Help for todo:
                               | [Default: 100]
 
       [colors]                | Set custom colors for different elements.
-        default               | Colors must be a string of numbers (e.g. "123")
-        urgent                | between 0-255, using the corresponding value 
-        wip                   | from the 256 color table
-        content
-        border
-        dim
+        default  [#99FFFF]    | Color must be a hex number (e.g. "#FFFFFF")
+        urgent   [#FF8000]
+        wip      [#66FF66]
+        content  [#FFFFFF]
+        border   [#FF99FF]
+        dim      [#404040]
 
 `)
 }

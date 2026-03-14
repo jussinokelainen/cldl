@@ -23,7 +23,7 @@ type TodoStruct struct {
 }
 
 func ListTodo(listLocations bool, pager bool, timeZone *time.Location, urgentPrio int, wipPrio int, colors ColorConf) {
-	SetColorScheme(colors)
+	setColorScheme(colors)
 	printList := func(listString string, page bool) {
 		if page {
 			printToPager(listString)

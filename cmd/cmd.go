@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"strconv"
 )
 
 var MasterDB *sql.DB
@@ -61,12 +62,12 @@ type ColorConf struct {
 
 func DefaultConfig() Config {
 	var colors ColorConf
-	colors.Default = "6"
-	colors.Urgent = "1"
-	colors.Wip = "4"
-	colors.Content = "2"
-	colors.Border = "5"
-	colors.Dim = "8"
+	colors.Default = "#99FFFF"
+	colors.Urgent = "#FF8000"
+	colors.Wip = "#66FF66"
+	colors.Content = "#FFFFFF"
+	colors.Border = "#FF99FF"
+	colors.Dim = "#404040"
 
 	var conf Config
 	conf.Auto_init = false
@@ -83,15 +84,62 @@ func DefaultConfig() Config {
 	return conf
 }
 
-func SetColorScheme(colors ColorConf) {
-	defaultColor = "\033[38;5;" + colors.Default + "m"
-	urgentColor = "\033[38;5;" + colors.Urgent + "m"
-	wipColor = "\033[38;5;" + colors.Wip + "m"
+func setColorScheme(c ColorConf) {
+	var err error
+	defaultColor, err = hexToRgbString(c.Default)
+	if err != nil {
+		errout("Failed to parse default color")
+		os.Exit(1)
+	}
+	urgentColor, err = hexToRgbString(c.Urgent)
+	if err != nil {
+		errout("Failed to parse urgent color")
+		os.Exit(1)
+	}
+	wipColor, err = hexToRgbString(c.Wip)
+	if err != nil {
+		errout("Failed to parse wip color")
+		os.Exit(1)
+	}
 
-	contentColor = "\033[38;5;" + colors.Content + "m"
-	borderColor = "\033[38;5;" + colors.Border + "m"
+	contentColor, err = hexToRgbString(c.Content)
+	if err != nil {
+		errout("Failed to parse content color")
+		os.Exit(1)
+	}
+	borderColor, err = hexToRgbString(c.Border)
+	if err != nil {
+		errout("Failed to parse border color")
+		os.Exit(1)
+	}
 
-	dimColor = "\033[38;5;" + colors.Dim + "m"
+	dimColor, err = hexToRgbString(c.Dim)
+	if err != nil {
+		errout("Failed to parse dim color")
+		os.Exit(1)
+	}
+}
+
+func hexToRgbString(hex string) (string, error) {
+	if len(hex) != 7 || hex[0] != '#' {
+		return "", fmt.Errorf("invalid hex color: %s", hex)
+	}
+	r, err := strconv.ParseInt(hex[1:3], 16, 0)
+	if err != nil {
+		return "", err
+	}
+
+	g, err := strconv.ParseInt(hex[3:5], 16, 0)
+	if err != nil {
+		return "", err
+	}
+
+	b, err := strconv.ParseInt(hex[5:7], 16, 0)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("\033[38;2;%d;%d;%dm", r, g, b), nil
 }
 
 func addToMasterDB(path string) {

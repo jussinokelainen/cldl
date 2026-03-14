@@ -75,7 +75,6 @@ func FixTodoTable(defaultPriority int) {
 		}
 		info("Added missing priority column")
 	}
-	info("Setting possible null priority values to default value")
 	DefaultNullPriorities(defaultPriority)
 }
 
@@ -83,6 +82,7 @@ func DefaultNullPriorities(defaultPriority int) {
 	todoDB := openTodoDB()
 	defer todoDB.Close()
 
+	info("Setting possible null priority values to default value")
 	sqlStatement := `UPDATE todo SET priority = $1 WHERE priority IS NULL;`
 	_, err := todoDB.Exec(sqlStatement, defaultPriority)
 	if err != nil {
