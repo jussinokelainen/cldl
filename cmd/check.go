@@ -1,10 +1,8 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
 	"os"
-	"strings"
 )
 
 func CheckTodos(confirm_rm bool) {
@@ -32,7 +30,7 @@ func CheckTodos(confirm_rm bool) {
 		if _, err := os.Stat(location); os.IsNotExist(err) {
 			info("This todo does not exist: \n\033[35m  " + location + "\033[0m")
 			if confirm_rm {
-				if confirmMasterRm() {
+				if askYesNo("Do you want to remove it from the list?") {
 					removeFromMasterDB(location)
 				}
 
@@ -40,26 +38,6 @@ func CheckTodos(confirm_rm bool) {
 				removeFromMasterDB(location)
 			}
 		}
-	}
-}
-
-func confirmMasterRm() bool {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Do you want to remove it from the list? [y/n]: ")
-	answer, err := reader.ReadString('\n')
-	if err != nil {
-		errout("Error reading input")
-		return confirmMasterRm()
-	}
-	answer = strings.TrimSpace(answer)
-	switch answer {
-	case "y":
-		return true
-	case "n":
-		return false
-	default:
-		fmt.Print("Invalid answer, try again.\n")
-		return confirmMasterRm()
 	}
 }
 

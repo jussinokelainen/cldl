@@ -1,21 +1,19 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
 	"os"
-	"strings"
 )
 
 func RmTodo(title string, rmAll bool, ask_rm_all bool, always_conf_full bool) {
 	if rmAll {
 		if getEntryCount() != 0 {
 			info("The list is not empty!")
-			if ask_full_rm("Do you still want to remove it?") {
+			if askYesNo("Do you still want to remove it?") {
 				removeAllData()
 			}
 		} else if always_conf_full {
-			if ask_full_rm("Are you sure?") {
+			if askYesNo("Are you sure?") {
 				removeAllData()
 			}
 		} else {
@@ -46,7 +44,7 @@ func RmTodo(title string, rmAll bool, ask_rm_all bool, always_conf_full bool) {
 		ok("Succesfully removed entry " + title)
 		if ask_rm_all && getEntryCount() == 0 {
 			info("The last entry of this todo-list was removed.")
-			if ask_full_rm("Do you want to fully remove the list?") {
+			if askYesNo("Do you want to fully remove the list?") {
 				removeAllData()
 			}
 		}
@@ -73,26 +71,6 @@ func getEntryCount() int {
 	}
 
 	return count
-}
-
-func ask_full_rm(question string) bool {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print(question + " [y/n]: ")
-	answer, err := reader.ReadString('\n')
-	if err != nil {
-		errout("Error reading input")
-		return ask_full_rm(question)
-	}
-	answer = strings.TrimSpace(answer)
-	switch answer {
-	case "y":
-		return true
-	case "n":
-		return false
-	default:
-		fmt.Print("Invalid answer, try again.\n")
-		return ask_full_rm(question)
-	}
 }
 
 // Deletes the local todo database and removes it from the master list

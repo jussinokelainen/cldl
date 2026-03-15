@@ -1,10 +1,12 @@
 package cmd
 
 import (
+	"bufio"
 	"database/sql"
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 var MasterDB *sql.DB
@@ -237,6 +239,26 @@ func getIfEntryExists(title string) (string, error) {
 	}
 
 	return content, nil
+}
+
+func askYesNo(question string) bool {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print(question + " [y/n]: ")
+	answer, err := reader.ReadString('\n')
+	if err != nil {
+		errout("Error reading input")
+		return askYesNo(question)
+	}
+	answer = strings.TrimSpace(answer)
+	switch answer {
+	case "y":
+		return true
+	case "n":
+		return false
+	default:
+		fmt.Print("Invalid answer, try again.\n")
+		return askYesNo(question)
+	}
 }
 
 // Checks whether a local todo exists in the current directory,
