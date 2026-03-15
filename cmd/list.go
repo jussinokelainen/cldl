@@ -23,13 +23,13 @@ type TodoStruct struct {
 }
 
 func ListTodo(listLocations bool, pager bool, config Config) {
-	timeZone, err := time.LoadLocation(strings.TrimSpace(config.Timezone))
+	timeZone, err := time.LoadLocation(strings.TrimSpace(config.General.Timezone))
 	if err != nil {
 		errout("Failed to parse timezone")
 		os.Exit(1)
 	}
-	urgentPrio := config.Urgent_priority
-	wipPrio := config.In_progress_priority
+	urgentPrio := config.Priority.Urgent
+	wipPrio := config.Priority.In_progress
 	colors := config.Colors
 	setColorScheme(colors)
 	printList := func(listString string, page bool) {

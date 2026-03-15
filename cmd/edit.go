@@ -9,7 +9,7 @@ import (
 	"github.com/mitchellh/go-wordwrap"
 )
 
-func EditTodo(title string, keep bool) {
+func EditTodo(title string, conf EditConf) {
 	if title == "" {
 		errout("Title required")
 		return
@@ -26,7 +26,7 @@ func EditTodo(title string, keep bool) {
 	fmt.Printf("\033[32m%s\033[0m\n\n", content)
 
 	reader := bufio.NewReader(os.Stdin)
-	if keep {
+	if conf.Keep_content {
 		fmt.Printf("\033[36mEnter content to be added into todo titled %s: \033[0m\n", title)
 	} else {
 		fmt.Printf("\033[36mEnter new content for todo titled %s: \033[0m\n", title)
@@ -40,7 +40,7 @@ func EditTodo(title string, keep bool) {
 		return
 	}
 	newContent = strings.TrimSpace(newContent)
-	if keep {
+	if conf.Keep_content {
 		newContent = content + "\n\nNew edit:\n" + newContent
 	}
 	changeEntryContent(newContent, title)

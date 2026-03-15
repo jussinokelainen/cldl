@@ -5,14 +5,14 @@ import (
 	"os"
 )
 
-func RmTodo(title string, rmAll bool, ask_rm_all bool, always_conf_full bool) {
+func RmTodo(title string, rmAll bool, conf RmConf) {
 	if rmAll {
 		if getEntryCount() != 0 {
 			info("The list is not empty!")
 			if askYesNo("Do you still want to remove it?") {
 				removeAllData()
 			}
-		} else if always_conf_full {
+		} else if conf.Always_confirm_full {
 			if askYesNo("Are you sure?") {
 				removeAllData()
 			}
@@ -42,7 +42,7 @@ func RmTodo(title string, rmAll bool, ask_rm_all bool, always_conf_full bool) {
 		errout("No entry found with title " + title)
 	} else {
 		ok("Succesfully removed entry " + title)
-		if ask_rm_all && getEntryCount() == 0 {
+		if conf.Ask_full && getEntryCount() == 0 {
 			info("The last entry of this todo-list was removed.")
 			if askYesNo("Do you want to fully remove the list?") {
 				removeAllData()

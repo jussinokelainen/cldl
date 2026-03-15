@@ -74,7 +74,7 @@ func handleParsing(conf cmd.Config) {
 			}
 		}
 
-		cmd.FixTodoTable(conf.Default_priority)
+		cmd.FixTodoTable(conf.Priority.Default)
 	case "set":
 		if !cmd.TodoExists() {
 			errout("No todo exists in current directory!")
@@ -128,11 +128,11 @@ func handleParsing(conf cmd.Config) {
 				cmd.HelpCheck()
 				return
 			case "no-confirm":
-				conf.Ask_rm_on_check = false
+				conf.General.Ask_rm_on_check = false
 			}
 		}
 
-		cmd.CheckTodos(conf.Ask_rm_on_check)
+		cmd.CheckTodos(conf.General.Ask_rm_on_check)
 
 	case "init":
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
@@ -169,7 +169,7 @@ func handleParsing(conf cmd.Config) {
 				cmd.HelpAdd()
 				return
 			case "auto-init":
-				conf.Auto_init = true
+				conf.Add.Auto_init = true
 			}
 		}
 
@@ -181,14 +181,14 @@ func handleParsing(conf cmd.Config) {
 					errout("Priority value must be integer")
 					return
 				}
-				conf.Default_priority = newPrio
-				conf.Ask_priority = false
+				conf.Priority.Default = newPrio
+				conf.Add.Ask_priority = false
 			case "auto-init":
 				switch flag[1] {
 				case "true":
-					conf.Auto_init = true
+					conf.Add.Auto_init = true
 				case "false":
-					conf.Auto_init = false
+					conf.Add.Auto_init = false
 				default:
 					errout("Bad value for auto-init: " + flag[1])
 					return
@@ -197,7 +197,7 @@ func handleParsing(conf cmd.Config) {
 		}
 
 		title := strings.Join(parsedArgs.NormalStr, " ")
-		cmd.AddTodo(title, conf)
+		cmd.AddTodo(title, conf.Add, conf.Priority.Default)
 
 	case "list", "ls":
 		additionalFlags := []string{
@@ -255,7 +255,7 @@ func handleParsing(conf cmd.Config) {
 		}
 
 		title := strings.Join(parsedArgs.NormalStr, " ")
-		cmd.RmTodo(title, rmAll, conf.Ask_full_rm, conf.Always_confirm_full_rm)
+		cmd.RmTodo(title, rmAll, conf.Rm)
 
 	case "edit":
 		if !cmd.TodoExists() {
@@ -275,7 +275,7 @@ func handleParsing(conf cmd.Config) {
 		for _, flag := range parsedArgs.Flags {
 			switch flag {
 			case "k", "keep":
-				conf.Keep_on_edit = !conf.Keep_on_edit
+				conf.Edit.Keep_content = !conf.Edit.Keep_content
 			case "h", "help":
 				cmd.HelpEdit()
 				return
@@ -287,7 +287,7 @@ func handleParsing(conf cmd.Config) {
 		}
 
 		title := strings.Join(parsedArgs.NormalStr, " ")
-		cmd.EditTodo(title, conf.Keep_on_edit)
+		cmd.EditTodo(title, conf.Edit)
 	case "relocate":
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
@@ -307,7 +307,7 @@ func handleParsing(conf cmd.Config) {
 			errout("No todo exists in current directory!")
 			return
 		}
-		cmd.RelocateTodo(conf.Ask_rm_on_check)
+		cmd.RelocateTodo(conf.General.Ask_rm_on_check)
 
 	default:
 		mainFlags, err := flagger.ParseFlags(args, flags)
@@ -370,52 +370,6 @@ Help for todo:
   with the sqlite databases (although it is not the only way panics can occur)
 
   Configuration expect a file as '~/.config/todo/config.toml'.
-
-  Usable config options:
-      auto_init = bool        | automatically initialize a new local todo if it
-                              | doesn't exist, or ask [y/n] to initialize
-                              | [Default: false]
-
-      ask_full_rm = bool      | Ask to fully remove the local database when the
-                              | last entry gets deleted. If set to false,
-                              | the database will not be removed
-                              | [Default: false]
-
-      ask_rm_on_check = bool  | Ask before removing an erroneus todo location
-                              | when using 'todo check'
-                              | [Default: true]
-
-      Ask_priority            | Asks for the priority that will be set to when
-                              | adding new list entry.
-                              | [Default: false]
-
-      keep_on_edit = bool     | Either keep the content and add new content
-                              | with a 'New edit' tag, or override entry content
-                              | [Default: false]
-
-      timezone = string       | Set the timezone used when displaying dates,
-                              | By default uses current local timezone
-
-      default_priority        | Priority that gets set to new list entries
-                              | [Default: 0]
-
-      urgent_priority         | Priority number after which entries are
-                              | considered to be urgent (title printed in orange)
-                              | [Default: 10]
-
-      in_progress_priority    | Priority number after which entries are
-                              | considered to be WIP (title printed in green)
-                              | This value should be set to something bigger
-                              | than urgent priority
-                              | [Default: 100]
-
-      [colors]  default val   | Set custom colors for different elements.
-        default  [#99FFFF]    | Color must be a hex number (e.g. "#FFFFFF")
-        urgent   [#FF8000]
-        wip      [#66FF66]
-        content  [#FFFFFF]
-        border   [#FF99FF]
-        dim      [#404040]
 
 `)
 }

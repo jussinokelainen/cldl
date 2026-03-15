@@ -39,19 +39,37 @@ In_progress_priority  |  Priority value after which a list item is considered in
 Colors  |  Set colorscheme
 */
 type Config struct {
-	Auto_init              bool
-	Ask_full_rm            bool
-	Ask_rm_on_check        bool
-	Always_confirm_full_rm bool
-	Ask_priority           bool
-	Keep_on_edit           bool
-	Timezone               string
+	General  GeneralConf
+	Add      AddConf
+	Edit     EditConf
+	Priority PriorityConf
+	Rm       RmConf
+	Colors   ColorConf
+}
 
-	Default_priority     int
-	Urgent_priority      int
-	In_progress_priority int
+type GeneralConf struct {
+	Ask_rm_on_check bool
+	Timezone        string
+}
 
-	Colors ColorConf
+type AddConf struct {
+	Auto_init    bool
+	Ask_priority bool
+}
+
+type EditConf struct {
+	Keep_content bool
+}
+
+type PriorityConf struct {
+	Default     int
+	Urgent      int
+	In_progress int
+}
+
+type RmConf struct {
+	Ask_full            bool
+	Always_confirm_full bool
 }
 
 type ColorConf struct {
@@ -64,6 +82,31 @@ type ColorConf struct {
 }
 
 func DefaultConfig() Config {
+	var conf Config
+	var general GeneralConf
+	general.Ask_rm_on_check = true
+	general.Timezone = "Local"
+	conf.General = general
+
+	var add AddConf
+	add.Auto_init = false
+	add.Ask_priority = false
+	conf.Add = add
+
+	var edit EditConf
+	edit.Keep_content = false
+	conf.Edit = edit
+
+	var priority PriorityConf
+	priority.Default = 0
+	priority.Urgent = 10
+	priority.In_progress = 100
+
+	var rm RmConf
+	rm.Ask_full = false
+	rm.Always_confirm_full = true
+	conf.Rm = rm
+
 	var colors ColorConf
 	colors.Default = "#99FFFF"
 	colors.Urgent = "#FF8000"
@@ -71,18 +114,6 @@ func DefaultConfig() Config {
 	colors.Content = "#FFFFFF"
 	colors.Border = "#FF99FF"
 	colors.Dim = "#404040"
-
-	var conf Config
-	conf.Auto_init = false
-	conf.Ask_full_rm = false
-	conf.Ask_rm_on_check = true
-	conf.Keep_on_edit = false
-	conf.Always_confirm_full_rm = true
-	conf.Timezone = "Local"
-	conf.Default_priority = 0
-	conf.Urgent_priority = 10
-	conf.In_progress_priority = 100
-	conf.Ask_priority = false
 	conf.Colors = colors
 
 	return conf

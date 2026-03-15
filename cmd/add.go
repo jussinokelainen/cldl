@@ -10,13 +10,10 @@ import (
 )
 
 // Adds a new todo with a title given as an argument, if title is not duplicate
-func AddTodo(title string, config Config) {
-	auto_init := config.Auto_init
-	priority := config.Default_priority
-	shouldAskPriority := config.Ask_priority
+func AddTodo(title string, conf AddConf, priority int) {
 	if !TodoExists() {
 		var answer bool
-		if auto_init {
+		if conf.Auto_init {
 			answer = true
 		} else {
 			info("Not todo currently exists in this directory")
@@ -57,7 +54,7 @@ func AddTodo(title string, config Config) {
 		content = "[ EMPTY ]"
 	}
 
-	if shouldAskPriority {
+	if conf.Ask_priority {
 		priority = askPriority()
 	}
 
