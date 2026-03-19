@@ -10,7 +10,7 @@ import (
 )
 
 // Adds a new todo with a title given as an argument, if title is not duplicate
-func AddTodo(title string, conf AddConf, priority int) {
+func AddTodo(title string, conf AddConf, priority int, tag string) {
 	if !TodoExists() {
 		var answer bool
 		if conf.Auto_init {
@@ -59,7 +59,7 @@ func AddTodo(title string, conf AddConf, priority int) {
 	}
 
 	sqlStatement := `INSERT INTO todo(title, content, time, priority, tag) VALUES($1, $2, $3, $4, $5);`
-	_, err = todoDB.Exec(sqlStatement, title, content, time, priority, "test")
+	_, err = todoDB.Exec(sqlStatement, title, content, time, priority, tag)
 	if err != nil {
 		errout("Error adding new todo, executing database query failed")
 		panic(err)

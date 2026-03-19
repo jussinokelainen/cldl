@@ -159,7 +159,10 @@ func handleParsing(conf cmd.Config) {
 		cmd.InitTodo()
 
 	case "add":
-		additionalValued := []string{"p", "priority"}
+		additionalValued := []string{
+			"p", "priority",
+			"t", "tag",
+		}
 		flags.Valued_flags = append(flags.Valued_flags, additionalValued...)
 		flags.Optional_value = append(flags.Optional_value, "auto-init")
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
@@ -179,6 +182,7 @@ func handleParsing(conf cmd.Config) {
 			}
 		}
 
+		tag := "NONE"
 		for _, flag := range parsedArgs.ValueFlags {
 			switch flag[0] {
 			case "p", "priority":
@@ -199,11 +203,13 @@ func handleParsing(conf cmd.Config) {
 					errout("Bad value for auto-init: " + flag[1])
 					return
 				}
+			case "t", "tag":
+				tag = flag[1]
 			}
 		}
 
 		title := strings.Join(parsedArgs.NormalStr, " ")
-		cmd.AddTodo(title, conf.Add, conf.Priority.Default)
+		cmd.AddTodo(title, conf.Add, conf.Priority.Default, tag)
 
 	case "list", "ls":
 		additionalFlags := []string{
