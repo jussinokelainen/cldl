@@ -58,8 +58,8 @@ func AddTodo(title string, conf AddConf, priority int) {
 		priority = askPriority()
 	}
 
-	sqlStatement := `INSERT INTO todo(title, content, time, priority) VALUES($1, $2, $3, $4);`
-	_, err = todoDB.Exec(sqlStatement, title, content, time, priority)
+	sqlStatement := `INSERT INTO todo(title, content, time, priority, tag) VALUES($1, $2, $3, $4, $5);`
+	_, err = todoDB.Exec(sqlStatement, title, content, time, priority, "test")
 	if err != nil {
 		errout("Error adding new todo, executing database query failed")
 		panic(err)

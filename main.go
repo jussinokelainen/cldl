@@ -81,7 +81,10 @@ func handleParsing(conf cmd.Config) {
 			return
 		}
 
-		additionalValued := []string{"p", "priority"}
+		additionalValued := []string{
+			"p", "priority",
+			"t", "tag",
+		}
 		flags.Valued_flags = append(flags.Valued_flags, additionalValued...)
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
@@ -111,6 +114,9 @@ func handleParsing(conf cmd.Config) {
 					os.Exit(1)
 				}
 				cmd.EditPriority(title, newPrio)
+			case "t", "tag":
+				title := strings.Join(parsedArgs.NormalStr, " ")
+				cmd.SetTagToEntry(title, flag[1])
 			}
 		}
 	case "check":
@@ -204,6 +210,8 @@ func handleParsing(conf cmd.Config) {
 			"a", "all",
 			"p", "pager",
 		}
+		additionalValued := []string{"t", "tag"}
+		flags.Valued_flags = append(flags.Valued_flags, additionalValued...)
 		flags.Flags = append(flags.Flags, additionalFlags...)
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
@@ -226,7 +234,16 @@ func handleParsing(conf cmd.Config) {
 			}
 		}
 
-		cmd.ListTodo(listAll, pagerList, conf)
+		filterByTag := false
+		var tag string
+		for _, flag := range parsedArgs.ValueFlags {
+			switch flag[0] {
+			case "t", "tag":
+				filterByTag = true
+				tag = flag[1]
+			}
+		}
+		cmd.ListTodo(listAll, pagerList, conf, filterByTag, tag)
 
 	case "rm", "remove", "done":
 		if !cmd.TodoExists() {

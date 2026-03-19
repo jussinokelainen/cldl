@@ -20,6 +20,7 @@ var (
 	borderColor  string
 
 	dimColor string
+	tagColor string
 )
 
 /*
@@ -79,6 +80,7 @@ type ColorConf struct {
 	Content string
 	Border  string
 	Dim     string
+	Tag     string
 }
 
 func DefaultConfig() Config {
@@ -101,6 +103,7 @@ func DefaultConfig() Config {
 	priority.Default = 0
 	priority.Urgent = 10
 	priority.In_progress = 100
+	conf.Priority = priority
 
 	var rm RmConf
 	rm.Ask_full = false
@@ -114,6 +117,7 @@ func DefaultConfig() Config {
 	colors.Content = "#FFFFFF"
 	colors.Border = "#FF99FF"
 	colors.Dim = "#404040"
+	colors.Tag = "#FFFF66"
 	conf.Colors = colors
 
 	return conf
@@ -151,6 +155,12 @@ func setColorScheme(c ColorConf) {
 	dimColor, err = hexToRgbString(c.Dim)
 	if err != nil {
 		errout("Failed to parse dim color")
+		os.Exit(1)
+	}
+
+	tagColor, err = hexToRgbString(c.Tag)
+	if err != nil {
+		errout("Failed to parse tag color")
 		os.Exit(1)
 	}
 }

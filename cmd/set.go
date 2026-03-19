@@ -21,6 +21,25 @@ func EditPriority(title string, newPrio int) {
 	}
 }
 
+func SetTagToEntry(title string, tag string) {
+	todoDB := openTodoDB()
+	defer todoDB.Close()
+
+	_, exists := getIfEntryExists(title)
+	if exists != nil {
+		errout(fmt.Sprintf("No todo entry exists with title %s", title))
+		return
+	}
+
+	info(fmt.Sprintf("Setting tag of %s to %s", title, tag))
+	sqlStatement := `UPDATE todo SET tag = $1 WHERE UPPER(title) = UPPER($2);`
+	_, err := todoDB.Exec(sqlStatement, tag, title)
+	if err != nil {
+		errout("Failed to edit todo content")
+		panic(err)
+	}
+}
+
 func UsageSet() {
 	fmt.Print(`
 Usage: todo set [-h | --help] [-p | --priority] <title>

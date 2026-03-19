@@ -20,9 +20,10 @@ type TodoStruct struct {
 	Content  string `json:"Content"`
 	Time     int64  `json:"time"`
 	Priority int64  `json:"priority"`
+	Tag      string `json:"tag"`
 }
 
-func ListTodo(listLocations bool, pager bool, config Config) {
+func ListTodo(listLocations bool, pager bool, config Config, filterByTag bool, tag string) {
 	timeZone, err := time.LoadLocation(strings.TrimSpace(config.General.Timezone))
 	if err != nil {
 		errout("Failed to parse timezone")
@@ -51,9 +52,13 @@ func ListTodo(listLocations bool, pager bool, config Config) {
 			return
 		}
 
-		todoSlice, err := getTodoSlice()
+		todoSlice, err := getTodoSlice(filterByTag, tag)
 		if err != nil {
-			info("Todo list empty!")
+			if filterByTag {
+				info("No entries with tag " + tag)
+			} else {
+				info("Todo list empty!")
+			}
 			return
 		}
 
@@ -102,7 +107,10 @@ func formatListItems(todoSlice []TodoStruct, timeZone *time.Location, urgentPrio
 		padContentToCenter(&listString, maxWidth+2)
 		fmt.Fprintf(&listString, "%s║  %s  ║\033[0m\n", borderColor, addSpace(maxWidth))
 
-		// Print time stamp and priority level
+		// Print tag, timestamp and priority level
+		if row.Tag != "NONE" {
+			listString.WriteString(makeTagLine(row.Tag))
+		}
 		listString.WriteString(makePriorityLine(int(row.Priority), priorityColor))
 		listString.WriteString(makeTimeStampLine(row.Time, timeZone))
 
@@ -142,6 +150,22 @@ func makeTitleLine(title string, priorityColor string) string {
 	return titleStr.String()
 }
 
+func makeTagLine(tag string) string {
+	var tagStr strings.Builder
+
+	// Print tag
+	tagString := "Tag: " + tag
+	tagStrlen := utf8.RuneCountInString(tagString)
+	free := max(maxWidth-tagStrlen, 0)
+	tagLeft := free / 2
+	tagRight := free - tagLeft
+	padContentToCenter(&tagStr, maxWidth+2)
+	fmt.Fprintf(&tagStr, "%s║%s", borderColor, addSpace(tagLeft+2))
+	fmt.Fprintf(&tagStr, "%s%s", tagColor, tagString)
+	fmt.Fprintf(&tagStr, "%s%s║\n", borderColor, addSpace(tagRight+2))
+
+	return tagStr.String()
+}
 func makeTimeStampLine(timestamp int64, timeZone *time.Location) string {
 	var timeStr strings.Builder
 
@@ -276,12 +300,19 @@ func padContentToCenter(listString *strings.Builder, contentWidth int) {
 
 // Gets and returns the contents of a local todo database,
 // returns an error if the list is empty
-func getTodoSlice() ([]TodoStruct, error) {
+func getTodoSlice(filterByTag bool, tag string) ([]TodoStruct, error) {
 	var todoSlice []TodoStruct
 	todoDB := openTodoDB()
 	defer todoDB.Close()
 
-	rows, err := todoDB.Query(`SELECT title, content, time, priority FROM todo ORDER BY priority DESC, time ASC;`)
+	var sqlStatement string
+	if filterByTag {
+		sqlStatement = fmt.Sprintf(`SELECT title, content, time, priority, tag FROM todo WHERE tag = '%s' ORDER BY priority DESC, time ASC;`, tag)
+	} else {
+		sqlStatement = `SELECT title, content, time, priority, tag FROM todo ORDER BY priority DESC, time ASC;`
+	}
+
+	rows, err := todoDB.Query(sqlStatement)
 	if err != nil {
 		errout("Failed getting todo list")
 		panic(err)
@@ -290,7 +321,7 @@ func getTodoSlice() ([]TodoStruct, error) {
 
 	for rows.Next() {
 		var row TodoStruct
-		err = rows.Scan(&row.Title, &row.Content, &row.Time, &row.Priority)
+		err = rows.Scan(&row.Title, &row.Content, &row.Time, &row.Priority, &row.Tag)
 		if err != nil {
 			errout("Failed scanning entry content")
 			panic(err)

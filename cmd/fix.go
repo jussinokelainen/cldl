@@ -10,6 +10,7 @@ func FixTodoTable(defaultPriority int) {
 	content := false
 	time := false
 	priority := false
+	tag := false
 	info("Checking todo table")
 
 	todoDB := openTodoDB()
@@ -43,6 +44,8 @@ func FixTodoTable(defaultPriority int) {
 			time = true
 		case "priority":
 			priority = true
+		case "tag":
+			tag = true
 		default:
 			errout("Unexpected column name found: " + name)
 		}
@@ -74,6 +77,13 @@ func FixTodoTable(defaultPriority int) {
 			panic(err)
 		}
 		info("Added missing priority column")
+	}
+	if !tag {
+		_, err := todoDB.Exec(`ALTER TABLE todo ADD COLUMN tag VARCHAR NOT NULL DEFAULT "NONE";`)
+		if err != nil {
+			panic(err)
+		}
+		info("Added missing tag column")
 	}
 	DefaultNullPriorities(defaultPriority)
 }
