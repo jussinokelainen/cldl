@@ -304,7 +304,7 @@ func handleParsing(conf cmd.Config) {
 		}
 
 		title := strings.Join(parsedArgs.NormalStr, " ")
-		cmd.EditTodo(title, conf.Edit)
+		cmd.EditTodo(title, conf.Edit, conf.Colors)
 	case "relocate":
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {

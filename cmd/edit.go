@@ -9,7 +9,8 @@ import (
 	"github.com/mitchellh/go-wordwrap"
 )
 
-func EditTodo(title string, conf EditConf) {
+func EditTodo(title string, conf EditConf, colors ColorConf) {
+	setColorScheme(colors)
 	if title == "" {
 		errout("Title required")
 		return
@@ -22,17 +23,17 @@ func EditTodo(title string, conf EditConf) {
 	}
 
 	content = wordwrap.WrapString(content, uint(maxWidth))
-	fmt.Printf("\033[36mOld content for %s:\n", title)
-	fmt.Printf("\033[32m%s\033[0m\n\n", content)
+	fmt.Printf("%sOld content for %s:\n", defaultColor, title)
+	fmt.Printf("%s%s\033[0m\n\n", contentColor, content)
 
 	reader := bufio.NewReader(os.Stdin)
 	if conf.Keep_content {
-		fmt.Printf("\033[36mEnter content to be added into todo titled %s: \033[0m\n", title)
+		fmt.Printf("%sEnter content to be added into todo titled %s: \033[0m\n", wipColor, title)
 	} else {
-		fmt.Printf("\033[36mEnter new content for todo titled %s: \033[0m\n", title)
+		fmt.Printf("%sEnter new content for todo titled %s: \033[0m\n", wipColor, title)
 	}
 
-	fmt.Print("\033[35m❯ \033[0m")
+	fmt.Printf("%s❯ \033[0m", borderColor)
 	newContent, err := reader.ReadString('\n')
 	if err != nil {
 		errout("Error reading input, did text end with a newline?")
