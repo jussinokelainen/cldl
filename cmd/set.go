@@ -52,6 +52,7 @@ Help for todo set:
     Available arguments:
         --help, -h     | Show this message
         --priority, -p | Set the priority of an entry
+        --tag, -t      | Set the tag of an entry
 
     Set various things in already existing entries
 `)

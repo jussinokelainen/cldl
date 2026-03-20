@@ -96,16 +96,18 @@ func formatListItems(todoSlice []TodoStruct, timeZone *time.Location, urgentPrio
 		listString.WriteString(makeTitleLine(row.Title, priorityColor))
 
 		// Print content
-		contentWrapped := wordwrap.WrapString(row.Content, uint(maxWidth))
-		contentLines := strings.SplitSeq(contentWrapped, "\n")
-		for line := range contentLines {
-			if len(line)%2 != 0 && utf8.RuneCountInString(row.Title)%2 != 0 {
-				line = " " + line
+		if row.Content != "[ EMPTY ]" {
+			contentWrapped := wordwrap.WrapString(row.Content, uint(maxWidth))
+			contentLines := strings.SplitSeq(contentWrapped, "\n")
+			for line := range contentLines {
+				if len(line)%2 != 0 && utf8.RuneCountInString(row.Title)%2 != 0 {
+					line = " " + line
+				}
+				listString.WriteString(formatContentLine(line))
 			}
-			listString.WriteString(formatContentLine(line))
+			padContentToCenter(&listString, maxWidth+2)
+			fmt.Fprintf(&listString, "%s║  %s  ║\033[0m\n", borderColor, addSpace(maxWidth))
 		}
-		padContentToCenter(&listString, maxWidth+2)
-		fmt.Fprintf(&listString, "%s║  %s  ║\033[0m\n", borderColor, addSpace(maxWidth))
 
 		// Print tag, timestamp and priority level
 		if row.Tag != "NONE" {
