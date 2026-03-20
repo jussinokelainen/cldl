@@ -9,6 +9,14 @@ import (
 	"strings"
 )
 
+type ListTag int
+
+const (
+	ALL ListTag = iota
+	ONLY
+	EXCEPT
+)
+
 var MasterDB *sql.DB
 
 var (
@@ -22,6 +30,14 @@ var (
 	dimColor string
 	tagColor string
 )
+
+type TodoStruct struct {
+	Title    string `json:"title"`
+	Content  string `json:"Content"`
+	Time     int64  `json:"time"`
+	Priority int64  `json:"priority"`
+	Tag      string `json:"tag"`
+}
 
 /*
 Struct to hold all config options for this application.

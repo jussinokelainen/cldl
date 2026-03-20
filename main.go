@@ -216,7 +216,10 @@ func handleParsing(conf cmd.Config) {
 			"a", "all",
 			"p", "pager",
 		}
-		additionalValued := []string{"t", "tag"}
+		additionalValued := []string{
+			"t", "tag",
+			"e", "except",
+		}
 		flags.Valued_flags = append(flags.Valued_flags, additionalValued...)
 		flags.Flags = append(flags.Flags, additionalFlags...)
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
@@ -240,12 +243,15 @@ func handleParsing(conf cmd.Config) {
 			}
 		}
 
-		filterByTag := false
+		filterByTag := cmd.ALL
 		var tag string
 		for _, flag := range parsedArgs.ValueFlags {
 			switch flag[0] {
 			case "t", "tag":
-				filterByTag = true
+				filterByTag = cmd.ONLY
+				tag = flag[1]
+			case "e", "except":
+				filterByTag = cmd.EXCEPT
 				tag = flag[1]
 			}
 		}

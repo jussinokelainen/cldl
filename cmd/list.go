@@ -15,15 +15,7 @@ import (
 var maxWidth = 50
 var applyPadding = true
 
-type TodoStruct struct {
-	Title    string `json:"title"`
-	Content  string `json:"Content"`
-	Time     int64  `json:"time"`
-	Priority int64  `json:"priority"`
-	Tag      string `json:"tag"`
-}
-
-func ListTodo(listLocations bool, pager bool, config Config, filterByTag bool, tag string) {
+func ListTodo(listLocations bool, pager bool, config Config, filterByTag ListTag, tag string) {
 	timeZone, err := time.LoadLocation(strings.TrimSpace(config.General.Timezone))
 	if err != nil {
 		errout("Failed to parse timezone")
@@ -54,9 +46,12 @@ func ListTodo(listLocations bool, pager bool, config Config, filterByTag bool, t
 
 		todoSlice, err := getTodoSlice(filterByTag, tag)
 		if err != nil {
-			if filterByTag {
+			switch filterByTag {
+			case ONLY:
 				info("No entries with tag " + tag)
-			} else {
+			case EXCEPT:
+				info("No entries without tag " + tag)
+			default:
 				info("Todo list empty!")
 			}
 			return
@@ -302,15 +297,18 @@ func padContentToCenter(listString *strings.Builder, contentWidth int) {
 
 // Gets and returns the contents of a local todo database,
 // returns an error if the list is empty
-func getTodoSlice(filterByTag bool, tag string) ([]TodoStruct, error) {
+func getTodoSlice(filterByTag ListTag, tag string) ([]TodoStruct, error) {
 	var todoSlice []TodoStruct
 	todoDB := openTodoDB()
 	defer todoDB.Close()
 
 	var sqlStatement string
-	if filterByTag {
+	switch filterByTag {
+	case ONLY:
 		sqlStatement = fmt.Sprintf(`SELECT title, content, time, priority, tag FROM todo WHERE tag = '%s' ORDER BY priority DESC, time ASC;`, tag)
-	} else {
+	case EXCEPT:
+		sqlStatement = fmt.Sprintf(`SELECT title, content, time, priority, tag FROM todo WHERE tag <> '%s' ORDER BY priority DESC, time ASC;`, tag)
+	default:
 		sqlStatement = `SELECT title, content, time, priority, tag FROM todo ORDER BY priority DESC, time ASC;`
 	}
 
@@ -371,6 +369,8 @@ Help for todo list:
         --all, -a    | List all locations with todo's
         --pager, -p  | Toggle pagering behavior, by default normal lists
                      | get pagered, location lists don't
+        --tag, -t    | Only list entries with a certain tag
+        --except, -e | Only list entries without a certain tag
 
     Show content in a local todo list, or alternatively with '--all'
     show all locations with todo lists
