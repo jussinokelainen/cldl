@@ -22,7 +22,7 @@ func InitTodo() {
         title VARCHAR UNIQUE NOT NULL,
         content VARCHAR NOT NULL,
         time INTEGER NOT NULL,
-        priority INTEGER NOT NULL
+        priority INTEGER NOT NULL,
         tag VARCHAR NOT NULL
         );`)
 	if err != nil {
@@ -37,19 +37,18 @@ func InitTodo() {
 
 // NOTE: Init help and usage functions
 func UsageInit() {
-	fmt.Print(`
-Default usage: todo init [-h | --help]
+	fmt.Print(`Default usage: todo init [-h | --help]
     Use 'todo init --help' to see more
 `)
 }
 func HelpInit() {
-	fmt.Print(`
-Help for todo init:
+	const helpmsg = `Help for todo init:
     Available arguments:
         --help, -h  | Show this message
 
     Initialize a local todo list in current directory
     Might be a useless command, since initialization can also
-    be done when adding an entry
-`)
+    be done when adding an entry`
+
+	PrintHelpMSG(helpmsg)
 }

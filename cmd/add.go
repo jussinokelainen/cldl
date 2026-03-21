@@ -27,7 +27,12 @@ func AddTodo(title string, conf AddConf, priority int, tag string) {
 		}
 	}
 
-	// Check whether an entry already exists with the same title
+	// Check for empty title and whether an entry already exists with the same title
+	if title == "" {
+		info("Title is required")
+		UsageAdd()
+		return
+	}
 	_, exists := getIfEntryExists(title)
 	if exists == nil {
 		errout("Failed to add new todo. Please select a unique title.")
@@ -107,14 +112,12 @@ func askIfInit() bool {
 
 // NOTE: Add command help and usage functions
 func UsageAdd() {
-	fmt.Print(`
-Usage: todo add [-h | --help] [--auto-init] [-p | --priority] <title>
+	fmt.Print(`Usage: todo add [-h | --help] [--auto-init] [-t | --tag] [-p | --priority] <title>
     Use 'todo add --help' to see more
 `)
 }
 func HelpAdd() {
-	fmt.Print(`
-Help for todo add:
+	const helpmsg = `Help for todo add:
     Available arguments:
         --help, -h     | Show this message
         --auto-init    | Automatically initialize a new todo when adding
@@ -127,6 +130,7 @@ Help for todo add:
         --priority, -p | Specify the priority that will be set for this entry
                        | regardless of default_priority, and it will not be
                        | asked later regardless of ask_priority
+        --tag, -t      | Set the tag for a new entry
 
     Use 'todo add <title>' where <title> is what you want as a title for the
     new todo entry. Titles can be entered with spaces in them without having
@@ -136,6 +140,7 @@ Help for todo add:
     (most likely by pressing 'enter'), Errors may otherwise occur
 
     Config option 'auto_init' Determines whether a new local database is
-    created automatically or asked before doing it
-`)
+    created automatically or asked before doing it`
+
+	PrintHelpMSG(helpmsg)
 }

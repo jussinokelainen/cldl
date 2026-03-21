@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -154,12 +153,13 @@ func makeTagLine(tag string) string {
 	tagString := "Tag: " + tag
 	tagStrlen := utf8.RuneCountInString(tagString)
 	free := max(maxWidth-tagStrlen, 0)
-	tagLeft := free / 2
-	tagRight := free - tagLeft
+	paddingLeft := free / 2
+	paddingRight := free - paddingLeft
+
 	padContentToCenter(&tagStr, maxWidth+2)
-	fmt.Fprintf(&tagStr, "%s║%s", borderColor, addSpace(tagLeft+2))
+	fmt.Fprintf(&tagStr, "%s║%s", borderColor, addSpace(paddingLeft+2))
 	fmt.Fprintf(&tagStr, "%s%s", tagColor, tagString)
-	fmt.Fprintf(&tagStr, "%s%s║\n", borderColor, addSpace(tagRight+2))
+	fmt.Fprintf(&tagStr, "%s%s║\n", borderColor, addSpace(paddingRight+2))
 
 	return tagStr.String()
 }
@@ -168,11 +168,15 @@ func makeTimeStampLine(timestamp int64, timeZone *time.Location) string {
 
 	// Print creation timestamp
 	timeString := "Created: " + time.Time.String(time.Unix(timestamp, 0).In(timeZone))
-	timePadding := maxWidth/2 - len(timeString)/2
+	visibleTimeLen := utf8.RuneCountInString(timeString)
+	free := max(maxWidth-visibleTimeLen, 0)
+	paddingLeft := free / 2
+	paddingRight := free - paddingLeft
+
 	padContentToCenter(&timeStr, maxWidth+2)
-	fmt.Fprintf(&timeStr, "%s║%s", borderColor, addSpace(timePadding+2))
+	fmt.Fprintf(&timeStr, "%s║%s", borderColor, addSpace(paddingLeft+2))
 	fmt.Fprintf(&timeStr, "%s%s", dimColor, timeString)
-	fmt.Fprintf(&timeStr, "%s%s║\n", borderColor, addSpace(timePadding+2))
+	fmt.Fprintf(&timeStr, "%s%s║\n", borderColor, addSpace(paddingRight+2))
 
 	return timeStr.String()
 }
@@ -186,12 +190,13 @@ func makePriorityLine(priority int, priorityColor string) string {
 	prioString := "Priority: " + fmt.Sprint(priority)
 	visiblePrioLen := utf8.RuneCountInString(prioString)
 	free := max(maxWidth-visiblePrioLen, 0)
-	prioLeft := free / 2
-	prioRight := free - prioLeft
+	paddingLeft := free / 2
+	paddingRight := free - paddingLeft
+
 	padContentToCenter(&prioStr, maxWidth+2)
-	fmt.Fprintf(&prioStr, "%s║%s", borderColor, addSpace(prioLeft+2))
+	fmt.Fprintf(&prioStr, "%s║%s", borderColor, addSpace(paddingLeft+2))
 	fmt.Fprintf(&prioStr, "%s%s", priorityColor, prioString)
-	fmt.Fprintf(&prioStr, "%s%s║\n", borderColor, addSpace(prioRight+2))
+	fmt.Fprintf(&prioStr, "%s%s║\n", borderColor, addSpace(paddingRight+2))
 
 	return prioStr.String()
 }
@@ -201,13 +206,13 @@ func formatContentLine(line string) string {
 	var listString strings.Builder
 	visibleLen := utf8.RuneCountInString(line)
 	free := max(maxWidth-visibleLen, 0)
-	left := free / 2
-	right := free - left
+	paddingLeft := free / 2
+	paddingRight := free - paddingLeft
 
 	padContentToCenter(&listString, maxWidth+2)
-	fmt.Fprintf(&listString, "%s║%s", borderColor, addSpace(left+2))
+	fmt.Fprintf(&listString, "%s║%s", borderColor, addSpace(paddingLeft+2))
 	fmt.Fprintf(&listString, "%s%s", contentColor, line)
-	fmt.Fprintf(&listString, "%s%s║\n", borderColor, addSpace(right+2))
+	fmt.Fprintf(&listString, "%s%s║\n", borderColor, addSpace(paddingRight+2))
 
 	return listString.String()
 }
@@ -262,19 +267,6 @@ func listAllTodoLocations() string {
 	fmt.Fprintf(&listString, "%s╚══%s══╝\033[0m\n", borderColor, addLine(longestLoc))
 
 	return listString.String()
-}
-
-// Simply prints the given content string into less or errors out
-func printToPager(content string) {
-	cmd := exec.Command("/usr/bin/less", "-R")
-	cmd.Stdin = strings.NewReader(content)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
-	if err != nil {
-		errout("Error in running less, is it installed?")
-		os.Exit(1)
-	}
 }
 
 func padContentToCenter(listString *strings.Builder, contentWidth int) {
@@ -356,14 +348,12 @@ func addSpace(length int) string {
 
 // NOTE: List command help and usage functions
 func UsageList() {
-	fmt.Print(`
-Usage: todo list [-h | --help] [-a | --all] [-p | --pager]
+	fmt.Print(`Usage: todo list [-h | --help] [-a | --all] [-p | --pager]
     Use 'todo list --help' to see more
 `)
 }
 func HelpList() {
-	fmt.Print(`
-Help for todo list:
+	const helpmsg = `Help for todo list:
     Available arguments:
         --help, -h   | Show this message
         --all, -a    | List all locations with todo's
@@ -373,6 +363,7 @@ Help for todo list:
         --except, -e | Only list entries without a certain tag
 
     Show content in a local todo list, or alternatively with '--all'
-    show all locations with todo lists
-`)
+    show all locations with todo lists`
+
+	PrintHelpMSG(helpmsg)
 }

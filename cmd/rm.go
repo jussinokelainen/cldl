@@ -90,20 +90,19 @@ func removeAllData() {
 
 // NOTE: Remove command help and usage functions
 func UsageRm() {
-	fmt.Print(`
-Usage: todo rm [-h | --help] [-a | --all] <title>
+	fmt.Print(`Usage: todo rm [-h | --help] [-a | --all] <title>
     Use 'todo rm --help' to see more
 `)
 }
 func HelpRm() {
-	fmt.Print(`
-Help for todo rm / done:
+	const helpmsg = `Help for todo rm / done:
     Available arguments:
         --help, -h  | Show help for todo rm
         --all, -a   | Fully remove todo list from current directory
 
     Rm and done are the same command with a different name.
     Use 'todo rm <title>' where <title> is the title
-    for the list entry to be deleted.
-`)
+    for the list entry to be deleted.`
+
+	PrintHelpMSG(helpmsg)
 }

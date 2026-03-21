@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"database/sql"
 	"fmt"
+	"golang.org/x/term"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 )
@@ -201,6 +203,37 @@ func hexToRgbString(hex string) (string, error) {
 	}
 
 	return fmt.Sprintf("\033[38;2;%d;%d;%dm", r, g, b), nil
+}
+
+func PrintHelpMSG(s string) {
+	if s == "" {
+		return
+	}
+	_, height, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		panic(err)
+	}
+	maxHeight := height - 4
+	lineCount := strings.Count(s, "\n") + 1
+	shouldPager := lineCount > maxHeight
+	if shouldPager {
+		printToPager(s)
+	} else {
+		fmt.Println(s)
+	}
+}
+
+// Simply prints the given content string into less or errors out
+func printToPager(content string) {
+	cmd := exec.Command("/usr/bin/less", "-R")
+	cmd.Stdin = strings.NewReader(content)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		errout("Error in running less, is it installed?")
+		os.Exit(1)
+	}
 }
 
 // Get the path of a local todo database, returns the path as a string

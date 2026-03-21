@@ -41,20 +41,18 @@ func SetTagToEntry(title string, tag string) {
 }
 
 func UsageSet() {
-	fmt.Print(`
-Usage: todo set [-h | --help] [-p | --priority] <title>
+	fmt.Print(`Usage: todo set [-h | --help] [-p | --priority] <title>
     Use 'todo set --help' to see more
 `)
 }
 func HelpSet() {
-	fmt.Print(`
-Help for todo set:
+	const helpmsg = `Help for todo set:
     Available arguments:
         --help, -h     | Show this message
         --priority, -p | Set the priority of an entry
         --tag, -t      | Set the tag of an entry
 
-    Set various things in already existing entries
-`)
+    Set various things in already existing entries should be simple`
 
+	PrintHelpMSG(helpmsg)
 }

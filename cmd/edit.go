@@ -66,14 +66,12 @@ func changeEntryContent(newContent string, title string) {
 
 // NOTE: Edit command help and usage functions
 func UsageEdit() {
-	fmt.Print(`
-Usage: todo edit [-h | --help] [-k | --keep] <title>
+	fmt.Print(`Usage: todo edit [-h | --help] [-k | --keep] <title>
     Use 'todo edit --help' to see more
 `)
 }
 func HelpEdit() {
-	fmt.Print(`
-Help for todo edit:
+	const helpmsg = `Help for todo edit:
     Available arguments:
         --help, -h  | Show this message
         --keep, -k  | Toggles the behavior of keeping on edit
@@ -82,6 +80,7 @@ Help for todo edit:
     to either keep the existing content or override it by default
 
     Same text inputting rules apply for editing as adding a new entry,
-    Check 'todo add --help'.
-`)
+    Check 'todo add --help'.`
+
+	PrintHelpMSG(helpmsg)
 }

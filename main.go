@@ -363,14 +363,12 @@ func errout(msg string) { fmt.Println("[\033[31m ERROR \033[0m] ", msg) }
 
 // NOTE: Main help and usage functions
 func mainUsage() {
-	fmt.Print(`
-Usage: todo [-h | --help] <command> [<args>]
+	fmt.Print(`Usage: todo [-h | --help] <command> [<args>]
     Use todo --help to see available commands
 `)
 }
 func mainHelp() {
-	fmt.Print(`
-Help for todo:
+	const helpmsg = `Help for todo:
   Flags:
       --help, -h           | Show this message
 
@@ -398,7 +396,37 @@ Help for todo:
   If a panic error occurs, most likely something went wrong when interacting
   with the sqlite databases (although it is not the only way panics can occur)
 
-  Configuration expect a file as '~/.config/todo/config.toml'.
+  Configuration expect a file '~/.config/todo/config.toml'.
 
-`)
+  Default configs:
+    [general]
+      Ask_rm_on_check = true
+      Timezone = "Local"
+
+    [add]
+      Auto_init = false
+      Ask_priority = false
+
+    [edit]
+      Keep_content = false
+
+    [priority]
+      Default = 0
+      Urgent = 10
+      In_progress = 100
+
+    [rm]
+      Ask_full = false
+      Always_confirm_full = true
+
+    [colors]
+      Default = "#99FFFF"
+      Urgent = "#FF8000"
+      Wip = "#66FF66"
+      Content = "#FFFFFF"
+      Border = "#FF99FF"
+      Dim = "#404040"
+      Tag = "#FFFF66"`
+
+	cmd.PrintHelpMSG(helpmsg)
 }

@@ -43,20 +43,19 @@ func CheckTodos(confirm_rm bool) {
 
 // NOTE: Check command help and usage functions
 func UsageCheck() {
-	fmt.Print(`
-Usage: todo check [-h | --help] [--no-confirm]
+	fmt.Print(`Usage: todo check [-h | --help] [--no-confirm]
     Use 'todo check --help' to see more
 `)
 }
 func HelpCheck() {
-	fmt.Print(`
-Help for todo check:
+	const helpmsg = `Help for todo check:
     Available arguments:
         --help, -h   | Show this message
         --no-confirm | Don't ask for confirmation before deleting
                        local databases, regardless of what configs have
 
     Checks all the saved locations of local todo lists and looks for locations
-    that do not have the corresponding list files, and asks to delete them
-`)
+    that do not have the corresponding list files, and asks to delete them`
+
+	PrintHelpMSG(helpmsg)
 }

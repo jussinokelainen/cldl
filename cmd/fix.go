@@ -105,20 +105,19 @@ func DefaultNullPriorities(defaultPriority int) {
 }
 
 func UsageFix() {
-	fmt.Print(`
-Usage: todo fix [-h | --help]
+	fmt.Print(`Usage: todo fix [-h | --help]
     Use 'todo fix --help' to see more
 `)
 }
 func HelpFix() {
-	fmt.Print(`
-Help for todo fix:
+	const helpmsg = `Help for todo fix:
     Available arguments:
         --help, -h   | Show this message
 
     This command will be useful after making breaking
     changes to the program and its databases. It checks
     whether a local todo list has all the required columns,
-    and adds them if they don't exist.
-`)
+    and adds them if they don't exist.`
+
+	PrintHelpMSG(helpmsg)
 }

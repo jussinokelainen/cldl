@@ -31,14 +31,12 @@ func RelocateTodo(ask_rm_on_check bool) {
 
 // NOTE: Init help and usage functions
 func UsageRelocate() {
-	fmt.Print(`
-Default usage: todo relocate [-h | --help]
+	fmt.Print(`Default usage: todo relocate [-h | --help]
     Use 'todo relocate --help' to see more
 `)
 }
 func HelpRelocate() {
-	fmt.Print(`
-Help for todo relocate:
+	const helpmsg = `Help for todo relocate:
     Available arguments:
         --help, -h  | Show this message
 
@@ -47,6 +45,7 @@ Help for todo relocate:
     it and checks the location list for non-existent
     locations.
 
-    Useful when renaming directories etc.
-`)
+    Useful when renaming directories etc.`
+
+	PrintHelpMSG(helpmsg)
 }
