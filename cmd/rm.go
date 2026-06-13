@@ -5,8 +5,27 @@ import (
 	"os"
 )
 
-func RmTodo(title string, rmAll bool, conf RmConf) {
-	if rmAll {
+func RmTodo(title string, rmAll bool, rmTag bool, conf RmConf) {
+	if rmAll && rmTag {
+		todoDB := openTodoDB()
+		defer todoDB.Close()
+
+		info("Clearing all tags in current todo list")
+		_, err := todoDB.Exec("UPDATE todo SET tag = 'NONE';")
+		if err != nil {
+			errout("Failed to edit todo content")
+			panic(err)
+		}
+		return
+	} else if rmTag {
+		if title == "" {
+			UsageRm()
+			return
+		}
+		SetTagToEntry(title, "NONE")
+
+		return
+	} else if rmAll {
 		if getEntryCount() != 0 {
 			info("The list is not empty!")
 			if askYesNo("Do you still want to remove it?") {
@@ -99,6 +118,8 @@ func HelpRm() {
     Available arguments:
         --help, -h  | Show help for todo rm
         --all, -a   | Fully remove todo list from current directory
+        --tag, -t   | Remove the tag from an entry. If used together with
+                    | --all, clears all tags in current list
 
     Rm and done are the same command with a different name.
     Use 'todo rm <title>' where <title> is the title

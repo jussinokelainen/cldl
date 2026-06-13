@@ -273,7 +273,10 @@ func handleParsing(conf cmd.Config) {
 			return
 		}
 
-		additionalFlags := []string{"a", "all"}
+		additionalFlags := []string{
+			"a", "all",
+			"t", "tag",
+		}
 		flags.Flags = append(flags.Flags, additionalFlags...)
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
@@ -283,10 +286,13 @@ func handleParsing(conf cmd.Config) {
 		}
 
 		rmAll := false
+		rmTag := false
 		for _, flag := range parsedArgs.Flags {
 			switch flag {
 			case "a", "all":
 				rmAll = true
+			case "t", "tag":
+				rmTag = true
 			case "h", "help":
 				cmd.HelpRm()
 				return
@@ -294,7 +300,7 @@ func handleParsing(conf cmd.Config) {
 		}
 
 		title := strings.Join(parsedArgs.NormalStr, " ")
-		cmd.RmTodo(title, rmAll, conf.Rm)
+		cmd.RmTodo(title, rmAll, rmTag, conf.Rm)
 
 	case "edit":
 		if !cmd.TodoExists() {
