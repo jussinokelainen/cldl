@@ -9,17 +9,23 @@ import (
 	"time"
 )
 
+type AddInfo struct {
+	Priority      int
+	Tag           string
+	Empty_content bool
+}
+
 // Adds a new todo with a title given as an argument, if title is not duplicate
-func AddTodo(title string, conf AddConf, priority int, tag string) {
+func AddTodo(title string, conf AddConf, data AddInfo) {
 	if !TodoExists() {
-		var answer bool
+		var initNew bool
 		if conf.Auto_init {
-			answer = true
+			initNew = true
 		} else {
 			info("Not todo currently exists in this directory")
-			answer = askIfInit()
+			initNew = askIfInit()
 		}
-		if answer {
+		if initNew {
 			InitTodo()
 			fmt.Print("\n")
 		} else {
@@ -39,32 +45,38 @@ func AddTodo(title string, conf AddConf, priority int, tag string) {
 		return
 	}
 
-	reader := bufio.NewReader(os.Stdin)
+	time := time.Now().Unix()
 
 	todoDB := openTodoDB()
 	defer todoDB.Close()
 
-	time := time.Now().Unix()
-
-	fmt.Printf("\033[36mEnter contents for new todo titled %s: \033[0m\n", title)
-	fmt.Print("\033[35m❯ \033[0m")
-	content, err := reader.ReadString('\n')
-	if err != nil {
-		errout("Error reading input, did text end with a newline")
-		UsageAdd()
-		return
-	}
-	content = strings.TrimSpace(content)
-	if content == "" {
+	var content string
+	if data.Empty_content {
 		content = "[ EMPTY ]"
+	} else {
+		reader := bufio.NewReader(os.Stdin)
+
+		fmt.Printf("\033[36mEnter contents for new todo titled %s: \033[0m\n", title)
+		fmt.Print("\033[35m❯ \033[0m")
+		var err error
+		content, err = reader.ReadString('\n')
+		if err != nil {
+			errout("Error reading input, did text end with a newline")
+			UsageAdd()
+			return
+		}
+		content = strings.TrimSpace(content)
+		if content == "" {
+			content = "[ EMPTY ]"
+		}
 	}
 
 	if conf.Ask_priority {
-		priority = askPriority()
+		data.Priority = askPriority()
 	}
 
 	sqlStatement := `INSERT INTO todo(title, content, time, priority, tag) VALUES($1, $2, $3, $4, $5);`
-	_, err = todoDB.Exec(sqlStatement, title, content, time, priority, tag)
+	_, err := todoDB.Exec(sqlStatement, title, content, time, data.Priority, data.Tag)
 	if err != nil {
 		errout("Error adding new todo, executing database query failed")
 		panic(err)
@@ -131,13 +143,15 @@ func HelpAdd() {
                        | regardless of default_priority, and it will not be
                        | asked later regardless of ask_priority
         --tag, -t      | Set the tag for a new entry
+        --empty, -e    | Adds todo without asking for content
 
     Use 'todo add <title>' where <title> is what you want as a title for the
     new todo entry. Titles can be entered with spaces in them without having
     to use quotes
 
     Inputting content will be finished by inputting a newline,
-    (most likely by pressing 'enter'), Errors may otherwise occur
+    (most likely by pressing 'enter'), Errors may otherwise occur.
+    Content can be empty by inputting nothing, or using the --empty argument.
 
     Config option 'auto_init' Determines whether a new local database is
     created automatically or asked before doing it`
