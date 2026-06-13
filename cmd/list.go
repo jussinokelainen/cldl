@@ -128,20 +128,19 @@ func formatListItems(todoSlice []TodoStruct, timeZone *time.Location, urgentPrio
 func makeTitleLine(title string, priorityColor string) string {
 	var titleStr strings.Builder
 
+	padLeft, padRight := getSidePadding(title)
 	titleSize := utf8.RuneCountInString(title)
-	titleLeftPad := maxWidth/2 - titleSize/2
-	titleRightPad := maxWidth/2 - (titleSize+1)/2
 	fmt.Fprint(&titleStr, "\n")
 
 	padContentToCenter(&titleStr, maxWidth+2)
-	fmt.Fprintf(&titleStr, "%s║%s", borderColor, addSpace(titleLeftPad+2))
+	fmt.Fprintf(&titleStr, "%s║%s", borderColor, addSpace(padLeft+2))
 	fmt.Fprintf(&titleStr, "%s%s", priorityColor, title)
-	fmt.Fprintf(&titleStr, "%s%s║\n", borderColor, addSpace(titleRightPad+2))
+	fmt.Fprintf(&titleStr, "%s%s║\n", borderColor, addSpace(padRight+2))
 
 	padContentToCenter(&titleStr, maxWidth+2)
-	fmt.Fprintf(&titleStr, "%s║%s", borderColor, addSpace(titleLeftPad))
+	fmt.Fprintf(&titleStr, "%s║%s", borderColor, addSpace(padLeft))
 	fmt.Fprintf(&titleStr, "%s══%s══", priorityColor, addLine(titleSize))
-	fmt.Fprintf(&titleStr, "%s%s║\n", borderColor, addSpace(titleRightPad))
+	fmt.Fprintf(&titleStr, "%s%s║\n", borderColor, addSpace(padRight))
 
 	return titleStr.String()
 }
@@ -151,15 +150,12 @@ func makeTagLine(tag string) string {
 
 	// Print tag
 	tagString := "Tag: " + tag
-	tagStrlen := utf8.RuneCountInString(tagString)
-	free := max(maxWidth-tagStrlen, 0)
-	paddingLeft := free / 2
-	paddingRight := free - paddingLeft
+	padLeft, padRight := getSidePadding(tagString)
 
 	padContentToCenter(&tagStr, maxWidth+2)
-	fmt.Fprintf(&tagStr, "%s║%s", borderColor, addSpace(paddingLeft+2))
+	fmt.Fprintf(&tagStr, "%s║%s", borderColor, addSpace(padLeft+2))
 	fmt.Fprintf(&tagStr, "%s%s", tagColor, tagString)
-	fmt.Fprintf(&tagStr, "%s%s║\n", borderColor, addSpace(paddingRight+2))
+	fmt.Fprintf(&tagStr, "%s%s║\n", borderColor, addSpace(padRight+2))
 
 	return tagStr.String()
 }
@@ -168,15 +164,12 @@ func makeTimeStampLine(timestamp int64, timeZone *time.Location) string {
 
 	// Print creation timestamp
 	timeString := "Created: " + time.Time.String(time.Unix(timestamp, 0).In(timeZone))
-	visibleTimeLen := utf8.RuneCountInString(timeString)
-	free := max(maxWidth-visibleTimeLen, 0)
-	paddingLeft := free / 2
-	paddingRight := free - paddingLeft
+	padLeft, padRight := getSidePadding(timeString)
 
 	padContentToCenter(&timeStr, maxWidth+2)
-	fmt.Fprintf(&timeStr, "%s║%s", borderColor, addSpace(paddingLeft+2))
+	fmt.Fprintf(&timeStr, "%s║%s", borderColor, addSpace(padLeft+2))
 	fmt.Fprintf(&timeStr, "%s%s", dimColor, timeString)
-	fmt.Fprintf(&timeStr, "%s%s║\n", borderColor, addSpace(paddingRight+2))
+	fmt.Fprintf(&timeStr, "%s%s║\n", borderColor, addSpace(padRight+2))
 
 	return timeStr.String()
 }
@@ -188,15 +181,12 @@ func makePriorityLine(priority int, priorityColor string) string {
 	}
 	// Print Priority
 	prioString := "Priority: " + fmt.Sprint(priority)
-	visiblePrioLen := utf8.RuneCountInString(prioString)
-	free := max(maxWidth-visiblePrioLen, 0)
-	paddingLeft := free / 2
-	paddingRight := free - paddingLeft
+	padLeft, padRight := getSidePadding(prioString)
 
 	padContentToCenter(&prioStr, maxWidth+2)
-	fmt.Fprintf(&prioStr, "%s║%s", borderColor, addSpace(paddingLeft+2))
+	fmt.Fprintf(&prioStr, "%s║%s", borderColor, addSpace(padLeft+2))
 	fmt.Fprintf(&prioStr, "%s%s", priorityColor, prioString)
-	fmt.Fprintf(&prioStr, "%s%s║\n", borderColor, addSpace(paddingRight+2))
+	fmt.Fprintf(&prioStr, "%s%s║\n", borderColor, addSpace(padRight+2))
 
 	return prioStr.String()
 }
@@ -204,15 +194,12 @@ func makePriorityLine(priority int, priorityColor string) string {
 // Formats and decorates a single line of a todo entry's content returns it as a string
 func formatContentLine(line string) string {
 	var listString strings.Builder
-	visibleLen := utf8.RuneCountInString(line)
-	free := max(maxWidth-visibleLen, 0)
-	paddingLeft := free / 2
-	paddingRight := free - paddingLeft
+	padLeft, padRight := getSidePadding(line)
 
 	padContentToCenter(&listString, maxWidth+2)
-	fmt.Fprintf(&listString, "%s║%s", borderColor, addSpace(paddingLeft+2))
+	fmt.Fprintf(&listString, "%s║%s", borderColor, addSpace(padLeft+2))
 	fmt.Fprintf(&listString, "%s%s", contentColor, line)
-	fmt.Fprintf(&listString, "%s%s║\n", borderColor, addSpace(paddingRight+2))
+	fmt.Fprintf(&listString, "%s%s║\n", borderColor, addSpace(padRight+2))
 
 	return listString.String()
 }
@@ -297,11 +284,51 @@ func getTodoSlice(filterByTag ListTag, tag string) ([]TodoStruct, error) {
 	var sqlStatement string
 	switch filterByTag {
 	case ONLY:
-		sqlStatement = fmt.Sprintf(`SELECT title, content, time, priority, tag FROM todo WHERE tag = '%s' ORDER BY priority DESC, time ASC;`, tag)
+		sqlStatement = fmt.Sprintf(`
+			SELECT
+				title,
+				content,
+				time,
+				priority,
+				tag
+			FROM
+				todo
+			WHERE
+				tag = '%s'
+			ORDER BY
+				priority DESC,
+				time ASC;
+			`, tag)
 	case EXCEPT:
-		sqlStatement = fmt.Sprintf(`SELECT title, content, time, priority, tag FROM todo WHERE tag <> '%s' ORDER BY priority DESC, time ASC;`, tag)
+		sqlStatement = fmt.Sprintf(`
+			SELECT
+				title,
+				content,
+				time,
+				priority,
+				tag
+			FROM
+				todo
+			WHERE
+				tag <> '%s'
+			ORDER BY
+				priority DESC,
+				time ASC;
+			`, tag)
 	default:
-		sqlStatement = `SELECT title, content, time, priority, tag FROM todo ORDER BY priority DESC, time ASC;`
+		sqlStatement = `
+			SELECT
+				title,
+				content,
+				time,
+				priority,
+				tag
+			FROM
+				todo
+			ORDER BY
+				priority DESC,
+				time ASC;
+			`
 	}
 
 	rows, err := todoDB.Query(sqlStatement)
@@ -326,6 +353,17 @@ func getTodoSlice(filterByTag ListTag, tag string) ([]TodoStruct, error) {
 	}
 
 	return todoSlice, nil
+}
+
+// Helper function for getting the correct spacing in various line inside
+// the printed todo list box
+func getSidePadding(s string) (int, int) {
+	strSize := utf8.RuneCountInString(s)
+	free := max(maxWidth-strSize, 0)
+	padLeft := free / 2
+	padRight := free - padLeft
+
+	return padLeft, padRight
 }
 
 // Formatting helper functions that return a string
