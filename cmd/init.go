@@ -12,7 +12,7 @@ func InitTodo() {
 	// Check whether current directory already has a list
 	// if it exists, do not create a new one, and just return
 	if _, err := os.Stat(GetDbPath()); !os.IsNotExist(err) {
-		errout("Todo already exists in current directory!")
+		ERROR("Todo already exists in current directory!")
 		return
 	}
 
@@ -26,13 +26,13 @@ func InitTodo() {
         tag VARCHAR NOT NULL
         );`)
 	if err != nil {
-		errout("Creating new todo failed!")
+		ERROR("Creating new todo failed!")
 		panic(err)
 	}
 
 	addToMasterDB(todoPath)
 
-	ok("New todo created!")
+	OK("New todo created!")
 }
 
 // NOTE: Init help and usage functions
@@ -41,14 +41,11 @@ func UsageInit() {
     Use 'todo init --help' to see more
 `)
 }
-func HelpInit() {
-	const helpmsg = `Help for todo init:
+
+const HelpInit = `Help for todo init:
     Available arguments:
         --help, -h  | Show this message
 
     Initialize a local todo list in current directory
     Might be a useless command, since initialization can also
     be done when adding an entry`
-
-	PrintHelpMSG(helpmsg)
-}

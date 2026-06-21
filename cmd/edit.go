@@ -12,13 +12,13 @@ import (
 func EditTodo(title string, conf EditConf, colors ColorConf) {
 	setColorScheme(colors)
 	if title == "" {
-		errout("Title required")
+		ERROR("Title required")
 		return
 	}
 
 	content, err := getIfEntryExists(title)
 	if err != nil {
-		errout("No todo list entry found with title " + title)
+		ERROR("No todo list entry found with title " + title)
 		return
 	}
 
@@ -36,7 +36,7 @@ func EditTodo(title string, conf EditConf, colors ColorConf) {
 	fmt.Printf("%s❯ \033[0m", borderColor)
 	newContent, err := reader.ReadString('\n')
 	if err != nil {
-		errout("Error reading input, did text end with a newline?")
+		ERROR("Error reading input, did text end with a newline?")
 		UsageEdit()
 		return
 	}
@@ -55,12 +55,12 @@ func changeEntryContent(newContent string, title string) {
 	sqlStatement := `UPDATE todo SET content = $1 WHERE UPPER(title) = UPPER($2);`
 	_, err := todoDB.Exec(sqlStatement, newContent, title)
 	if err != nil {
-		errout("Failed to edit todo content")
+		ERROR("Failed to edit todo content")
 		panic(err)
 	}
 
 	fmt.Print("\n")
-	ok("Successfully changed content for " + title)
+	OK("Successfully changed content for " + title)
 
 }
 
@@ -70,8 +70,8 @@ func UsageEdit() {
     Use 'todo edit --help' to see more
 `)
 }
-func HelpEdit() {
-	const helpmsg = `Help for todo edit:
+
+const HelpEdit = `Help for todo edit:
     Available arguments:
         --help, -h  | Show this message
         --keep, -k  | Toggles the behavior of keeping on edit
@@ -81,6 +81,3 @@ func HelpEdit() {
 
     Same text inputting rules apply for editing as adding a new entry,
     Check 'todo add --help'.`
-
-	PrintHelpMSG(helpmsg)
-}

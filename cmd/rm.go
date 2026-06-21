@@ -10,10 +10,10 @@ func RmTodo(title string, rmAll bool, rmTag bool, conf RmConf) {
 		todoDB := openTodoDB()
 		defer todoDB.Close()
 
-		info("Clearing all tags in current todo list")
+		INFO("Clearing all tags in current todo list")
 		_, err := todoDB.Exec("UPDATE todo SET tag = 'NONE';")
 		if err != nil {
-			errout("Failed to edit todo content")
+			ERROR("Failed to edit todo content")
 			panic(err)
 		}
 		return
@@ -27,7 +27,7 @@ func RmTodo(title string, rmAll bool, rmTag bool, conf RmConf) {
 		return
 	} else if rmAll {
 		if getEntryCount() != 0 {
-			info("The list is not empty!")
+			INFO("The list is not empty!")
 			if askYesNo("Do you still want to remove it?") {
 				removeAllData()
 			}
@@ -52,17 +52,17 @@ func RmTodo(title string, rmAll bool, rmTag bool, conf RmConf) {
 	sqlStatement := `DELETE FROM todo WHERE UPPER(title) = UPPER(?);`
 	res, err := todoDB.Exec(sqlStatement, title)
 	if err != nil {
-		errout("Error removing entry")
+		ERROR("Error removing entry")
 		panic(err)
 	}
 
 	rowsAffected, _ := res.RowsAffected()
 	if rowsAffected == 0 {
-		errout("No entry found with title " + title)
+		ERROR("No entry found with title " + title)
 	} else {
-		ok("Succesfully removed entry " + title)
+		OK("Succesfully removed entry " + title)
 		if conf.Ask_full && getEntryCount() == 0 {
-			info("The last entry of this todo-list was removed.")
+			INFO("The last entry of this todo-list was removed.")
 			if askYesNo("Do you want to fully remove the list?") {
 				removeAllData()
 			}
@@ -84,7 +84,7 @@ func getEntryCount() int {
 	for res.Next() {
 		err = res.Scan(&count)
 		if err != nil {
-			errout("Failed scanning existing entry content")
+			ERROR("Failed scanning existing entry content")
 			panic(err)
 		}
 	}
@@ -100,11 +100,11 @@ func removeAllData() {
 	removeFromMasterDB(todoPath)
 	err := os.Remove(todoPath)
 	if err != nil {
-		errout("Failed removing local db")
+		ERROR("Failed removing local db")
 		panic(err)
 	}
 
-	ok("Succesfully removed local database!")
+	OK("Succesfully removed local database!")
 }
 
 // NOTE: Remove command help and usage functions
@@ -113,8 +113,8 @@ func UsageRm() {
     Use 'todo rm --help' to see more
 `)
 }
-func HelpRm() {
-	const helpmsg = `Help for todo rm / done:
+
+const HelpRm = `Help for todo rm / done:
     Available arguments:
         --help, -h  | Show help for todo rm
         --all, -a   | Fully remove todo list from current directory
@@ -124,6 +124,3 @@ func HelpRm() {
     Rm and done are the same command with a different name.
     Use 'todo rm <title>' where <title> is the title
     for the list entry to be deleted.`
-
-	PrintHelpMSG(helpmsg)
-}

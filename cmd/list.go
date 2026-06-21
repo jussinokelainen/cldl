@@ -17,7 +17,7 @@ var applyPadding = true
 func ListTodo(listLocations bool, pager bool, config Config, filterByTag ListTag, tag string) {
 	timeZone, err := time.LoadLocation(strings.TrimSpace(config.General.Timezone))
 	if err != nil {
-		errout("Failed to parse timezone")
+		ERROR("Failed to parse timezone")
 		os.Exit(1)
 	}
 	urgentPrio := config.Priority.Urgent
@@ -39,7 +39,7 @@ func ListTodo(listLocations bool, pager bool, config Config, filterByTag ListTag
 		return
 	} else {
 		if !TodoExists() {
-			errout("No todo exists in current directory!")
+			ERROR("No todo exists in current directory!")
 			return
 		}
 
@@ -47,11 +47,11 @@ func ListTodo(listLocations bool, pager bool, config Config, filterByTag ListTag
 		if err != nil {
 			switch filterByTag {
 			case ONLY:
-				info("No entries with tag " + tag)
+				INFO("No entries with tag " + tag)
 			case EXCEPT:
-				info("No entries without tag " + tag)
+				INFO("No entries without tag " + tag)
 			default:
-				info("Todo list empty!")
+				INFO("Todo list empty!")
 			}
 			return
 		}
@@ -214,7 +214,7 @@ func listAllTodoLocations() string {
 
 	rows, err := MasterDB.Query(`SELECT location FROM locations;`)
 	if err != nil {
-		errout("Failed getting all locations")
+		ERROR("Failed getting all locations")
 		panic(err)
 	}
 	defer rows.Close()
@@ -223,7 +223,7 @@ func listAllTodoLocations() string {
 		var location string
 		err = rows.Scan(&location)
 		if err != nil {
-			errout("Failed scanning entry content")
+			ERROR("Failed scanning entry content")
 			panic(err)
 		}
 		shortenedString := strings.Replace(location, homeDir, "~", 1)
@@ -333,7 +333,7 @@ func getTodoSlice(filterByTag ListTag, tag string) ([]TodoStruct, error) {
 
 	rows, err := todoDB.Query(sqlStatement)
 	if err != nil {
-		errout("Failed getting todo list")
+		ERROR("Failed getting todo list")
 		panic(err)
 	}
 	defer rows.Close()
@@ -342,7 +342,7 @@ func getTodoSlice(filterByTag ListTag, tag string) ([]TodoStruct, error) {
 		var row TodoStruct
 		err = rows.Scan(&row.Title, &row.Content, &row.Time, &row.Priority, &row.Tag)
 		if err != nil {
-			errout("Failed scanning entry content")
+			ERROR("Failed scanning entry content")
 			panic(err)
 		}
 		todoSlice = append(todoSlice, row)
@@ -390,8 +390,8 @@ func UsageList() {
     Use 'todo list --help' to see more
 `)
 }
-func HelpList() {
-	const helpmsg = `Help for todo list:
+
+const HelpList = `Help for todo list:
     Available arguments:
         --help, -h   | Show this message
         --all, -a    | List all locations with todo's
@@ -402,6 +402,3 @@ func HelpList() {
 
     Show content in a local todo list, or alternatively with '--all'
     show all locations with todo lists`
-
-	PrintHelpMSG(helpmsg)
-}

@@ -145,40 +145,40 @@ func setColorScheme(c ColorConf) {
 	var err error
 	defaultColor, err = hexToRgbString(c.Default)
 	if err != nil {
-		errout("Failed to parse default color")
+		ERROR("Failed to parse default color")
 		os.Exit(1)
 	}
 	urgentColor, err = hexToRgbString(c.Urgent)
 	if err != nil {
-		errout("Failed to parse urgent color")
+		ERROR("Failed to parse urgent color")
 		os.Exit(1)
 	}
 	wipColor, err = hexToRgbString(c.Wip)
 	if err != nil {
-		errout("Failed to parse wip color")
+		ERROR("Failed to parse wip color")
 		os.Exit(1)
 	}
 
 	contentColor, err = hexToRgbString(c.Content)
 	if err != nil {
-		errout("Failed to parse content color")
+		ERROR("Failed to parse content color")
 		os.Exit(1)
 	}
 	borderColor, err = hexToRgbString(c.Border)
 	if err != nil {
-		errout("Failed to parse border color")
+		ERROR("Failed to parse border color")
 		os.Exit(1)
 	}
 
 	dimColor, err = hexToRgbString(c.Dim)
 	if err != nil {
-		errout("Failed to parse dim color")
+		ERROR("Failed to parse dim color")
 		os.Exit(1)
 	}
 
 	tagColor, err = hexToRgbString(c.Tag)
 	if err != nil {
-		errout("Failed to parse tag color")
+		ERROR("Failed to parse tag color")
 		os.Exit(1)
 	}
 }
@@ -218,6 +218,7 @@ func PrintHelpMSG(s string) {
 	shouldPager := lineCount > maxHeight
 	if shouldPager {
 		printToPager(s)
+		fmt.Println(s)
 	} else {
 		fmt.Println(s)
 	}
@@ -231,7 +232,7 @@ func printToPager(content string) {
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		errout("Error in running less, is it installed?")
+		ERROR("Error in running less, is it installed?")
 		os.Exit(1)
 	}
 }
@@ -240,7 +241,7 @@ func printToPager(content string) {
 func GetDbPath() string {
 	cwd, err := os.Getwd()
 	if err != nil {
-		errout("Getting db path failed!")
+		ERROR("Getting db path failed!")
 		panic(err)
 	}
 	return cwd + "/.todoApp.db"
@@ -250,7 +251,7 @@ func GetDbPath() string {
 func openTodoDB() *sql.DB {
 	db, err := sql.Open("sqlite", GetDbPath())
 	if err != nil {
-		errout("Opening todo DB failed!")
+		ERROR("Opening todo DB failed!")
 		panic(err)
 	}
 	return db
@@ -261,24 +262,24 @@ func openTodoDB() *sql.DB {
 func CreateMasterDB() {
 	homedir, err := os.UserHomeDir()
 	if err != nil {
-		errout("Getting homedir failed!")
+		ERROR("Getting homedir failed!")
 		panic(err)
 	}
 	masterDbDIR := homedir + "/.sqlite/todo"
 	err = os.MkdirAll(masterDbDIR, 0755)
 	if err != nil {
-		errout("Creating .sqlite/todo directory failed!")
+		ERROR("Creating .sqlite/todo directory failed!")
 		panic(err)
 	}
 
 	MasterDB, err = sql.Open("sqlite", masterDbDIR+"/.todo.db")
 	if err != nil {
-		errout("Opening master database failed!")
+		ERROR("Opening master database failed!")
 		panic(err)
 	}
 	_, err = MasterDB.Exec(`CREATE TABLE IF NOT EXISTS locations (location VARCHAR UNIQUE);`)
 	if err != nil {
-		errout("Creating master database failed!")
+		ERROR("Creating master database failed!")
 		panic(err)
 	}
 }
@@ -288,7 +289,7 @@ func addToMasterDB(path string) {
 	sqlStatement := `INSERT INTO locations(location) VALUES($1);`
 	_, err := MasterDB.Exec(sqlStatement, path)
 	if err != nil {
-		errout("Adding to master DB failed!")
+		ERROR("Adding to master DB failed!")
 		panic(err)
 	}
 }
@@ -297,10 +298,10 @@ func removeFromMasterDB(todoPath string) {
 	sqlStatement := `DELETE FROM locations WHERE location = ?;`
 	_, err := MasterDB.Exec(sqlStatement, todoPath)
 	if err != nil {
-		errout("Error removing from master db")
+		ERROR("Error removing from master db")
 		panic(err)
 	}
-	ok("Removed \033[35m" + todoPath + "\033[0m from location list")
+	OK("Removed \033[35m" + todoPath + "\033[0m from location list")
 }
 
 // Get the existing content of a todo entry if it exists, returns an error if it doesn't exist
@@ -311,7 +312,7 @@ func getIfEntryExists(title string) (string, error) {
 	sqlStatement := `SELECT content from todo WHERE UPPER(title) = UPPER($1);`
 	res, err := todoDB.Query(sqlStatement, title)
 	if err != nil {
-		errout("Failed checking entry in database!")
+		ERROR("Failed checking entry in database!")
 		panic(err)
 	}
 	defer res.Close()
@@ -320,7 +321,7 @@ func getIfEntryExists(title string) (string, error) {
 	for res.Next() {
 		err = res.Scan(&content)
 		if err != nil {
-			errout("Failed scanning existing entry content")
+			ERROR("Failed scanning existing entry content")
 			panic(err)
 		}
 	}
@@ -336,7 +337,7 @@ func askYesNo(question string) bool {
 	fmt.Print(question + " [y/n]: ")
 	answer, err := reader.ReadString('\n')
 	if err != nil {
-		errout("Error reading input")
+		ERROR("Error reading input")
 		return askYesNo(question)
 	}
 	answer = strings.TrimSpace(answer)
@@ -363,6 +364,6 @@ func TodoExists() bool {
 }
 
 // Status printing helpers
-func ok(msg string)     { fmt.Println("[\033[32m OK \033[0m] ", msg) }
-func info(msg string)   { fmt.Println("[\033[35m INFO \033[0m] ", msg) }
-func errout(msg string) { fmt.Println("[\033[31m ERROR \033[0m] ", msg) }
+func OK(msg ...any)    { fmt.Println(append([]any{"[\033[32m OK \033[0m]"}, msg...)...) }
+func INFO(msg ...any)  { fmt.Println(append([]any{"[\033[35m INFO \033[0m]"}, msg...)...) }
+func ERROR(msg ...any) { fmt.Println(append([]any{"[\033[31m ERROR \033[0m]"}, msg...)...) }

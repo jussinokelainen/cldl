@@ -22,7 +22,7 @@ func AddTodo(title string, conf AddConf, data AddInfo) {
 		if conf.Auto_init {
 			initNew = true
 		} else {
-			info("Not todo currently exists in this directory")
+			INFO("Not todo currently exists in this directory")
 			initNew = askIfInit()
 		}
 		if initNew {
@@ -35,13 +35,13 @@ func AddTodo(title string, conf AddConf, data AddInfo) {
 
 	// Check for empty title and whether an entry already exists with the same title
 	if title == "" {
-		info("Title is required")
+		INFO("Title is required")
 		UsageAdd()
 		return
 	}
 	_, exists := getIfEntryExists(title)
 	if exists == nil {
-		errout("Failed to add new todo. Please select a unique title.")
+		ERROR("Failed to add new todo. Please select a unique title.")
 		return
 	}
 
@@ -61,7 +61,7 @@ func AddTodo(title string, conf AddConf, data AddInfo) {
 		var err error
 		content, err = reader.ReadString('\n')
 		if err != nil {
-			errout("Error reading input, did text end with a newline")
+			ERROR("Error reading input, did text end with a newline")
 			UsageAdd()
 			return
 		}
@@ -78,10 +78,10 @@ func AddTodo(title string, conf AddConf, data AddInfo) {
 	sqlStatement := `INSERT INTO todo(title, content, time, priority, tag) VALUES($1, $2, $3, $4, $5);`
 	_, err := todoDB.Exec(sqlStatement, title, content, time, data.Priority, data.Tag)
 	if err != nil {
-		errout("Error adding new todo, executing database query failed")
+		ERROR("Error adding new todo, executing database query failed")
 		panic(err)
 	}
-	ok("Successfully added new todo " + title)
+	OK("Successfully added new todo " + title)
 }
 
 func askPriority() int {
@@ -89,14 +89,14 @@ func askPriority() int {
 	fmt.Print("\033[35mEnter priority to be set for this entry\033[0m: ")
 	answer, err := reader.ReadString('\n')
 	if err != nil {
-		errout("Error reading input")
+		ERROR("Error reading input")
 		return askPriority()
 	}
 	answer = strings.TrimSpace(answer)
 
 	answerInt, err := strconv.Atoi(answer)
 	if err != nil {
-		errout("Input must be an integer")
+		ERROR("Input must be an integer")
 		return askPriority()
 	}
 	return answerInt
@@ -107,7 +107,7 @@ func askIfInit() bool {
 	fmt.Print("Do you want to initialize a new one? [y/n]: ")
 	answer, err := reader.ReadString('\n')
 	if err != nil {
-		errout("Error reading input")
+		ERROR("Error reading input")
 		return askIfInit()
 	}
 	answer = strings.TrimSpace(answer)
@@ -128,8 +128,8 @@ func UsageAdd() {
     Use 'todo add --help' to see more
 `)
 }
-func HelpAdd() {
-	const helpmsg = `Help for todo add:
+
+const HelpAdd = `Help for todo add:
     Available arguments:
         --help, -h     | Show this message
         --auto-init    | Automatically initialize a new todo when adding
@@ -155,6 +155,3 @@ func HelpAdd() {
 
     Config option 'auto_init' Determines whether a new local database is
     created automatically or asked before doing it`
-
-	PrintHelpMSG(helpmsg)
-}

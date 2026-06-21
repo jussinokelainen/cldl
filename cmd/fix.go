@@ -11,7 +11,7 @@ func FixTodoTable(defaultPriority int) {
 	time := false
 	priority := false
 	tag := false
-	info("Checking todo table")
+	INFO("Checking todo table")
 
 	todoDB := openTodoDB()
 	defer todoDB.Close()
@@ -47,7 +47,7 @@ func FixTodoTable(defaultPriority int) {
 		case "tag":
 			tag = true
 		default:
-			errout("Unexpected column name found: " + name)
+			ERROR("Unexpected column name found: " + name)
 		}
 	}
 	if !title {
@@ -55,35 +55,35 @@ func FixTodoTable(defaultPriority int) {
 		if err != nil {
 			panic(err)
 		}
-		info("Added missing title column")
+		INFO("Added missing title column")
 	}
 	if !content {
 		_, err := todoDB.Exec(`ALTER TABLE todo ADD COLUMN content VARCHAR NOT NULL;`)
 		if err != nil {
 			panic(err)
 		}
-		info("Added missing content column")
+		INFO("Added missing content column")
 	}
 	if !time {
 		_, err := todoDB.Exec(`ALTER TABLE todo ADD COLUMN time INTEGER NOT NULL;`)
 		if err != nil {
 			panic(err)
 		}
-		info("Added missing time column")
+		INFO("Added missing time column")
 	}
 	if !priority {
 		_, err := todoDB.Exec(`ALTER TABLE todo ADD COLUMN priority INTEGER NOT NULL;`)
 		if err != nil {
 			panic(err)
 		}
-		info("Added missing priority column")
+		INFO("Added missing priority column")
 	}
 	if !tag {
 		_, err := todoDB.Exec(`ALTER TABLE todo ADD COLUMN tag VARCHAR NOT NULL DEFAULT "NONE";`)
 		if err != nil {
 			panic(err)
 		}
-		info("Added missing tag column")
+		INFO("Added missing tag column")
 	}
 	DefaultNullPriorities(defaultPriority)
 }
@@ -95,11 +95,11 @@ func DefaultNullPriorities(defaultPriority int) {
 	todoDB := openTodoDB()
 	defer todoDB.Close()
 
-	info("Setting possible null priority values to default value")
+	INFO("Setting possible null priority values to default value")
 	sqlStatement := `UPDATE todo SET priority = $1 WHERE priority IS NULL;`
 	_, err := todoDB.Exec(sqlStatement, defaultPriority)
 	if err != nil {
-		errout("Failed to edit todo content")
+		ERROR("Failed to edit todo content")
 		panic(err)
 	}
 }
@@ -109,8 +109,8 @@ func UsageFix() {
     Use 'todo fix --help' to see more
 `)
 }
-func HelpFix() {
-	const helpmsg = `Help for todo fix:
+
+const HelpFix = `Help for todo fix:
     Available arguments:
         --help, -h   | Show this message
 
@@ -118,6 +118,3 @@ func HelpFix() {
     changes to the program and its databases. It checks
     whether a local todo list has all the required columns,
     and adds them if they don't exist.`
-
-	PrintHelpMSG(helpmsg)
-}

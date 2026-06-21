@@ -7,7 +7,7 @@ func RelocateTodo(ask_rm_on_check bool) {
 	sqlStatement := `SELECT COUNT(*) from locations WHERE location = ?;`
 	res, err := MasterDB.Query(sqlStatement, path)
 	if err != nil {
-		errout("Failed checking entry in database!")
+		ERROR("Failed checking entry in database!")
 		panic(err)
 	}
 	defer res.Close()
@@ -16,15 +16,15 @@ func RelocateTodo(ask_rm_on_check bool) {
 	for res.Next() {
 		err = res.Scan(&content)
 		if err != nil {
-			errout("Failed scanning existing entry content")
+			ERROR("Failed scanning existing entry content")
 			panic(err)
 		}
 	}
 	if content < 1 {
-		info("Adding local todo to location list")
+		INFO("Adding local todo to location list")
 		addToMasterDB(path)
 	} else {
-		info("Todo location already exists in the list")
+		INFO("Todo location already exists in the list")
 	}
 	CheckTodos(ask_rm_on_check)
 }
@@ -35,8 +35,8 @@ func UsageRelocate() {
     Use 'todo relocate --help' to see more
 `)
 }
-func HelpRelocate() {
-	const helpmsg = `Help for todo relocate:
+
+const HelpRelocate = `Help for todo relocate:
     Available arguments:
         --help, -h  | Show this message
 
@@ -46,6 +46,3 @@ func HelpRelocate() {
     locations.
 
     Useful when renaming directories etc.`
-
-	PrintHelpMSG(helpmsg)
-}

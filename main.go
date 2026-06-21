@@ -14,7 +14,7 @@ import (
 func main() {
 	configDir, err := os.UserHomeDir()
 	if err != nil {
-		errout("Failed to get config directory")
+		cmd.ERROR("Failed to get config directory")
 		return
 	}
 
@@ -25,7 +25,7 @@ func main() {
 	configFile := configDir + "/.config/todo/config.toml"
 	_, err = toml.DecodeFile(configFile, &conf)
 	if err != nil {
-		errout("Failed to get configs, using defaults")
+		cmd.ERROR("Failed to get configs, using defaults")
 		conf = cmd.DefaultConfig()
 	}
 
@@ -55,13 +55,13 @@ func handleParsing(conf cmd.Config) {
 	switch args[0] {
 	case "fix":
 		if !cmd.TodoExists() {
-			errout("No todo exists in current directory!")
+			cmd.ERROR("No todo exists in current directory!")
 			return
 		}
 
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
-			errout("Bad Arguments")
+			cmd.ERROR("Bad Arguments")
 			cmd.UsageFix()
 			os.Exit(1)
 		}
@@ -69,7 +69,7 @@ func handleParsing(conf cmd.Config) {
 		for _, flag := range parsedArgs.Flags {
 			switch flag {
 			case "h", "help":
-				cmd.HelpFix()
+				cmd.PrintHelpMSG(cmd.HelpFix)
 				return
 			}
 		}
@@ -77,7 +77,7 @@ func handleParsing(conf cmd.Config) {
 		cmd.FixTodoTable(conf.Priority.Default)
 	case "set":
 		if !cmd.TodoExists() {
-			errout("No todo exists in current directory!")
+			cmd.ERROR("No todo exists in current directory!")
 			return
 		}
 
@@ -88,7 +88,7 @@ func handleParsing(conf cmd.Config) {
 		flags.Valued_flags = append(flags.Valued_flags, additionalValued...)
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
-			errout("Bad Arguments")
+			cmd.ERROR("Bad Arguments")
 			cmd.UsageSet()
 			os.Exit(1)
 		}
@@ -100,7 +100,7 @@ func handleParsing(conf cmd.Config) {
 		for _, flag := range parsedArgs.Flags {
 			switch flag {
 			case "h", "help":
-				cmd.HelpSet()
+				cmd.PrintHelpMSG(cmd.HelpSet)
 				return
 			}
 		}
@@ -110,7 +110,7 @@ func handleParsing(conf cmd.Config) {
 				title := strings.Join(parsedArgs.NormalStr, " ")
 				newPrio, err := strconv.Atoi(flag[1])
 				if err != nil {
-					errout("Invalid number for flag priority")
+					cmd.ERROR("Invalid number for flag priority")
 					os.Exit(1)
 				}
 				cmd.EditPriority(title, newPrio)
@@ -123,7 +123,7 @@ func handleParsing(conf cmd.Config) {
 		flags.Flags = append(flags.Flags, "no-confirm")
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
-			errout("Bad Arguments")
+			cmd.ERROR("Bad Arguments")
 			cmd.UsageCheck()
 			os.Exit(1)
 		}
@@ -131,7 +131,7 @@ func handleParsing(conf cmd.Config) {
 		for _, flag := range parsedArgs.Flags {
 			switch flag {
 			case "h", "help":
-				cmd.HelpCheck()
+				cmd.PrintHelpMSG(cmd.HelpCheck)
 				return
 			case "no-confirm":
 				conf.General.Ask_rm_on_check = false
@@ -143,7 +143,7 @@ func handleParsing(conf cmd.Config) {
 	case "init":
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
-			errout("Bad Arguments")
+			cmd.ERROR("Bad Arguments")
 			cmd.UsageInit()
 			os.Exit(1)
 		}
@@ -151,7 +151,7 @@ func handleParsing(conf cmd.Config) {
 		for _, flag := range parsedArgs.Flags {
 			switch flag {
 			case "h", "help":
-				cmd.HelpInit()
+				cmd.PrintHelpMSG(cmd.HelpInit)
 				return
 			}
 		}
@@ -169,7 +169,7 @@ func handleParsing(conf cmd.Config) {
 		flags.Optional_value = append(flags.Optional_value, "auto-init")
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
-			errout("Bad Arguments")
+			cmd.ERROR("Bad Arguments")
 			cmd.UsageAdd()
 			os.Exit(1)
 		}
@@ -178,7 +178,7 @@ func handleParsing(conf cmd.Config) {
 		for _, flag := range parsedArgs.Flags {
 			switch flag {
 			case "h", "help":
-				cmd.HelpAdd()
+				cmd.PrintHelpMSG(cmd.HelpAdd)
 				return
 			case "e", "empty":
 				no_ask_content = true
@@ -193,7 +193,7 @@ func handleParsing(conf cmd.Config) {
 			case "p", "priority":
 				newPrio, err := strconv.Atoi(flag[1])
 				if err != nil {
-					errout("Priority value must be integer")
+					cmd.ERROR("Priority value must be integer")
 					return
 				}
 				conf.Priority.Default = newPrio
@@ -205,7 +205,7 @@ func handleParsing(conf cmd.Config) {
 				case "false":
 					conf.Add.Auto_init = false
 				default:
-					errout("Bad value for auto-init: " + flag[1])
+					cmd.ERROR("Bad value for auto-init: " + flag[1])
 					return
 				}
 			case "t", "tag":
@@ -234,7 +234,7 @@ func handleParsing(conf cmd.Config) {
 		flags.Flags = append(flags.Flags, additionalFlags...)
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
-			errout("Bad Arguments")
+			cmd.ERROR("Bad Arguments")
 			cmd.UsageList()
 			os.Exit(1)
 		}
@@ -248,7 +248,7 @@ func handleParsing(conf cmd.Config) {
 			case "p", "pager":
 				pagerList = false
 			case "h", "help":
-				cmd.HelpList()
+				cmd.PrintHelpMSG(cmd.HelpList)
 				return
 			}
 		}
@@ -269,7 +269,7 @@ func handleParsing(conf cmd.Config) {
 
 	case "rm", "remove", "done":
 		if !cmd.TodoExists() {
-			errout("No todo exists in current directory!")
+			cmd.ERROR("No todo exists in current directory!")
 			return
 		}
 
@@ -280,7 +280,7 @@ func handleParsing(conf cmd.Config) {
 		flags.Flags = append(flags.Flags, additionalFlags...)
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
-			errout("Bad Arguments")
+			cmd.ERROR("Bad Arguments")
 			cmd.UsageRm()
 			os.Exit(1)
 		}
@@ -294,7 +294,7 @@ func handleParsing(conf cmd.Config) {
 			case "t", "tag":
 				rmTag = true
 			case "h", "help":
-				cmd.HelpRm()
+				cmd.PrintHelpMSG(cmd.HelpRm)
 				return
 			}
 		}
@@ -304,7 +304,7 @@ func handleParsing(conf cmd.Config) {
 
 	case "edit":
 		if !cmd.TodoExists() {
-			errout("No todo exists in current directory!")
+			cmd.ERROR("No todo exists in current directory!")
 			return
 		}
 
@@ -312,7 +312,7 @@ func handleParsing(conf cmd.Config) {
 		flags.Flags = append(flags.Flags, additionalFlags...)
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
-			errout("Bad Arguments")
+			cmd.ERROR("Bad Arguments")
 			cmd.UsageRm()
 			os.Exit(1)
 		}
@@ -322,10 +322,10 @@ func handleParsing(conf cmd.Config) {
 			case "k", "keep":
 				conf.Edit.Keep_content = !conf.Edit.Keep_content
 			case "h", "help":
-				cmd.HelpEdit()
+				cmd.PrintHelpMSG(cmd.HelpEdit)
 				return
 			default:
-				errout("Bad Arguments")
+				cmd.ERROR("Bad Arguments")
 				cmd.UsageEdit()
 				os.Exit(1)
 			}
@@ -336,7 +336,7 @@ func handleParsing(conf cmd.Config) {
 	case "relocate":
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 		if err != nil {
-			errout("Bad Arguments")
+			cmd.ERROR("Bad Arguments")
 			cmd.UsageRelocate()
 			os.Exit(1)
 		}
@@ -344,12 +344,12 @@ func handleParsing(conf cmd.Config) {
 		for _, flag := range parsedArgs.Flags {
 			switch flag {
 			case "h", "help":
-				cmd.HelpRelocate()
+				cmd.PrintHelpMSG(cmd.HelpRelocate)
 				return
 			}
 		}
 		if !cmd.TodoExists() {
-			errout("No todo exists in current directory!")
+			cmd.ERROR("No todo exists in current directory!")
 			return
 		}
 		cmd.RelocateTodo(conf.General.Ask_rm_on_check)
@@ -357,7 +357,7 @@ func handleParsing(conf cmd.Config) {
 	default:
 		mainFlags, err := flagger.ParseFlags(args, flags)
 		if err != nil || (len(mainFlags.Flags) < 1 && len(mainFlags.ValueFlags) < 1) {
-			errout("Bad arguments")
+			cmd.ERROR("Bad arguments")
 			mainUsage()
 			os.Exit(1)
 		}
@@ -371,11 +371,6 @@ func handleParsing(conf cmd.Config) {
 		}
 	}
 }
-
-// Status printing helpers
-func ok(msg string)     { fmt.Println("[\033[32m OK \033[0m] ", msg) }
-func info(msg string)   { fmt.Println("[\033[35m INFO \033[0m] ", msg) }
-func errout(msg string) { fmt.Println("[\033[31m ERROR \033[0m] ", msg) }
 
 // NOTE: Main help and usage functions
 func mainUsage() {
