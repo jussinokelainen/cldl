@@ -1,4 +1,6 @@
 APP := todo
+LDFLAGS := -ldflags "-w -s -X main.version=stripped -buildid= -extldflags=static"
+EXTFLAGS := -buildvcs=false -a -installsuffix cgo -trimpath
 
 # This makefile and program will probably not work as intended
 # if directories and personal project stuff etc aren't the same
@@ -10,7 +12,8 @@ build:
 	@mkdir -p bin
 
 	@printf "\e[36m==> \e[0mCompiling binaries...\n"
-	go build -o ./bin/$(APP) ./
+	go build -o ./bin/$(APP)-debug ./
+	go build $(LDFLAGS) $(EXTFLAGS) -o ./bin/$(APP) ./
 
 	@printf "[\e[32m OK \e[0m] Build complete\n"
 
