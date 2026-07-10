@@ -265,10 +265,10 @@ func CreateMasterDB() {
 		ERROR("Getting homedir failed!")
 		panic(err)
 	}
-	masterDbDIR := homedir + "/.sqlite/todo"
+	masterDbDIR := homedir + "/.local/share/todo"
 	err = os.MkdirAll(masterDbDIR, 0755)
 	if err != nil {
-		ERROR("Creating .sqlite/todo directory failed!")
+		ERROR("Creating ~/.local/share/todo directory failed!")
 		panic(err)
 	}
 
