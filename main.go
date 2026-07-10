@@ -53,6 +53,29 @@ func handleParsing(conf cmd.Config) {
 	flags.Optional_value = []string{}
 
 	switch args[0] {
+	case "rename":
+		if !cmd.TodoExists() {
+			cmd.ERROR("No todo exists in current directory!")
+			return
+		}
+
+		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
+		if err != nil {
+			cmd.ERROR("Bad Arguments")
+			cmd.UsageRename()
+			os.Exit(1)
+		}
+
+		for _, flag := range parsedArgs.Flags {
+			switch flag {
+			case "h", "help":
+				cmd.PrintHelpMSG(cmd.HelpRename)
+				return
+			}
+		}
+
+		title := strings.Join(parsedArgs.NormalStr, " ")
+		cmd.RenameTodo(title, conf.Colors)
 	case "fix":
 		if !cmd.TodoExists() {
 			cmd.ERROR("No todo exists in current directory!")
@@ -395,6 +418,7 @@ func mainHelp() {
       rm, remove, done     | Remove todo list entry or entire list
       edit                 | Edit an existing todo entry
       fix                  | Fixes the todo table, useful after breaking changes
+      rename               | Change the title of a todo entry
 
   For more info about commands, use 'todo <command> --help'
 

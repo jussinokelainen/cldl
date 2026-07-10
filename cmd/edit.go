@@ -59,9 +59,7 @@ func changeEntryContent(newContent string, title string) {
 		panic(err)
 	}
 
-	fmt.Print("\n")
 	OK("Successfully changed content for " + title)
-
 }
 
 // NOTE: Edit command help and usage functions
