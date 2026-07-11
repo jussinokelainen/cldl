@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -103,7 +104,10 @@ func formatListItems(todoSlice []TodoStruct, timeZone *time.Location, urgentPrio
 			fmt.Fprintf(&listString, "%s║  %s  ║\033[0m\n", borderColor, addSpace(maxWidth))
 		}
 
-		// Print tag, timestamp and priority level
+		// Print location, tag, timestamp and priority level
+		if row.File != "NO_FILE" {
+			listString.WriteString(makeLocationLine(row.File, row.Line, wipColor))
+		}
 		if row.Tag != "NONE" {
 			listString.WriteString(makeTagLine(row.Tag))
 		}
@@ -123,6 +127,27 @@ func formatListItems(todoSlice []TodoStruct, timeZone *time.Location, urgentPrio
 		current_box++
 	}
 	return listString.String()
+}
+
+func makeLocationLine(file_path string, file_line int, Color string) string {
+	var titleStr strings.Builder
+	loc_string := file_path + ":" + strconv.Itoa(file_line)
+
+	padLeft, padRight := getSidePadding(loc_string)
+	titleSize := utf8.RuneCountInString(loc_string)
+
+	padContentToCenter(&titleStr, maxWidth+2)
+	fmt.Fprintf(&titleStr, "%s║%s", borderColor, addSpace(padLeft+2))
+	fmt.Fprintf(&titleStr, "%s%s", Color, loc_string)
+	fmt.Fprintf(&titleStr, "%s%s║\n", borderColor, addSpace(padRight+2))
+
+	padContentToCenter(&titleStr, maxWidth+2)
+	fmt.Fprintf(&titleStr, "%s║%s", borderColor, addSpace(padLeft))
+	fmt.Fprintf(&titleStr, "%s══%s══", Color, addLine(titleSize))
+	fmt.Fprintf(&titleStr, "%s%s║\n", borderColor, addSpace(padRight))
+
+	return titleStr.String()
+
 }
 
 func makeTitleLine(title string, priorityColor string) string {
@@ -290,7 +315,9 @@ func getTodoSlice(filterByTag ListTag, tag string) ([]TodoStruct, error) {
 				content,
 				time,
 				priority,
-				tag
+				tag,
+				file,
+				line
 			FROM
 				todo
 			WHERE
@@ -306,7 +333,9 @@ func getTodoSlice(filterByTag ListTag, tag string) ([]TodoStruct, error) {
 				content,
 				time,
 				priority,
-				tag
+				tag,
+				file,
+				line
 			FROM
 				todo
 			WHERE
@@ -322,7 +351,9 @@ func getTodoSlice(filterByTag ListTag, tag string) ([]TodoStruct, error) {
 				content,
 				time,
 				priority,
-				tag
+				tag,
+				file,
+				line
 			FROM
 				todo
 			ORDER BY
@@ -340,7 +371,7 @@ func getTodoSlice(filterByTag ListTag, tag string) ([]TodoStruct, error) {
 
 	for rows.Next() {
 		var row TodoStruct
-		err = rows.Scan(&row.Title, &row.Content, &row.Time, &row.Priority, &row.Tag)
+		err = rows.Scan(&row.Title, &row.Content, &row.Time, &row.Priority, &row.Tag, &row.File, &row.Line)
 		if err != nil {
 			ERROR("Failed scanning entry content")
 			panic(err)

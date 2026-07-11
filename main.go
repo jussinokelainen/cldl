@@ -105,6 +105,8 @@ func handleParsing(conf cmd.Config) {
 		}
 
 		additionalValued := []string{
+			"f", "file",
+			"l", "line",
 			"p", "priority",
 			"t", "tag",
 		}
@@ -129,6 +131,22 @@ func handleParsing(conf cmd.Config) {
 		}
 		for _, flag := range parsedArgs.ValueFlags {
 			switch flag[0] {
+			case "f", "file":
+				if cmd.File_exists(flag[1]) || flag[1] == "NO_FILE" {
+					title := strings.Join(parsedArgs.NormalStr, " ")
+					cmd.Set_filepath_to_entry(title, flag[1])
+				} else {
+					cmd.ERROR("Specified file not found")
+					os.Exit(1)
+				}
+			case "l", "line":
+				linenum, err := strconv.Atoi(flag[1])
+				if err != nil {
+					cmd.ERROR("Invalid number for line number")
+					os.Exit(1)
+				}
+				title := strings.Join(parsedArgs.NormalStr, " ")
+				cmd.Set_fileline_to_entry(title, linenum)
 			case "p", "priority":
 				title := strings.Join(parsedArgs.NormalStr, " ")
 				newPrio, err := strconv.Atoi(flag[1])
@@ -184,6 +202,8 @@ func handleParsing(conf cmd.Config) {
 	case "add":
 		additionalFlags := []string{"e", "empty"}
 		additionalValued := []string{
+			"f", "file",
+			"l", "line",
 			"p", "priority",
 			"t", "tag",
 		}
@@ -210,9 +230,27 @@ func handleParsing(conf cmd.Config) {
 			}
 		}
 
+		var data cmd.AddInfo
+		data.File_path = "NO_FILE"
+		data.File_line = 1
+
 		tag := "NONE"
 		for _, flag := range parsedArgs.ValueFlags {
 			switch flag[0] {
+			case "f", "file":
+				if cmd.File_exists(flag[1]) {
+					data.File_path = flag[1]
+				} else {
+					cmd.ERROR("Specified file not found")
+					os.Exit(1)
+				}
+			case "l", "line":
+				linenum, err := strconv.Atoi(flag[1])
+				if err != nil {
+					cmd.ERROR("Invalid number for line number")
+					os.Exit(1)
+				}
+				data.File_line = linenum
 			case "p", "priority":
 				newPrio, err := strconv.Atoi(flag[1])
 				if err != nil {
@@ -236,7 +274,6 @@ func handleParsing(conf cmd.Config) {
 			}
 		}
 
-		var data cmd.AddInfo
 		data.Priority = conf.Priority.Default
 		data.Tag = tag
 		data.Empty_content = no_ask_content
@@ -299,6 +336,7 @@ func handleParsing(conf cmd.Config) {
 		additionalFlags := []string{
 			"a", "all",
 			"t", "tag",
+			"f", "file",
 		}
 		flags.Flags = append(flags.Flags, additionalFlags...)
 		parsedArgs, err := flagger.ParseFlags(args[1:], flags)
@@ -312,6 +350,11 @@ func handleParsing(conf cmd.Config) {
 		rmTag := false
 		for _, flag := range parsedArgs.Flags {
 			switch flag {
+			case "f", "file":
+				title := strings.Join(parsedArgs.NormalStr, " ")
+				cmd.Set_filepath_to_entry(title, "NO_FILE")
+				cmd.Set_fileline_to_entry(title, 1)
+				return
 			case "a", "all":
 				rmAll = true
 			case "t", "tag":

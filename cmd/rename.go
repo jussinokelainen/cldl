@@ -15,7 +15,7 @@ func RenameTodo(oldTitle string, colors ColorConf) {
 		return
 	}
 
-	_, err := getIfEntryExists(oldTitle)
+	_, err := get_content_if_entry_exists(oldTitle)
 	if err != nil {
 		ERROR("No todo list entry with title:", oldTitle)
 		panic(err)

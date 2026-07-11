@@ -120,6 +120,7 @@ const HelpRm = `Help for todo rm / done:
         --all, -a   | Fully remove todo list from current directory
         --tag, -t   | Remove the tag from an entry. If used together with
                     | --all, clears all tags in current list
+        --file, -f  | Clear the file set for an entry
 
     Rm and done are the same command with a different name.
     Use 'todo rm <title>' where <title> is the title

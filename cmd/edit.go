@@ -16,7 +16,7 @@ func EditTodo(title string, conf EditConf, colors ColorConf) {
 		return
 	}
 
-	content, err := getIfEntryExists(title)
+	content, err := get_content_if_entry_exists(title)
 	if err != nil {
 		ERROR("No todo list entry found with title " + title)
 		return

@@ -13,8 +13,7 @@ build:
 
 	@printf "\e[36m==> \e[0mCompiling binaries...\n"
 	go build -o ./bin/$(APP) ./
-
-	@printf "[\e[32m OK \e[0m] Build complete\n"
+	@printf "[\e[32m OK \e[0m] Debug Build complete\n"
 
 # Remove all files created by the program
 clean:
@@ -24,8 +23,11 @@ clean:
 	@printf "[\e[32m OK \e[0m] Removing complete\n"
 
 install: build
-	@printf "\e[32m==> \e[0mCopying required files and binaries...\n"
+	@printf "\e[36m==> \e[0mCompiling binaries...\n"
 	go build $(LDFLAGS) $(EXTFLAGS) -o ./bin/$(APP)-release ./
+	@printf "[\e[32m OK \e[0m] Release Build complete\n"
+
+	@printf "\e[32m==> \e[0mCopying required files and binaries...\n"
 	cp ./bin/$(APP)-release ~/bin/$(APP)
 
 	@printf "[\e[32m OK \e[0m] Installing complete\n"

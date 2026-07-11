@@ -23,7 +23,9 @@ func InitTodo() {
         content VARCHAR NOT NULL,
         time INTEGER NOT NULL,
         priority INTEGER NOT NULL,
-        tag VARCHAR NOT NULL
+        tag VARCHAR NOT NULL,
+		file VARCHAR NOT NULL,
+		line INTEGER NOT NULL
         );`)
 	if err != nil {
 		ERROR("Creating new todo failed!")

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -13,6 +14,8 @@ type AddInfo struct {
 	Priority      int
 	Tag           string
 	Empty_content bool
+	File_path     string
+	File_line     int
 }
 
 // Adds a new todo with a title given as an argument, if title is not duplicate
@@ -39,7 +42,7 @@ func AddTodo(title string, conf AddConf, data AddInfo) {
 		UsageAdd()
 		return
 	}
-	_, exists := getIfEntryExists(title)
+	_, exists := get_content_if_entry_exists(title)
 	if exists == nil {
 		ERROR("Failed to add new todo. Please select a unique title.")
 		return
@@ -75,12 +78,22 @@ func AddTodo(title string, conf AddConf, data AddInfo) {
 		data.Priority = askPriority()
 	}
 
-	sqlStatement := `INSERT INTO todo(title, content, time, priority, tag) VALUES($1, $2, $3, $4, $5);`
-	_, err := todoDB.Exec(sqlStatement, title, content, time, data.Priority, data.Tag)
+	sqlStatement := `INSERT INTO todo(title, content, time, priority, tag, file, line) VALUES($1, $2, $3, $4, $5, $6, $7);`
+	_, err := todoDB.Exec(sqlStatement, title, content, time, data.Priority, data.Tag, data.File_path, data.File_line)
 	if err != nil {
 		ERROR("Error adding new todo, executing database query failed")
 		panic(err)
 	}
+
+	ext := filepath.Ext(data.File_path)
+	comment_pf, ok := lineComments[ext]
+	if !ok {
+		comment_pf = "#"
+	}
+
+	comment_line := fmt.Sprint(comment_pf, " TODO-ENTRY: title: ", title, ", priority: ", data.Priority, ", tag: ", data.Tag)
+	insert_line(data.File_path, (data.File_line - 1), comment_line)
+
 	OK("Successfully added new todo " + title)
 }
 
@@ -144,6 +157,8 @@ const HelpAdd = `Help for todo add:
                        | asked later regardless of ask_priority
         --tag, -t      | Set the tag for a new entry
         --empty, -e    | Adds todo without asking for content
+        --file, -f     | Specify the file connected to the entry
+        --line, -l     | Specify the line in the file
 
     Use 'todo add <title>' where <title> is what you want as a title for the
     new todo entry. Titles can be entered with spaces in them without having

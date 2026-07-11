@@ -11,6 +11,35 @@ import (
 	"strings"
 )
 
+var lineComments = map[string]string{
+	".go":    "//",
+	".c":     "//",
+	".cpp":   "//",
+	".h":     "//",
+	".hpp":   "//",
+	".rs":    "//",
+	".js":    "//",
+	".ts":    "//",
+	".java":  "//",
+	".kt":    "//",
+	".swift": "//",
+
+	".py":   "#",
+	".sh":   "#",
+	".bash": "#",
+	".zsh":  "#",
+	".yaml": "#",
+	".yml":  "#",
+	".toml": "#",
+	".rb":   "#",
+
+	".lua": "--",
+	".sql": "--",
+
+	".tex": "%",
+	".vim": "\"",
+}
+
 type ListTag int
 
 const (
@@ -39,6 +68,8 @@ type TodoStruct struct {
 	Time     int64  `json:"time"`
 	Priority int64  `json:"priority"`
 	Tag      string `json:"tag"`
+	File     string `json:"file"`
+	Line     int    `json:"line"`
 }
 
 /*
@@ -305,7 +336,7 @@ func removeFromMasterDB(todoPath string) {
 }
 
 // Get the existing content of a todo entry if it exists, returns an error if it doesn't exist
-func getIfEntryExists(title string) (string, error) {
+func get_content_if_entry_exists(title string) (string, error) {
 	todoDB := openTodoDB()
 	defer todoDB.Close()
 
@@ -352,12 +383,37 @@ func askYesNo(question string) bool {
 	}
 }
 
+func insert_line(filename string, lineNum int, newLine string) error {
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+
+	lines := strings.Split(string(data), "\n")
+
+	if lineNum < 0 {
+		lineNum = 0
+	}
+	if lineNum > len(lines) {
+		lineNum = len(lines)
+	}
+
+	lines = append(lines[:lineNum], append([]string{newLine}, lines[lineNum:]...)...)
+
+	return os.WriteFile(filename, []byte(strings.Join(lines, "\n")), 0644)
+}
+
 // Checks whether a local todo exists in the current directory,
 // might give an erroneus result if some other file is named
 // exactly as the todo database should be,
 // in which case errors that might come are a skill issue
 func TodoExists() bool {
-	if _, err := os.Stat(GetDbPath()); os.IsNotExist(err) {
+	return File_exists(GetDbPath())
+}
+
+// Check whether given file exists
+func File_exists(path string) bool {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return false
 	}
 	return true
