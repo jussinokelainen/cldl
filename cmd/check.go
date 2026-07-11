@@ -44,12 +44,12 @@ func CheckTodos(confirm_rm bool) {
 
 // NOTE: Check command help and usage functions
 func UsageCheck() {
-	fmt.Print(`Usage: todo check [-h | --help] [--no-confirm]
-    Use 'todo check --help' to see more
+	fmt.Print(`Usage: cldl check [-h | --help] [--no-confirm]
+    Use 'cldl check --help' to see more
 `)
 }
 
-const HelpCheck = `Help for todo check:
+const HelpCheck = `Help for cldl check:
     Available arguments:
         --help, -h   | Show this message
         --no-confirm | Don't ask for confirmation before deleting

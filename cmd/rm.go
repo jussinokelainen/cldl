@@ -109,19 +109,19 @@ func removeAllData() {
 
 // NOTE: Remove command help and usage functions
 func UsageRm() {
-	fmt.Print(`Usage: todo rm [-h | --help] [-a | --all] <title>
-    Use 'todo rm --help' to see more
+	fmt.Print(`Usage: cldl rm [-h | --help] [-a | --all] <title>
+    Use 'cldl rm --help' to see more
 `)
 }
 
-const HelpRm = `Help for todo rm / done:
+const HelpRm = `Help for cldl rm / done:
     Available arguments:
-        --help, -h  | Show help for todo rm
-        --all, -a   | Fully remove todo list from current directory
+        --help, -h  | Show help for cldl rm
+        --all, -a   | Fully remove cldl list from current directory
         --tag, -t   | Remove the tag from an entry. If used together with
                     | --all, clears all tags in current list
         --file, -f  | Clear the file set for an entry
 
     Rm and done are the same command with a different name.
-    Use 'todo rm <title>' where <title> is the title
+    Use 'cldl rm <title>' where <title> is the title
     for the list entry to be deleted.`

@@ -1,0 +1,28 @@
+# Maintainer: Jussi Nokelainen <jussinoke@gmail.com>
+pkgname='cldl'
+pkgver=1
+pkgrel=1
+pkgdesc='Directory based cli todo lists'
+arch=('x86_64')
+url="https://github.com/jussinokelainen/cldl"
+license=('MIT')
+depends=('glibc' 'less')
+makedepends=('git' 'go')
+source=("$pkgname::git://github.com/jussinokelainen/cldl.git")
+options=('!debug')
+sha256sums=('SKIP')
+
+pkgver() {
+	cd "$pkgname"
+	printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+build() {
+	cd "$pkgname"
+	make release
+}
+
+package() {
+	cd "$pkgname"
+	install -Dm755 ./bin/$pkgname "$pkgdir/usr/bin/$pkgname"
+}

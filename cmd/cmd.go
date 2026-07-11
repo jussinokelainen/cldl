@@ -275,7 +275,7 @@ func GetDbPath() string {
 		ERROR("Getting db path failed!")
 		panic(err)
 	}
-	return cwd + "/.todoApp.db"
+	return cwd + "/.cldl.db"
 }
 
 // Open a connection to a local database, returns a pointer to it
@@ -296,14 +296,14 @@ func CreateMasterDB() {
 		ERROR("Getting homedir failed!")
 		panic(err)
 	}
-	masterDbDIR := homedir + "/.local/share/todo"
+	masterDbDIR := homedir + "/.local/share/cldl"
 	err = os.MkdirAll(masterDbDIR, 0755)
 	if err != nil {
-		ERROR("Creating ~/.local/share/todo directory failed!")
+		ERROR("Creating ~/.local/share/cldl directory failed!")
 		panic(err)
 	}
 
-	MasterDB, err = sql.Open("sqlite", masterDbDIR+"/.todo.db")
+	MasterDB, err = sql.Open("sqlite", masterDbDIR+"/.cldl.db")
 	if err != nil {
 		ERROR("Opening master database failed!")
 		panic(err)

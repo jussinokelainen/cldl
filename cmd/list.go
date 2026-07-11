@@ -417,12 +417,12 @@ func addSpace(length int) string {
 
 // NOTE: List command help and usage functions
 func UsageList() {
-	fmt.Print(`Usage: todo list [-h | --help] [-a | --all] [-p | --pager]
-    Use 'todo list --help' to see more
+	fmt.Print(`Usage: cldl list [-h | --help] [-a | --all] [-p | --pager]
+    Use 'cldl list --help' to see more
 `)
 }
 
-const HelpList = `Help for todo list:
+const HelpList = `Help for cldl list:
     Available arguments:
         --help, -h   | Show this message
         --all, -a    | List all locations with todo's

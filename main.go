@@ -1,12 +1,12 @@
 package main
 
 import (
+	"cldl/cmd"
+	"cldl/flagger"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
-	"todo/cmd"
-	"todo/flagger"
 
 	"github.com/BurntSushi/toml"
 )
@@ -22,7 +22,7 @@ func main() {
 	defer cmd.MasterDB.Close()
 
 	conf := cmd.DefaultConfig()
-	configFile := configDir + "/.config/todo/config.toml"
+	configFile := configDir + "/.config/cldl/config.toml"
 	_, err = toml.DecodeFile(configFile, &conf)
 	if err != nil {
 		cmd.ERROR("Failed to get configs, using defaults")
@@ -440,17 +440,17 @@ func handleParsing(conf cmd.Config) {
 
 // NOTE: Main help and usage functions
 func mainUsage() {
-	fmt.Print(`Usage: todo [-h | --help] <command> [<args>]
-    Use todo --help to see available commands
+	fmt.Print(`Usage: cldl [-h | --help] <command> [<args>]
+    Use cldl --help to see available commands
 `)
 }
 func mainHelp() {
-	const helpmsg = `Help for todo:
+	const helpmsg = `Help for cldl:
   Flags:
       --help, -h           | Show this message
 
   Available commands:
-      set                  | Set some values of todo entries, see todo set --help
+      set                  | Set some values of todo entries, see cldl set --help
       init                 | Create new todo in current directory
       check                | Check all locations saved by the program whether
                            | the list actually exists. Also checks that a local
@@ -463,7 +463,7 @@ func mainHelp() {
       fix                  | Fixes the todo table, useful after breaking changes
       rename               | Change the title of a todo entry
 
-  For more info about commands, use 'todo <command> --help'
+  For more info about commands, use 'cldl <command> --help'
 
   Todo application that creates local per-directory todo-lists with sqlite
   List entry titles are case-insensitive when editing or removing them,
@@ -474,7 +474,7 @@ func mainHelp() {
   If a panic error occurs, most likely something went wrong when interacting
   with the sqlite databases (although it is not the only way panics can occur)
 
-  Configuration expect a file '~/.config/todo/config.toml'.
+  Configuration expect a file '~/.config/cldl/config.toml'.
 
   Default configs:
     [general]

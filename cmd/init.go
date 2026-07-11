@@ -39,12 +39,12 @@ func InitTodo() {
 
 // NOTE: Init help and usage functions
 func UsageInit() {
-	fmt.Print(`Default usage: todo init [-h | --help]
-    Use 'todo init --help' to see more
+	fmt.Print(`Default usage: cldl init [-h | --help]
+    Use 'cldl init --help' to see more
 `)
 }
 
-const HelpInit = `Help for todo init:
+const HelpInit = `Help for cldl init:
     Available arguments:
         --help, -h  | Show this message
 

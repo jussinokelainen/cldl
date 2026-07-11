@@ -91,7 +91,7 @@ func AddTodo(title string, conf AddConf, data AddInfo) {
 		comment_pf = "#"
 	}
 
-	comment_line := fmt.Sprint(comment_pf, " TODO-ENTRY: title: ", title, ", priority: ", data.Priority, ", tag: ", data.Tag)
+	comment_line := fmt.Sprint(comment_pf, " CLDL-ENTRY: title: ", title, ", priority: ", data.Priority, ", tag: ", data.Tag)
 	insert_line(data.File_path, (data.File_line - 1), comment_line)
 
 	OK("Successfully added new todo " + title)
@@ -137,12 +137,12 @@ func askIfInit() bool {
 
 // NOTE: Add command help and usage functions
 func UsageAdd() {
-	fmt.Print(`Usage: todo add [-h | --help] [--auto-init] [-t | --tag] [-p | --priority] <title>
-    Use 'todo add --help' to see more
+	fmt.Print(`Usage: cldl add [-h | --help] [--auto-init] [-t | --tag] [-p | --priority] <title>
+    Use 'cldl add --help' to see more
 `)
 }
 
-const HelpAdd = `Help for todo add:
+const HelpAdd = `Help for cldl add:
     Available arguments:
         --help, -h     | Show this message
         --auto-init    | Automatically initialize a new todo when adding
@@ -160,7 +160,7 @@ const HelpAdd = `Help for todo add:
         --file, -f     | Specify the file connected to the entry
         --line, -l     | Specify the line in the file
 
-    Use 'todo add <title>' where <title> is what you want as a title for the
+    Use 'cldl add <title>' where <title> is what you want as a title for the
     new todo entry. Titles can be entered with spaces in them without having
     to use quotes
 

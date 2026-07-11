@@ -125,12 +125,12 @@ func DefaultNullPriorities(defaultPriority int) {
 }
 
 func UsageFix() {
-	fmt.Print(`Usage: todo fix [-h | --help]
-    Use 'todo fix --help' to see more
+	fmt.Print(`Usage: cldl fix [-h | --help]
+    Use 'cldl fix --help' to see more
 `)
 }
 
-const HelpFix = `Help for todo fix:
+const HelpFix = `Help for cldl fix:
     Available arguments:
         --help, -h   | Show this message
 

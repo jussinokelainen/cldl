@@ -31,16 +31,16 @@ func RelocateTodo(ask_rm_on_check bool) {
 
 // NOTE: Init help and usage functions
 func UsageRelocate() {
-	fmt.Print(`Default usage: todo relocate [-h | --help]
-    Use 'todo relocate --help' to see more
+	fmt.Print(`Default usage: cldl relocate [-h | --help]
+    Use 'cldl relocate --help' to see more
 `)
 }
 
-const HelpRelocate = `Help for todo relocate:
+const HelpRelocate = `Help for cldl relocate:
     Available arguments:
         --help, -h  | Show this message
 
-    If a todo list exists in current location but
+    If a cldl list exists in current location but
     it isn't present in the location list, adds
     it and checks the location list for non-existent
     locations.

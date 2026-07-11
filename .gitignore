@@ -1,1 +1,3 @@
 bin/
+linux-package/*
+!linux-package/PKGBUILD

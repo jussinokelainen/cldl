@@ -54,12 +54,12 @@ func changeEntryTitle(newTitle string, oldTitle string) {
 }
 
 func UsageRename() {
-	fmt.Print(`Usage: todo rename [-h | --help] <title>
-    Use 'todo fix --help' to see more
+	fmt.Print(`Usage: cldl rename [-h | --help] <title>
+    Use 'cldl fix --help' to see more
 `)
 }
 
-const HelpRename = `Help for todo rename:
+const HelpRename = `Help for cldl rename:
     Available arguments:
         --help, -h   | Show this message
 
