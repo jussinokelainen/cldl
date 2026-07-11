@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"local/flagger/flagger"
 	"os"
 	"strconv"
 	"strings"
 	"todo/cmd"
+	"todo/flagger"
 
 	"github.com/BurntSushi/toml"
 )

@@ -2,10 +2,6 @@ module todo
 
 go 1.25.6
 
-require local/flagger v0.0.0
-
-replace local/flagger => /localgomodules/flagger/
-
 require (
 	github.com/BurntSushi/toml v1.6.0
 	github.com/mitchellh/go-wordwrap v1.0.1
