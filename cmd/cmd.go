@@ -100,6 +100,7 @@ type Config struct {
 type GeneralConf struct {
 	Ask_rm_on_check bool
 	Timezone        string
+	CheckDirs       []string
 }
 
 type AddConf struct {
@@ -137,6 +138,7 @@ func DefaultConfig() Config {
 	var general GeneralConf
 	general.Ask_rm_on_check = true
 	general.Timezone = "Local"
+	general.CheckDirs = []string{}
 	conf.General = general
 
 	var add AddConf
@@ -315,14 +317,29 @@ func CreateMasterDB() {
 	}
 }
 
+// Function to add new paths for lists
+// to the location database
 func addToMasterDB(path string) {
-	// Add new todo location into list location database
 	sqlStatement := `INSERT INTO locations(location) VALUES($1);`
 	_, err := MasterDB.Exec(sqlStatement, path)
 	if err != nil {
 		ERROR("Adding to master DB failed!")
 		panic(err)
 	}
+}
+
+func check_if_masterdb_has_loc(location string) bool {
+	sqlStatement := "SELECT location FROM locations WHERE location = ?;"
+	err := MasterDB.QueryRow(sqlStatement, location).Scan(&location)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			ERROR(err)
+			os.Exit(1)
+		}
+		return false
+	}
+
+	return true
 }
 
 func removeFromMasterDB(todoPath string) {

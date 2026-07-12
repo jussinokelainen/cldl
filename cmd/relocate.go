@@ -26,7 +26,7 @@ func RelocateTodo(ask_rm_on_check bool) {
 	} else {
 		INFO("Todo location already exists in the list")
 	}
-	CheckTodos(ask_rm_on_check)
+	CheckTodos(ask_rm_on_check, false, []string{}, false)
 }
 
 // NOTE: Init help and usage functions

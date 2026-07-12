@@ -1,6 +1,6 @@
 # Maintainer: Jussi Nokelainen <jussinoke@gmail.com>
 pkgname='cldl'
-pkgver=1
+pkgver=r44.5751219
 pkgrel=1
 pkgdesc='Directory based cli todo lists'
 arch=('x86_64')
@@ -8,7 +8,7 @@ url="https://github.com/jussinokelainen/cldl"
 license=('MIT')
 depends=('glibc' 'less')
 makedepends=('git' 'go')
-source=("$pkgname::git://github.com/jussinokelainen/cldl.git")
+source=("$pkgname::git+https://github.com/jussinokelainen/cldl.git")
 options=('!debug')
 sha256sums=('SKIP')
 

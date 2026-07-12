@@ -53,24 +53,24 @@ func handleParsing(conf cmd.Config) {
 	flags.Optional_value = []string{}
 
 	switch args[0] {
-	case "rename":
-		handle_rename(args, flags, conf.Colors)
-	case "fix":
-		handle_fix(args, flags, conf.Priority)
-	case "set":
-		handle_set(args, flags)
-	case "check":
-		handle_check(args, flags, conf.General)
 	case "init":
 		handle_init(args, flags)
-	case "add":
-		handle_add(args, flags, conf)
 	case "list", "ls":
 		handle_list(args, flags, conf)
+	case "add":
+		handle_add(args, flags, conf)
 	case "rm", "remove", "done":
 		handle_remove(args, flags, conf.Rm)
 	case "edit":
 		handle_edit(args, flags, conf)
+	case "set":
+		handle_set(args, flags)
+	case "rename":
+		handle_rename(args, flags, conf.Colors)
+	case "fix":
+		handle_fix(args, flags, conf.Priority)
+	case "check":
+		handle_check(args, flags, conf.General)
 	case "relocate":
 		handle_relocate(args, flags, conf.General)
 	default:
@@ -205,13 +205,22 @@ func handle_set(args []string, flags flagger.Flagset) {
 }
 
 func handle_check(args []string, flags flagger.Flagset, general_conf cmd.GeneralConf) {
-	flags.Flags = append(flags.Flags, "no-confirm")
+	additionalFlags := []string{
+		"no-confirm",
+		"directories", "d",
+		"verbose", "v",
+	}
+	flags.Flags = append(flags.Flags, additionalFlags...)
+
 	parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 	if err != nil {
 		cmd.ERROR("Bad Arguments")
 		cmd.UsageCheck()
 		os.Exit(1)
 	}
+
+	check_directories := false
+	verbose_check := false
 
 	for _, flag := range parsedArgs.Flags {
 		switch flag {
@@ -220,10 +229,19 @@ func handle_check(args []string, flags flagger.Flagset, general_conf cmd.General
 			return
 		case "no-confirm":
 			general_conf.Ask_rm_on_check = false
+		case "directories", "d":
+			check_directories = true
+		case "verbose", "v":
+			verbose_check = true
 		}
 	}
 
-	cmd.CheckTodos(general_conf.Ask_rm_on_check)
+	cmd.CheckTodos(
+		general_conf.Ask_rm_on_check,
+		check_directories,
+		general_conf.CheckDirs,
+		verbose_check,
+	)
 }
 
 func handle_init(args []string, flags flagger.Flagset) {
