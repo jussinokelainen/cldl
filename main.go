@@ -343,7 +343,7 @@ func handle_add(args []string, flags flagger.Flagset, conf cmd.Config) {
 	data.Empty_content = no_ask_content
 
 	title := strings.Join(parsedArgs.NormalStr, " ")
-	cmd.AddTodo(title, conf.Add, data)
+	cmd.AddTodo(title, conf.Add, data, conf.Colors)
 }
 
 func handle_list(args []string, flags flagger.Flagset, conf cmd.Config) {

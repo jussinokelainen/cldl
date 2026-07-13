@@ -106,6 +106,7 @@ type GeneralConf struct {
 type AddConf struct {
 	Auto_init    bool
 	Ask_priority bool
+	Ask_tags     bool
 }
 
 type EditConf struct {

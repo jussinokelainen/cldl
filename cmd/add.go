@@ -19,7 +19,8 @@ type AddInfo struct {
 }
 
 // Adds a new todo with a title given as an argument, if title is not duplicate
-func AddTodo(title string, conf AddConf, data AddInfo) {
+func AddTodo(title string, conf AddConf, data AddInfo, colors ColorConf) {
+	setColorScheme(colors)
 	if !TodoExists() {
 		var initNew bool
 		if conf.Auto_init {
@@ -59,8 +60,8 @@ func AddTodo(title string, conf AddConf, data AddInfo) {
 	} else {
 		reader := bufio.NewReader(os.Stdin)
 
-		fmt.Printf("\033[36mEnter contents for new todo titled %s: \033[0m\n", title)
-		fmt.Print("\033[35m❯ \033[0m")
+		fmt.Printf("%sEnter contents for new todo titled %s: \033[0m\n", contentColor, title)
+		fmt.Printf("%s❯ \033[0m", borderColor)
 		var err error
 		content, err = reader.ReadString('\n')
 		if err != nil {
@@ -75,7 +76,10 @@ func AddTodo(title string, conf AddConf, data AddInfo) {
 	}
 
 	if conf.Ask_priority {
-		data.Priority = askPriority()
+		data.Priority = ask_priority()
+	}
+	if conf.Ask_tags {
+		data.Tag = ask_tag()
 	}
 
 	sqlStatement := `INSERT INTO todo(title, content, time, priority, tag, file, line) VALUES($1, $2, $3, $4, $5, $6, $7);`
@@ -97,22 +101,39 @@ func AddTodo(title string, conf AddConf, data AddInfo) {
 	OK("Successfully added new todo " + title)
 }
 
-func askPriority() int {
+func ask_priority() int {
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("\033[35mEnter priority to be set for this entry\033[0m: ")
+	fmt.Printf("%sEnter priority to be set for this entry:\033[0m ", wipColor)
 	answer, err := reader.ReadString('\n')
 	if err != nil {
-		ERROR("Error reading input")
-		return askPriority()
+		ERROR("Error reading input, try again.")
+		return ask_priority()
 	}
 	answer = strings.TrimSpace(answer)
 
 	answerInt, err := strconv.Atoi(answer)
 	if err != nil {
-		ERROR("Input must be an integer")
-		return askPriority()
+		ERROR("Input must be an integer, try again.")
+		return ask_priority()
 	}
 	return answerInt
+}
+
+func ask_tag() string {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Printf("%sEnter tag to be set for this entry:\033[0m ", tagColor)
+	answer, err := reader.ReadString('\n')
+	if err != nil {
+		ERROR("Error reading input, try again.")
+		return ask_tag()
+	}
+	answer = strings.TrimSpace(answer)
+
+	if answer == "" {
+		answer = "NONE"
+	}
+
+	return answer
 }
 
 func askIfInit() bool {
