@@ -9,6 +9,14 @@ Installation
 cd pkgbuild/arch
 makepkg -si
 ```
+
+#### macOS (homebrew):
+```bash
+brew tap jussinokelainen/cldl
+brew trust jussinokelainen/cldl
+brew install cldl
+```
+
 #### Other:
 Run
 ```bash
