@@ -145,6 +145,7 @@ func DefaultConfig() Config {
 	var add AddConf
 	add.Auto_init = false
 	add.Ask_priority = false
+	add.Ask_tags = false
 	conf.Add = add
 
 	var edit EditConf

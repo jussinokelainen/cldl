@@ -527,37 +527,39 @@ func mainHelp() {
   If a panic error occurs, most likely something went wrong when interacting
   with the sqlite databases (although it is not the only way panics can occur)
 
-  Configuration expect a file '~/.config/cldl/config.toml'.
+  Configuration expects a file '~/.config/cldl/config.toml'.
 
   Default configs:
     [general]
-      Ask_rm_on_check = true
-      Timezone = "Local"
+      ask_rm_on_check = true
+      timezone = "Local"
+      checkdirs = []
 
     [add]
-      Auto_init = false
-      Ask_priority = false
+      auto_init = false
+      ask_priority = false
+      ask_tags = false
 
     [edit]
-      Keep_content = false
+      keep_content = false
 
     [priority]
-      Default = 0
-      Urgent = 10
-      In_progress = 100
+      default = 0
+      urgent = 10
+      in_progress = 100
 
     [rm]
-      Ask_full = false
-      Always_confirm_full = true
+      ask_full = false
+      always_confirm_full = true
 
     [colors]
-      Default = "#99FFFF"
-      Urgent = "#FF8000"
-      Wip = "#66FF66"
-      Content = "#FFFFFF"
-      Border = "#FF99FF"
-      Dim = "#404040"
-      Tag = "#FFFF66"`
+      default = "#99FFFF"
+      urgent = "#FF8000"
+      wip = "#66FF66"
+      content = "#FFFFFF"
+      border = "#FF99FF"
+      dim = "#404040"
+      tag = "#FFFF66"`
 
 	cmd.PrintHelpMSG(helpmsg)
 }

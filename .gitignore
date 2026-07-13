@@ -9,3 +9,6 @@ pkgbuild/arch/*.pkg.tar.*
 
 # Cloned repositories
 pkgbuild/arch/cldl-git/
+
+# Homebrew package repo
+pkgbuild/homebrew/homebrew-cldl/
