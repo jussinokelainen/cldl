@@ -6,7 +6,8 @@ Installation
 ------------
 #### Arch Linux:
 ```bash
-cd pkgbuild/arch
+git clone git@github.com:jussinokelainen/cldl.git
+cd cldl/pkgbuild/arch
 makepkg -si
 ```
 
@@ -20,6 +21,8 @@ brew install cldl
 #### Other:
 Run
 ```bash
+git clone git@github.com:jussinokelainen/cldl.git
+cd cldl
 make release
 ```
 then copy the built binary from bin/ to your PATH.
