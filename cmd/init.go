@@ -7,16 +7,16 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-func InitTodo() {
-	todoPath := GetDbPath()
+func Init_todo() {
+	todoPath := Get_db_path()
 	// Check whether current directory already has a list
 	// if it exists, do not create a new one, and just return
-	if _, err := os.Stat(GetDbPath()); !os.IsNotExist(err) {
+	if _, err := os.Stat(Get_db_path()); !os.IsNotExist(err) {
 		ERROR("Todo already exists in current directory!")
 		return
 	}
 
-	todoDB := openTodoDB()
+	todoDB := open_todo_db()
 	defer todoDB.Close()
 	_, err := todoDB.Exec(`CREATE TABLE todo(
         title VARCHAR UNIQUE NOT NULL,
@@ -32,13 +32,13 @@ func InitTodo() {
 		panic(err)
 	}
 
-	addToMasterDB(todoPath)
+	add_to_master_db(todoPath)
 
 	OK("New todo created!")
 }
 
 // NOTE: Init help and usage functions
-func UsageInit() {
+func Usage_init() {
 	fmt.Print(`Default usage: cldl init [-h | --help]
     Use 'cldl init --help' to see more
 `)

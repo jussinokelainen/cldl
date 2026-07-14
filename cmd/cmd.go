@@ -137,7 +137,7 @@ type ColorConf struct {
 	File    string
 }
 
-func DefaultConfig() Config {
+func Default_config() Config {
 	var conf Config
 	var general GeneralConf
 	general.Ask_rm_on_check = true
@@ -180,54 +180,54 @@ func DefaultConfig() Config {
 	return conf
 }
 
-func setColorScheme(c ColorConf) {
+func set_color_scheme(c ColorConf) {
 	var err error
-	defaultColor, err = hexToRgbString(c.Default)
+	defaultColor, err = hex_to_rgb_string(c.Default)
 	if err != nil {
 		ERROR("Failed to parse default color")
 		os.Exit(1)
 	}
-	urgentColor, err = hexToRgbString(c.Urgent)
+	urgentColor, err = hex_to_rgb_string(c.Urgent)
 	if err != nil {
 		ERROR("Failed to parse urgent color")
 		os.Exit(1)
 	}
-	wipColor, err = hexToRgbString(c.Wip)
+	wipColor, err = hex_to_rgb_string(c.Wip)
 	if err != nil {
 		ERROR("Failed to parse wip color")
 		os.Exit(1)
 	}
 
-	contentColor, err = hexToRgbString(c.Content)
+	contentColor, err = hex_to_rgb_string(c.Content)
 	if err != nil {
 		ERROR("Failed to parse content color")
 		os.Exit(1)
 	}
-	borderColor, err = hexToRgbString(c.Border)
+	borderColor, err = hex_to_rgb_string(c.Border)
 	if err != nil {
 		ERROR("Failed to parse border color")
 		os.Exit(1)
 	}
 
-	dimColor, err = hexToRgbString(c.Dim)
+	dimColor, err = hex_to_rgb_string(c.Dim)
 	if err != nil {
 		ERROR("Failed to parse dim color")
 		os.Exit(1)
 	}
 
-	tagColor, err = hexToRgbString(c.Tag)
+	tagColor, err = hex_to_rgb_string(c.Tag)
 	if err != nil {
 		ERROR("Failed to parse tag color")
 		os.Exit(1)
 	}
-	fileColor, err = hexToRgbString(c.File)
+	fileColor, err = hex_to_rgb_string(c.File)
 	if err != nil {
 		ERROR("Failed to parse file color")
 		os.Exit(1)
 	}
 }
 
-func hexToRgbString(hex string) (string, error) {
+func hex_to_rgb_string(hex string) (string, error) {
 	if len(hex) != 7 || hex[0] != '#' {
 		return "", fmt.Errorf("invalid hex color: %s", hex)
 	}
@@ -249,7 +249,7 @@ func hexToRgbString(hex string) (string, error) {
 	return fmt.Sprintf("\033[38;2;%d;%d;%dm", r, g, b), nil
 }
 
-func PrintHelpMSG(s string) {
+func Print_help_msg(s string) {
 	if s == "" {
 		return
 	}
@@ -261,7 +261,7 @@ func PrintHelpMSG(s string) {
 	lineCount := strings.Count(s, "\n") + 1
 	shouldPager := lineCount > maxHeight
 	if shouldPager {
-		printToPager(s)
+		print_to_pager(s)
 		fmt.Println(s)
 	} else {
 		fmt.Println(s)
@@ -269,7 +269,7 @@ func PrintHelpMSG(s string) {
 }
 
 // Simply prints the given content string into less or errors out
-func printToPager(content string) {
+func print_to_pager(content string) {
 	cmd := exec.Command("/usr/bin/less", "-R")
 	cmd.Stdin = strings.NewReader(content)
 	cmd.Stdout = os.Stdout
@@ -282,7 +282,7 @@ func printToPager(content string) {
 }
 
 // Get the path of a local todo database, returns the path as a string
-func GetDbPath() string {
+func Get_db_path() string {
 	cwd, err := os.Getwd()
 	if err != nil {
 		ERROR("Getting db path failed!")
@@ -292,8 +292,8 @@ func GetDbPath() string {
 }
 
 // Open a connection to a local database, returns a pointer to it
-func openTodoDB() *sql.DB {
-	db, err := sql.Open("sqlite", GetDbPath())
+func open_todo_db() *sql.DB {
+	db, err := sql.Open("sqlite", Get_db_path())
 	if err != nil {
 		ERROR("Opening todo DB failed!")
 		panic(err)
@@ -303,7 +303,7 @@ func openTodoDB() *sql.DB {
 
 // Creates a 'master' database that holds all the locations to
 // local databases if one does not yet exist
-func CreateMasterDB() {
+func Create_master_db() {
 	homedir, err := os.UserHomeDir()
 	if err != nil {
 		ERROR("Getting homedir failed!")
@@ -330,7 +330,7 @@ func CreateMasterDB() {
 
 // Function to add new paths for lists
 // to the location database
-func addToMasterDB(path string) {
+func add_to_master_db(path string) {
 	sqlStatement := `INSERT INTO locations(location) VALUES($1);`
 	_, err := MasterDB.Exec(sqlStatement, path)
 	if err != nil {
@@ -353,7 +353,7 @@ func check_if_masterdb_has_loc(location string) bool {
 	return true
 }
 
-func removeFromMasterDB(todoPath string) {
+func remove_from_master_db(todoPath string) {
 	sqlStatement := `DELETE FROM locations WHERE location = ?;`
 	_, err := MasterDB.Exec(sqlStatement, todoPath)
 	if err != nil {
@@ -365,7 +365,7 @@ func removeFromMasterDB(todoPath string) {
 
 // Get the existing content of a todo entry if it exists, returns an error if it doesn't exist
 func get_content_if_entry_exists(title string) (string, error) {
-	todoDB := openTodoDB()
+	todoDB := open_todo_db()
 	defer todoDB.Close()
 
 	sqlStatement := `SELECT content from todo WHERE UPPER(title) = UPPER($1);`
@@ -391,13 +391,13 @@ func get_content_if_entry_exists(title string) (string, error) {
 	return content, nil
 }
 
-func askYesNo(question string) bool {
+func ask_yes_no(question string) bool {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print(question + " [y/n]: ")
 	answer, err := reader.ReadString('\n')
 	if err != nil {
 		ERROR("Error reading input")
-		return askYesNo(question)
+		return ask_yes_no(question)
 	}
 	answer = strings.TrimSpace(answer)
 	switch answer {
@@ -407,7 +407,7 @@ func askYesNo(question string) bool {
 		return false
 	default:
 		fmt.Print("Invalid answer, try again.\n")
-		return askYesNo(question)
+		return ask_yes_no(question)
 	}
 }
 
@@ -435,8 +435,8 @@ func insert_line(filename string, lineNum int, newLine string) error {
 // might give an erroneus result if some other file is named
 // exactly as the todo database should be,
 // in which case errors that might come are a skill issue
-func TodoExists() bool {
-	return File_exists(GetDbPath())
+func Todo_exists() bool {
+	return File_exists(Get_db_path())
 }
 
 // Check whether given file exists

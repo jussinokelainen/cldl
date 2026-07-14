@@ -19,18 +19,18 @@ type AddInfo struct {
 }
 
 // Adds a new todo with a title given as an argument, if title is not duplicate
-func AddTodo(title string, conf AddConf, data AddInfo, colors ColorConf) {
-	setColorScheme(colors)
-	if !TodoExists() {
+func Add_todo(title string, conf AddConf, data AddInfo, colors ColorConf) {
+	set_color_scheme(colors)
+	if !Todo_exists() {
 		var initNew bool
 		if conf.Auto_init {
 			initNew = true
 		} else {
 			INFO("Not todo currently exists in this directory")
-			initNew = askIfInit()
+			initNew = ask_if_init()
 		}
 		if initNew {
-			InitTodo()
+			Init_todo()
 			fmt.Print("\n")
 		} else {
 			return
@@ -40,7 +40,7 @@ func AddTodo(title string, conf AddConf, data AddInfo, colors ColorConf) {
 	// Check for empty title and whether an entry already exists with the same title
 	if title == "" {
 		INFO("Title is required")
-		UsageAdd()
+		Usage_add()
 		return
 	}
 	_, exists := get_content_if_entry_exists(title)
@@ -51,7 +51,7 @@ func AddTodo(title string, conf AddConf, data AddInfo, colors ColorConf) {
 
 	time := time.Now().Unix()
 
-	todoDB := openTodoDB()
+	todoDB := open_todo_db()
 	defer todoDB.Close()
 
 	var content string
@@ -66,7 +66,7 @@ func AddTodo(title string, conf AddConf, data AddInfo, colors ColorConf) {
 		content, err = reader.ReadString('\n')
 		if err != nil {
 			ERROR("Error reading input, did text end with a newline")
-			UsageAdd()
+			Usage_add()
 			return
 		}
 		content = strings.TrimSpace(content)
@@ -136,13 +136,13 @@ func ask_tag() string {
 	return answer
 }
 
-func askIfInit() bool {
+func ask_if_init() bool {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Do you want to initialize a new one? [y/n]: ")
 	answer, err := reader.ReadString('\n')
 	if err != nil {
 		ERROR("Error reading input")
-		return askIfInit()
+		return ask_if_init()
 	}
 	answer = strings.TrimSpace(answer)
 	switch answer {
@@ -152,12 +152,12 @@ func askIfInit() bool {
 		return false
 	default:
 		fmt.Print("Invalid answer, try again.\n")
-		return askIfInit()
+		return ask_if_init()
 	}
 }
 
 // NOTE: Add command help and usage functions
-func UsageAdd() {
+func Usage_add() {
 	fmt.Print(`Usage: cldl add [-h | --help] [--auto-init] [-t | --tag] [-p | --priority] <title>
     Use 'cldl add --help' to see more
 `)

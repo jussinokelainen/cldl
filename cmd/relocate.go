@@ -2,8 +2,8 @@ package cmd
 
 import "fmt"
 
-func RelocateTodo(ask_rm_on_check bool) {
-	path := GetDbPath()
+func Relocate_todo(ask_rm_on_check bool) {
+	path := Get_db_path()
 	sqlStatement := `SELECT COUNT(*) from locations WHERE location = ?;`
 	res, err := MasterDB.Query(sqlStatement, path)
 	if err != nil {
@@ -22,15 +22,15 @@ func RelocateTodo(ask_rm_on_check bool) {
 	}
 	if content < 1 {
 		INFO("Adding local todo to location list")
-		addToMasterDB(path)
+		add_to_master_db(path)
 	} else {
 		INFO("Todo location already exists in the list")
 	}
-	CheckTodos(ask_rm_on_check, false, []string{}, false)
+	Check_todos(ask_rm_on_check, false, []string{}, false)
 }
 
 // NOTE: Init help and usage functions
-func UsageRelocate() {
+func Usage_relocate() {
 	fmt.Print(`Default usage: cldl relocate [-h | --help]
     Use 'cldl relocate --help' to see more
 `)

@@ -3,7 +3,7 @@ package cmd
 import "fmt"
 
 func Set_filepath_to_entry(title string, file_path string) {
-	todoDB := openTodoDB()
+	todoDB := open_todo_db()
 	defer todoDB.Close()
 
 	_, exists := get_content_if_entry_exists(title)
@@ -21,7 +21,7 @@ func Set_filepath_to_entry(title string, file_path string) {
 	}
 }
 func Set_fileline_to_entry(title string, line_num int) {
-	todoDB := openTodoDB()
+	todoDB := open_todo_db()
 	defer todoDB.Close()
 
 	_, exists := get_content_if_entry_exists(title)
@@ -39,8 +39,8 @@ func Set_fileline_to_entry(title string, line_num int) {
 	}
 }
 
-func EditPriority(title string, newPrio int) {
-	todoDB := openTodoDB()
+func Edit_priority(title string, newPrio int) {
+	todoDB := open_todo_db()
 	defer todoDB.Close()
 
 	_, exists := get_content_if_entry_exists(title)
@@ -58,8 +58,8 @@ func EditPriority(title string, newPrio int) {
 	}
 }
 
-func SetTagToEntry(title string, tag string) {
-	todoDB := openTodoDB()
+func Set_tag_to_entry(title string, tag string) {
+	todoDB := open_todo_db()
 	defer todoDB.Close()
 
 	_, exists := get_content_if_entry_exists(title)
@@ -77,7 +77,7 @@ func SetTagToEntry(title string, tag string) {
 	}
 }
 
-func UsageSet() {
+func Usage_set() {
 	fmt.Print(`Usage: cldl set [-h | --help] [-p | --priority] <title>
     Use 'cldl set --help' to see more
 `)

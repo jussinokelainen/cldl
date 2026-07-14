@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func CheckTodos(confirm_rm bool, check_directories bool, dir_paths []string, verbose bool) {
+func Check_todos(confirm_rm bool, check_directories bool, dir_paths []string, verbose bool) {
 	if check_directories {
 		check_dir_list(dir_paths, verbose)
 	} else {
@@ -71,7 +71,7 @@ func check_dir_list(dir_paths []string, verbose bool) {
 			}
 		} else {
 			INFO("cldl list at\033[31m", shortenedString, "\033[0mwas not in saved locations, adding...")
-			addToMasterDB(path)
+			add_to_master_db(path)
 		}
 	}
 	OK("Checks done.")
@@ -101,12 +101,12 @@ func check_loc_list(confirm_rm bool) {
 		if _, err := os.Stat(location); os.IsNotExist(err) {
 			INFO("This todo does not exist: \n\033[35m  " + location + "\033[0m")
 			if confirm_rm {
-				if askYesNo("Do you want to remove it from the list?") {
-					removeFromMasterDB(location)
+				if ask_yes_no("Do you want to remove it from the list?") {
+					remove_from_master_db(location)
 				}
 
 			} else {
-				removeFromMasterDB(location)
+				remove_from_master_db(location)
 			}
 		}
 	}
@@ -114,7 +114,7 @@ func check_loc_list(confirm_rm bool) {
 }
 
 // NOTE: Check command help and usage functions
-func UsageCheck() {
+func Usage_check() {
 	fmt.Print(`Usage: cldl check [-h | --help] [--no-confirm]
     Use 'cldl check --help' to see more
 `)

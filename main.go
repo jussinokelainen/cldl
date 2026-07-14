@@ -18,30 +18,30 @@ func main() {
 		return
 	}
 
-	cmd.CreateMasterDB()
+	cmd.Create_master_db()
 	defer cmd.MasterDB.Close()
 
-	conf := cmd.DefaultConfig()
+	conf := cmd.Default_config()
 	configFile := configDir + "/.config/cldl/config.toml"
 	_, err = toml.DecodeFile(configFile, &conf)
 	if err != nil {
 		cmd.ERROR("Failed to get configs, using defaults")
-		conf = cmd.DefaultConfig()
+		conf = cmd.Default_config()
 	}
 
-	handleParsing(conf)
+	handle_parsing(conf)
 }
 
 /*
 Handles the main parsing of flags, arguments and subcommands, and then calls
 required subcommand functions.
 */
-func handleParsing(conf cmd.Config) {
+func handle_parsing(conf cmd.Config) {
 
 	args := os.Args[1:]
 	// If no args given, print usage and exit since there is nothing to do
 	if len(args) < 1 {
-		mainUsage()
+		main_usage()
 		return
 	}
 
@@ -77,14 +77,14 @@ func handleParsing(conf cmd.Config) {
 		mainFlags, err := flagger.ParseFlags(args, flags)
 		if err != nil || (len(mainFlags.Flags) < 1 && len(mainFlags.ValueFlags) < 1) {
 			cmd.ERROR("Bad arguments")
-			mainUsage()
+			main_usage()
 			os.Exit(1)
 		}
 
 		for _, flag := range mainFlags.Flags {
 			switch flag {
 			case "h", "help":
-				mainHelp()
+				main_help()
 				return
 			}
 		}
@@ -92,7 +92,7 @@ func handleParsing(conf cmd.Config) {
 }
 
 func handle_rename(args []string, flags flagger.Flagset, color_conf cmd.ColorConf) {
-	if !cmd.TodoExists() {
+	if !cmd.Todo_exists() {
 		cmd.ERROR("No todo exists in current directory!")
 		return
 	}
@@ -100,24 +100,24 @@ func handle_rename(args []string, flags flagger.Flagset, color_conf cmd.ColorCon
 	parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 	if err != nil {
 		cmd.ERROR("Bad Arguments")
-		cmd.UsageRename()
+		cmd.Usage_rename()
 		os.Exit(1)
 	}
 
 	for _, flag := range parsedArgs.Flags {
 		switch flag {
 		case "h", "help":
-			cmd.PrintHelpMSG(cmd.HelpRename)
+			cmd.Print_help_msg(cmd.HelpRename)
 			return
 		}
 	}
 
 	title := strings.Join(parsedArgs.NormalStr, " ")
-	cmd.RenameTodo(title, color_conf)
+	cmd.Rename_todo(title, color_conf)
 }
 
 func handle_fix(args []string, flags flagger.Flagset, prio_conf cmd.PriorityConf) {
-	if !cmd.TodoExists() {
+	if !cmd.Todo_exists() {
 		cmd.ERROR("No todo exists in current directory!")
 		return
 	}
@@ -125,23 +125,23 @@ func handle_fix(args []string, flags flagger.Flagset, prio_conf cmd.PriorityConf
 	parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 	if err != nil {
 		cmd.ERROR("Bad Arguments")
-		cmd.UsageFix()
+		cmd.Usage_fix()
 		os.Exit(1)
 	}
 
 	for _, flag := range parsedArgs.Flags {
 		switch flag {
 		case "h", "help":
-			cmd.PrintHelpMSG(cmd.HelpFix)
+			cmd.Print_help_msg(cmd.HelpFix)
 			return
 		}
 	}
 
-	cmd.FixTodoTable(prio_conf.Default)
+	cmd.Fix_todo_table(prio_conf.Default)
 }
 
 func handle_set(args []string, flags flagger.Flagset) {
-	if !cmd.TodoExists() {
+	if !cmd.Todo_exists() {
 		cmd.ERROR("No todo exists in current directory!")
 		return
 	}
@@ -156,18 +156,18 @@ func handle_set(args []string, flags flagger.Flagset) {
 	parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 	if err != nil {
 		cmd.ERROR("Bad Arguments")
-		cmd.UsageSet()
+		cmd.Usage_set()
 		os.Exit(1)
 	}
 	if len(parsedArgs.Flags) < 1 && len(parsedArgs.ValueFlags) < 1 {
-		cmd.UsageSet()
+		cmd.Usage_set()
 		os.Exit(1)
 	}
 
 	for _, flag := range parsedArgs.Flags {
 		switch flag {
 		case "h", "help":
-			cmd.PrintHelpMSG(cmd.HelpSet)
+			cmd.Print_help_msg(cmd.HelpSet)
 			return
 		}
 	}
@@ -196,10 +196,10 @@ func handle_set(args []string, flags flagger.Flagset) {
 				cmd.ERROR("Invalid number for flag priority")
 				os.Exit(1)
 			}
-			cmd.EditPriority(title, newPrio)
+			cmd.Edit_priority(title, newPrio)
 		case "t", "tag":
 			title := strings.Join(parsedArgs.NormalStr, " ")
-			cmd.SetTagToEntry(title, flag[1])
+			cmd.Set_tag_to_entry(title, flag[1])
 		}
 	}
 }
@@ -215,7 +215,7 @@ func handle_check(args []string, flags flagger.Flagset, general_conf cmd.General
 	parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 	if err != nil {
 		cmd.ERROR("Bad Arguments")
-		cmd.UsageCheck()
+		cmd.Usage_check()
 		os.Exit(1)
 	}
 
@@ -225,7 +225,7 @@ func handle_check(args []string, flags flagger.Flagset, general_conf cmd.General
 	for _, flag := range parsedArgs.Flags {
 		switch flag {
 		case "h", "help":
-			cmd.PrintHelpMSG(cmd.HelpCheck)
+			cmd.Print_help_msg(cmd.HelpCheck)
 			return
 		case "no-confirm":
 			general_conf.Ask_rm_on_check = false
@@ -236,7 +236,7 @@ func handle_check(args []string, flags flagger.Flagset, general_conf cmd.General
 		}
 	}
 
-	cmd.CheckTodos(
+	cmd.Check_todos(
 		general_conf.Ask_rm_on_check,
 		check_directories,
 		general_conf.CheckDirs,
@@ -248,19 +248,19 @@ func handle_init(args []string, flags flagger.Flagset) {
 	parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 	if err != nil {
 		cmd.ERROR("Bad Arguments")
-		cmd.UsageInit()
+		cmd.Usage_init()
 		os.Exit(1)
 	}
 
 	for _, flag := range parsedArgs.Flags {
 		switch flag {
 		case "h", "help":
-			cmd.PrintHelpMSG(cmd.HelpInit)
+			cmd.Print_help_msg(cmd.HelpInit)
 			return
 		}
 	}
 
-	cmd.InitTodo()
+	cmd.Init_todo()
 }
 
 func handle_add(args []string, flags flagger.Flagset, conf cmd.Config) {
@@ -277,7 +277,7 @@ func handle_add(args []string, flags flagger.Flagset, conf cmd.Config) {
 	parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 	if err != nil {
 		cmd.ERROR("Bad Arguments")
-		cmd.UsageAdd()
+		cmd.Usage_add()
 		os.Exit(1)
 	}
 
@@ -285,7 +285,7 @@ func handle_add(args []string, flags flagger.Flagset, conf cmd.Config) {
 	for _, flag := range parsedArgs.Flags {
 		switch flag {
 		case "h", "help":
-			cmd.PrintHelpMSG(cmd.HelpAdd)
+			cmd.Print_help_msg(cmd.HelpAdd)
 			return
 		case "e", "empty":
 			no_ask_content = true
@@ -344,7 +344,7 @@ func handle_add(args []string, flags flagger.Flagset, conf cmd.Config) {
 	data.Empty_content = no_ask_content
 
 	title := strings.Join(parsedArgs.NormalStr, " ")
-	cmd.AddTodo(title, conf.Add, data, conf.Colors)
+	cmd.Add_todo(title, conf.Add, data, conf.Colors)
 }
 
 func handle_list(args []string, flags flagger.Flagset, conf cmd.Config) {
@@ -361,7 +361,7 @@ func handle_list(args []string, flags flagger.Flagset, conf cmd.Config) {
 	parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 	if err != nil {
 		cmd.ERROR("Bad Arguments")
-		cmd.UsageList()
+		cmd.Usage_list()
 		os.Exit(1)
 	}
 
@@ -374,7 +374,7 @@ func handle_list(args []string, flags flagger.Flagset, conf cmd.Config) {
 		case "p", "pager":
 			pagerList = false
 		case "h", "help":
-			cmd.PrintHelpMSG(cmd.HelpList)
+			cmd.Print_help_msg(cmd.HelpList)
 			return
 		}
 	}
@@ -391,11 +391,11 @@ func handle_list(args []string, flags flagger.Flagset, conf cmd.Config) {
 			tag = flag[1]
 		}
 	}
-	cmd.ListTodo(listAll, pagerList, conf, filterByTag, tag)
+	cmd.List_todo(listAll, pagerList, conf, filterByTag, tag)
 }
 
 func handle_remove(args []string, flags flagger.Flagset, rm_conf cmd.RmConf) {
-	if !cmd.TodoExists() {
+	if !cmd.Todo_exists() {
 		cmd.ERROR("No todo exists in current directory!")
 		return
 	}
@@ -409,7 +409,7 @@ func handle_remove(args []string, flags flagger.Flagset, rm_conf cmd.RmConf) {
 	parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 	if err != nil {
 		cmd.ERROR("Bad Arguments")
-		cmd.UsageRm()
+		cmd.Usage_rm()
 		os.Exit(1)
 	}
 
@@ -427,17 +427,17 @@ func handle_remove(args []string, flags flagger.Flagset, rm_conf cmd.RmConf) {
 		case "t", "tag":
 			rmTag = true
 		case "h", "help":
-			cmd.PrintHelpMSG(cmd.HelpRm)
+			cmd.Print_help_msg(cmd.HelpRm)
 			return
 		}
 	}
 
 	title := strings.Join(parsedArgs.NormalStr, " ")
-	cmd.RmTodo(title, rmAll, rmTag, rm_conf)
+	cmd.Rm_todo(title, rmAll, rmTag, rm_conf)
 }
 
 func handle_edit(args []string, flags flagger.Flagset, conf cmd.Config) {
-	if !cmd.TodoExists() {
+	if !cmd.Todo_exists() {
 		cmd.ERROR("No todo exists in current directory!")
 		return
 	}
@@ -447,7 +447,7 @@ func handle_edit(args []string, flags flagger.Flagset, conf cmd.Config) {
 	parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 	if err != nil {
 		cmd.ERROR("Bad Arguments")
-		cmd.UsageRm()
+		cmd.Usage_rm()
 		os.Exit(1)
 	}
 
@@ -456,49 +456,49 @@ func handle_edit(args []string, flags flagger.Flagset, conf cmd.Config) {
 		case "k", "keep":
 			conf.Edit.Keep_content = !conf.Edit.Keep_content
 		case "h", "help":
-			cmd.PrintHelpMSG(cmd.HelpEdit)
+			cmd.Print_help_msg(cmd.HelpEdit)
 			return
 		default:
 			cmd.ERROR("Bad Arguments")
-			cmd.UsageEdit()
+			cmd.Usage_edit()
 			os.Exit(1)
 		}
 	}
 
 	title := strings.Join(parsedArgs.NormalStr, " ")
-	cmd.EditTodo(title, conf.Edit, conf.Colors)
+	cmd.Edit_todo(title, conf.Edit, conf.Colors)
 }
 
 func handle_relocate(args []string, flags flagger.Flagset, general_conf cmd.GeneralConf) {
 	parsedArgs, err := flagger.ParseFlags(args[1:], flags)
 	if err != nil {
 		cmd.ERROR("Bad Arguments")
-		cmd.UsageRelocate()
+		cmd.Usage_relocate()
 		os.Exit(1)
 	}
 
 	for _, flag := range parsedArgs.Flags {
 		switch flag {
 		case "h", "help":
-			cmd.PrintHelpMSG(cmd.HelpRelocate)
+			cmd.Print_help_msg(cmd.HelpRelocate)
 			return
 		}
 	}
-	if !cmd.TodoExists() {
+	if !cmd.Todo_exists() {
 		cmd.ERROR("No todo exists in current directory!")
 		return
 	}
-	cmd.RelocateTodo(general_conf.Ask_rm_on_check)
+	cmd.Relocate_todo(general_conf.Ask_rm_on_check)
 
 }
 
 // NOTE: Main help and usage functions
-func mainUsage() {
+func main_usage() {
 	fmt.Print(`Usage: cldl [-h | --help] <command> [<args>]
     Use cldl --help to see available commands
 `)
 }
-func mainHelp() {
+func main_help() {
 	const helpmsg = `Help for cldl:
   Flags:
       --help, -h           | Show this message
@@ -563,5 +563,5 @@ func mainHelp() {
       tag     = "#FFFF66"
       file    = "#99FFFF"`
 
-	cmd.PrintHelpMSG(helpmsg)
+	cmd.Print_help_msg(helpmsg)
 }

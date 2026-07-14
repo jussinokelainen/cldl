@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func FixTodoTable(defaultPriority int) {
+func Fix_todo_table(defaultPriority int) {
 	title := false
 	content := false
 	time := false
@@ -15,7 +15,7 @@ func FixTodoTable(defaultPriority int) {
 	line := false
 	INFO("Checking todo table")
 
-	todoDB := openTodoDB()
+	todoDB := open_todo_db()
 	defer todoDB.Close()
 
 	rows, err := todoDB.Query("PRAGMA table_info(todo)")
@@ -105,14 +105,15 @@ func FixTodoTable(defaultPriority int) {
 		}
 		INFO("Added missing line column")
 	}
-	DefaultNullPriorities(defaultPriority)
+	Default_null_priorities(defaultPriority)
 }
 
+// TODO: get rid of this function?
 // This function will be more and more useless as time goes on, but since when
 // The priority column was first added it was able to have null values, this
 // function might be required sometimes, so it has to be in the fix subcommand
-func DefaultNullPriorities(defaultPriority int) {
-	todoDB := openTodoDB()
+func Default_null_priorities(defaultPriority int) {
+	todoDB := open_todo_db()
 	defer todoDB.Close()
 
 	INFO("Setting possible null priority values to default value")
@@ -124,7 +125,7 @@ func DefaultNullPriorities(defaultPriority int) {
 	}
 }
 
-func UsageFix() {
+func Usage_fix() {
 	fmt.Print(`Usage: cldl fix [-h | --help]
     Use 'cldl fix --help' to see more
 `)

@@ -15,7 +15,7 @@ import (
 var maxWidth = 50
 var applyPadding = true
 
-func ListTodo(listLocations bool, pager bool, config Config, filterByTag ListTag, tag string) {
+func List_todo(listLocations bool, pager bool, config Config, filterByTag ListTag, tag string) {
 	timeZone, err := time.LoadLocation(strings.TrimSpace(config.General.Timezone))
 	if err != nil {
 		ERROR("Failed to parse timezone")
@@ -24,10 +24,10 @@ func ListTodo(listLocations bool, pager bool, config Config, filterByTag ListTag
 	urgentPrio := config.Priority.Urgent
 	wipPrio := config.Priority.In_progress
 	colors := config.Colors
-	setColorScheme(colors)
+	set_color_scheme(colors)
 	printList := func(listString string, page bool) {
 		if page {
-			printToPager(listString)
+			print_to_pager(listString)
 		} else {
 			fmt.Print(listString)
 		}
@@ -36,15 +36,15 @@ func ListTodo(listLocations bool, pager bool, config Config, filterByTag ListTag
 	if listLocations {
 		// Default pagering behavior is opposite to normal listing, so use opposite values
 		applyPadding = !pager
-		printList(listAllTodoLocations(), !pager)
+		printList(list_all_todo_locations(), !pager)
 		return
 	} else {
-		if !TodoExists() {
+		if !Todo_exists() {
 			ERROR("No todo exists in current directory!")
 			return
 		}
 
-		todoSlice, err := getTodoSlice(filterByTag, tag)
+		todoSlice, err := get_todo_slice(filterByTag, tag)
 		if err != nil {
 			switch filterByTag {
 			case ONLY:
@@ -62,21 +62,21 @@ func ListTodo(listLocations bool, pager bool, config Config, filterByTag ListTag
 		}
 		applyPadding = pager
 
-		printList(formatListItems(todoSlice, timeZone, urgentPrio, wipPrio), pager)
+		printList(format_list_items(todoSlice, timeZone, urgentPrio, wipPrio), pager)
 		return
 	}
 }
 
 // Formats the items in a given slice. Returns a string with all decorations, newlines etc
 // that is ready to be printed as returned
-func formatListItems(todoSlice []TodoStruct, timeZone *time.Location, urgentPrio int, wipPrio int) string {
+func format_list_items(todoSlice []TodoStruct, timeZone *time.Location, urgentPrio int, wipPrio int) string {
 	current_box := 1
 	var listString strings.Builder
 	// Top border and empty row
-	padContentToCenter(&listString, maxWidth+2)
-	fmt.Fprintf(&listString, "%s╔══%s══╗\n", borderColor, addLine(maxWidth))
-	padContentToCenter(&listString, maxWidth+2)
-	fmt.Fprintf(&listString, "%s║  %s  ║\033[0m", borderColor, addSpace(maxWidth))
+	pad_content_to_center(&listString, maxWidth+2)
+	fmt.Fprintf(&listString, "%s╔══%s══╗\n", borderColor, add_line(maxWidth))
+	pad_content_to_center(&listString, maxWidth+2)
+	fmt.Fprintf(&listString, "%s║  %s  ║\033[0m", borderColor, add_space(maxWidth))
 
 	for _, row := range todoSlice {
 		var priorityColor string
@@ -88,7 +88,7 @@ func formatListItems(todoSlice []TodoStruct, timeZone *time.Location, urgentPrio
 			priorityColor = defaultColor
 		}
 		// Print title
-		listString.WriteString(makeTitleLine(row.Title, priorityColor))
+		listString.WriteString(make_title_line(row.Title, priorityColor))
 
 		// Print content
 		if row.Content != "[ EMPTY ]" {
@@ -98,140 +98,140 @@ func formatListItems(todoSlice []TodoStruct, timeZone *time.Location, urgentPrio
 				if len(line)%2 != 0 && utf8.RuneCountInString(row.Title)%2 != 0 {
 					line = " " + line
 				}
-				listString.WriteString(formatContentLine(line))
+				listString.WriteString(format_content_line(line))
 			}
-			padContentToCenter(&listString, maxWidth+2)
-			fmt.Fprintf(&listString, "%s║  %s  ║\033[0m\n", borderColor, addSpace(maxWidth))
+			pad_content_to_center(&listString, maxWidth+2)
+			fmt.Fprintf(&listString, "%s║  %s  ║\033[0m\n", borderColor, add_space(maxWidth))
 		}
 
 		// Print location, tag, timestamp and priority level
 		if row.File != "NO_FILE" {
-			listString.WriteString(makeLocationLine(row.File, row.Line, fileColor))
+			listString.WriteString(make_location_line(row.File, row.Line, fileColor))
 		}
 		if row.Tag != "NONE" {
-			listString.WriteString(makeTagLine(row.Tag))
+			listString.WriteString(make_tag_line(row.Tag))
 		}
-		listString.WriteString(makePriorityLine(int(row.Priority), priorityColor))
-		listString.WriteString(makeTimeStampLine(row.Time, timeZone))
+		listString.WriteString(make_priority_line(int(row.Priority), priorityColor))
+		listString.WriteString(make_timestamp_line(row.Time, timeZone))
 
 		// Print borders that continue into the next box if not last box
 		if current_box < len(todoSlice) {
-			padContentToCenter(&listString, maxWidth+2)
-			fmt.Fprintf(&listString, "%s╠══%s══╣\033[0m\n", borderColor, addLine(maxWidth))
-			padContentToCenter(&listString, maxWidth+2)
-			fmt.Fprintf(&listString, "%s║  %s  ║\033[0m", borderColor, addSpace(maxWidth))
+			pad_content_to_center(&listString, maxWidth+2)
+			fmt.Fprintf(&listString, "%s╠══%s══╣\033[0m\n", borderColor, add_line(maxWidth))
+			pad_content_to_center(&listString, maxWidth+2)
+			fmt.Fprintf(&listString, "%s║  %s  ║\033[0m", borderColor, add_space(maxWidth))
 		} else {
-			padContentToCenter(&listString, maxWidth+2)
-			fmt.Fprintf(&listString, "%s╚══%s══╝\033[0m\n", borderColor, addLine(maxWidth))
+			pad_content_to_center(&listString, maxWidth+2)
+			fmt.Fprintf(&listString, "%s╚══%s══╝\033[0m\n", borderColor, add_line(maxWidth))
 		}
 		current_box++
 	}
 	return listString.String()
 }
 
-func makeLocationLine(file_path string, file_line int, Color string) string {
+func make_location_line(file_path string, file_line int, Color string) string {
 	var titleStr strings.Builder
 	loc_string := file_path + ":" + strconv.Itoa(file_line)
 
-	padLeft, padRight := getSidePadding(loc_string)
+	padLeft, padRight := get_side_padding(loc_string)
 	titleSize := utf8.RuneCountInString(loc_string)
 
-	padContentToCenter(&titleStr, maxWidth+2)
-	fmt.Fprintf(&titleStr, "%s║%s", borderColor, addSpace(padLeft+2))
+	pad_content_to_center(&titleStr, maxWidth+2)
+	fmt.Fprintf(&titleStr, "%s║%s", borderColor, add_space(padLeft+2))
 	fmt.Fprintf(&titleStr, "%s%s", Color, loc_string)
-	fmt.Fprintf(&titleStr, "%s%s║\n", borderColor, addSpace(padRight+2))
+	fmt.Fprintf(&titleStr, "%s%s║\n", borderColor, add_space(padRight+2))
 
-	padContentToCenter(&titleStr, maxWidth+2)
-	fmt.Fprintf(&titleStr, "%s║%s", borderColor, addSpace(padLeft))
-	fmt.Fprintf(&titleStr, "%s══%s══", Color, addLine(titleSize))
-	fmt.Fprintf(&titleStr, "%s%s║\n", borderColor, addSpace(padRight))
+	pad_content_to_center(&titleStr, maxWidth+2)
+	fmt.Fprintf(&titleStr, "%s║%s", borderColor, add_space(padLeft))
+	fmt.Fprintf(&titleStr, "%s══%s══", Color, add_line(titleSize))
+	fmt.Fprintf(&titleStr, "%s%s║\n", borderColor, add_space(padRight))
 
 	return titleStr.String()
 
 }
 
-func makeTitleLine(title string, priorityColor string) string {
+func make_title_line(title string, priorityColor string) string {
 	var titleStr strings.Builder
 
-	padLeft, padRight := getSidePadding(title)
+	padLeft, padRight := get_side_padding(title)
 	titleSize := utf8.RuneCountInString(title)
 	fmt.Fprint(&titleStr, "\n")
 
-	padContentToCenter(&titleStr, maxWidth+2)
-	fmt.Fprintf(&titleStr, "%s║%s", borderColor, addSpace(padLeft+2))
+	pad_content_to_center(&titleStr, maxWidth+2)
+	fmt.Fprintf(&titleStr, "%s║%s", borderColor, add_space(padLeft+2))
 	fmt.Fprintf(&titleStr, "%s%s", priorityColor, title)
-	fmt.Fprintf(&titleStr, "%s%s║\n", borderColor, addSpace(padRight+2))
+	fmt.Fprintf(&titleStr, "%s%s║\n", borderColor, add_space(padRight+2))
 
-	padContentToCenter(&titleStr, maxWidth+2)
-	fmt.Fprintf(&titleStr, "%s║%s", borderColor, addSpace(padLeft))
-	fmt.Fprintf(&titleStr, "%s══%s══", priorityColor, addLine(titleSize))
-	fmt.Fprintf(&titleStr, "%s%s║\n", borderColor, addSpace(padRight))
+	pad_content_to_center(&titleStr, maxWidth+2)
+	fmt.Fprintf(&titleStr, "%s║%s", borderColor, add_space(padLeft))
+	fmt.Fprintf(&titleStr, "%s══%s══", priorityColor, add_line(titleSize))
+	fmt.Fprintf(&titleStr, "%s%s║\n", borderColor, add_space(padRight))
 
 	return titleStr.String()
 }
 
-func makeTagLine(tag string) string {
+func make_tag_line(tag string) string {
 	var tagStr strings.Builder
 
 	// Print tag
 	tagString := "Tag: " + tag
-	padLeft, padRight := getSidePadding(tagString)
+	padLeft, padRight := get_side_padding(tagString)
 
-	padContentToCenter(&tagStr, maxWidth+2)
-	fmt.Fprintf(&tagStr, "%s║%s", borderColor, addSpace(padLeft+2))
+	pad_content_to_center(&tagStr, maxWidth+2)
+	fmt.Fprintf(&tagStr, "%s║%s", borderColor, add_space(padLeft+2))
 	fmt.Fprintf(&tagStr, "%s%s", tagColor, tagString)
-	fmt.Fprintf(&tagStr, "%s%s║\n", borderColor, addSpace(padRight+2))
+	fmt.Fprintf(&tagStr, "%s%s║\n", borderColor, add_space(padRight+2))
 
 	return tagStr.String()
 }
-func makeTimeStampLine(timestamp int64, timeZone *time.Location) string {
+func make_timestamp_line(timestamp int64, timeZone *time.Location) string {
 	var timeStr strings.Builder
 
 	// Print creation timestamp
 	timeString := "Created: " + time.Time.String(time.Unix(timestamp, 0).In(timeZone))
-	padLeft, padRight := getSidePadding(timeString)
+	padLeft, padRight := get_side_padding(timeString)
 
-	padContentToCenter(&timeStr, maxWidth+2)
-	fmt.Fprintf(&timeStr, "%s║%s", borderColor, addSpace(padLeft+2))
+	pad_content_to_center(&timeStr, maxWidth+2)
+	fmt.Fprintf(&timeStr, "%s║%s", borderColor, add_space(padLeft+2))
 	fmt.Fprintf(&timeStr, "%s%s", dimColor, timeString)
-	fmt.Fprintf(&timeStr, "%s%s║\n", borderColor, addSpace(padRight+2))
+	fmt.Fprintf(&timeStr, "%s%s║\n", borderColor, add_space(padRight+2))
 
 	return timeStr.String()
 }
 
-func makePriorityLine(priority int, priorityColor string) string {
+func make_priority_line(priority int, priorityColor string) string {
 	var prioStr strings.Builder
 	if priorityColor == defaultColor {
 		priorityColor = dimColor
 	}
 	// Print Priority
 	prioString := "Priority: " + fmt.Sprint(priority)
-	padLeft, padRight := getSidePadding(prioString)
+	padLeft, padRight := get_side_padding(prioString)
 
-	padContentToCenter(&prioStr, maxWidth+2)
-	fmt.Fprintf(&prioStr, "%s║%s", borderColor, addSpace(padLeft+2))
+	pad_content_to_center(&prioStr, maxWidth+2)
+	fmt.Fprintf(&prioStr, "%s║%s", borderColor, add_space(padLeft+2))
 	fmt.Fprintf(&prioStr, "%s%s", priorityColor, prioString)
-	fmt.Fprintf(&prioStr, "%s%s║\n", borderColor, addSpace(padRight+2))
+	fmt.Fprintf(&prioStr, "%s%s║\n", borderColor, add_space(padRight+2))
 
 	return prioStr.String()
 }
 
 // Formats and decorates a single line of a todo entry's content returns it as a string
-func formatContentLine(line string) string {
+func format_content_line(line string) string {
 	var listString strings.Builder
-	padLeft, padRight := getSidePadding(line)
+	padLeft, padRight := get_side_padding(line)
 
-	padContentToCenter(&listString, maxWidth+2)
-	fmt.Fprintf(&listString, "%s║%s", borderColor, addSpace(padLeft+2))
+	pad_content_to_center(&listString, maxWidth+2)
+	fmt.Fprintf(&listString, "%s║%s", borderColor, add_space(padLeft+2))
 	fmt.Fprintf(&listString, "%s%s", contentColor, line)
-	fmt.Fprintf(&listString, "%s%s║\n", borderColor, addSpace(padRight+2))
+	fmt.Fprintf(&listString, "%s%s║\n", borderColor, add_space(padRight+2))
 
 	return listString.String()
 }
 
 // Lists, formats and decorates all locations inside the master database
 // returns a decorated string
-func listAllTodoLocations() string {
+func list_all_todo_locations() string {
 	var listString strings.Builder
 	var locSlice []string
 	homeDir, _ := os.UserHomeDir()
@@ -265,27 +265,27 @@ func listAllTodoLocations() string {
 	}
 
 	fmt.Fprint(&listString, "\n")
-	padContentToCenter(&listString, longestLoc+2)
+	pad_content_to_center(&listString, longestLoc+2)
 	fmt.Fprintf(&listString, "%s%sAll todo list locations\033[0m\n",
-		addSpace((longestLoc/2)-9), defaultColor)
-	padContentToCenter(&listString, longestLoc+2)
-	fmt.Fprintf(&listString, "%s╔══%s══╗\n", borderColor, addLine(longestLoc))
+		add_space((longestLoc/2)-9), defaultColor)
+	pad_content_to_center(&listString, longestLoc+2)
+	fmt.Fprintf(&listString, "%s╔══%s══╗\n", borderColor, add_line(longestLoc))
 
 	for _, loc := range locSlice {
 		lenDiff := longestLoc - len(loc)
-		padContentToCenter(&listString, longestLoc+2)
-		fmt.Fprintf(&listString, "%s║%s", borderColor, addSpace(lenDiff/2+2))
+		pad_content_to_center(&listString, longestLoc+2)
+		fmt.Fprintf(&listString, "%s║%s", borderColor, add_space(lenDiff/2+2))
 		fmt.Fprintf(&listString, "%s%s", contentColor, loc)
-		fmt.Fprintf(&listString, "%s%s║\n", borderColor, addSpace((lenDiff+1)/2+2))
+		fmt.Fprintf(&listString, "%s%s║\n", borderColor, add_space((lenDiff+1)/2+2))
 	}
 
-	padContentToCenter(&listString, longestLoc+2)
-	fmt.Fprintf(&listString, "%s╚══%s══╝\033[0m\n", borderColor, addLine(longestLoc))
+	pad_content_to_center(&listString, longestLoc+2)
+	fmt.Fprintf(&listString, "%s╚══%s══╝\033[0m\n", borderColor, add_line(longestLoc))
 
 	return listString.String()
 }
 
-func padContentToCenter(listString *strings.Builder, contentWidth int) {
+func pad_content_to_center(listString *strings.Builder, contentWidth int) {
 	if applyPadding {
 		spacerSize := 1
 		width, _, err := term.GetSize(int(os.Stdout.Fd()))
@@ -305,9 +305,9 @@ func padContentToCenter(listString *strings.Builder, contentWidth int) {
 
 // Gets and returns the contents of a local todo database,
 // returns an error if the list is empty
-func getTodoSlice(filterByTag ListTag, tag string) ([]TodoStruct, error) {
+func get_todo_slice(filterByTag ListTag, tag string) ([]TodoStruct, error) {
 	var todoSlice []TodoStruct
-	todoDB := openTodoDB()
+	todoDB := open_todo_db()
 	defer todoDB.Close()
 
 	var sqlStatement string
@@ -392,7 +392,7 @@ func getTodoSlice(filterByTag ListTag, tag string) ([]TodoStruct, error) {
 
 // Helper function for getting the correct spacing in various line inside
 // the printed todo list box
-func getSidePadding(s string) (int, int) {
+func get_side_padding(s string) (int, int) {
 	strSize := utf8.RuneCountInString(s)
 	free := max(maxWidth-strSize, 0)
 	padLeft := free / 2
@@ -403,7 +403,7 @@ func getSidePadding(s string) (int, int) {
 
 // Formatting helper functions that return a string
 // with a given amount of spaces or lines
-func addLine(length int) string {
+func add_line(length int) string {
 	if length > 0 {
 		return strings.Repeat("═", length)
 	} else {
@@ -411,7 +411,7 @@ func addLine(length int) string {
 	}
 }
 
-func addSpace(length int) string {
+func add_space(length int) string {
 	if length > 0 {
 		return strings.Repeat(" ", length)
 	} else {
@@ -420,7 +420,7 @@ func addSpace(length int) string {
 }
 
 // NOTE: List command help and usage functions
-func UsageList() {
+func Usage_list() {
 	fmt.Print(`Usage: cldl list [-h | --help] [-a | --all] [-p | --pager]
     Use 'cldl list --help' to see more
 `)

@@ -9,8 +9,8 @@ import (
 	"github.com/mitchellh/go-wordwrap"
 )
 
-func EditTodo(title string, conf EditConf, colors ColorConf) {
-	setColorScheme(colors)
+func Edit_todo(title string, conf EditConf, colors ColorConf) {
+	set_color_scheme(colors)
 	if title == "" {
 		ERROR("Title required")
 		return
@@ -37,19 +37,19 @@ func EditTodo(title string, conf EditConf, colors ColorConf) {
 	newContent, err := reader.ReadString('\n')
 	if err != nil {
 		ERROR("Error reading input, did text end with a newline?")
-		UsageEdit()
+		Usage_edit()
 		return
 	}
 	newContent = strings.TrimSpace(newContent)
 	if conf.Keep_content {
 		newContent = content + "\n\nNew edit:\n" + newContent
 	}
-	changeEntryContent(newContent, title)
+	change_entry_content(newContent, title)
 }
 
 // Send the new content of an entry into the database
-func changeEntryContent(newContent string, title string) {
-	todoDB := openTodoDB()
+func change_entry_content(newContent string, title string) {
+	todoDB := open_todo_db()
 	defer todoDB.Close()
 
 	sqlStatement := `UPDATE todo SET content = $1 WHERE UPPER(title) = UPPER($2);`
@@ -63,7 +63,7 @@ func changeEntryContent(newContent string, title string) {
 }
 
 // NOTE: Edit command help and usage functions
-func UsageEdit() {
+func Usage_edit() {
 	fmt.Print(`Usage: cldl edit [-h | --help] [-k | --keep] <title>
     Use 'cldl edit --help' to see more
 `)
