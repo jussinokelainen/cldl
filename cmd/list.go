@@ -259,6 +259,10 @@ func listAllTodoLocations() string {
 
 		locSlice = append(locSlice, shortenedString)
 	}
+	if len(locSlice) < 1 {
+		INFO("No list locations saved. 'cldl check -d' might help, see 'cldl check -h' for more.")
+		os.Exit(0)
+	}
 
 	fmt.Fprint(&listString, "\n")
 	padContentToCenter(&listString, longestLoc+2)
