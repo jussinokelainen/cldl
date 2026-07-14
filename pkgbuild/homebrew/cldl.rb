@@ -9,6 +9,6 @@ class Cldl < Formula
 
   def install
     system "make", "release"
-    bin.install "bin/cldl"
+    bin.install "build/cldl"
   end
 end

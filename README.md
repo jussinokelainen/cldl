@@ -25,7 +25,7 @@ git clone git@github.com:jussinokelainen/cldl.git
 cd cldl
 make release
 ```
-then copy the built binary from bin/ to your PATH.
+then copy the built binary from build/ to your PATH.
 
 Alternatively if ~/bin/ is in your PATH, run
 ```bash

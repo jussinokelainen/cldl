@@ -1,5 +1,5 @@
 # Built binaries
-bin/
+build/
 
 pkgbuild/arch/pkg/
 pkgbuild/arch/src/
