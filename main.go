@@ -533,34 +533,35 @@ func mainHelp() {
   Default configs:
     [general]
       ask_rm_on_check = true
-      timezone = "Local"
-      checkdirs = []
+      timezone        = "Local"
+      checkdirs       = []
 
     [add]
-      auto_init = false
+      auto_init    = false
       ask_priority = false
-      ask_tags = false
+      ask_tags     = false
 
     [edit]
       keep_content = false
 
     [priority]
-      default = 0
-      urgent = 10
+      default     = 0
+      urgent      = 10
       in_progress = 100
 
     [rm]
-      ask_full = false
+      ask_full            = false
       always_confirm_full = true
 
     [colors]
       default = "#99FFFF"
-      urgent = "#FF8000"
-      wip = "#66FF66"
+      urgent  = "#FF8000"
+      wip     = "#66FF66"
       content = "#FFFFFF"
-      border = "#FF99FF"
-      dim = "#404040"
-      tag = "#FFFF66"`
+      border  = "#FF99FF"
+      dim     = "#404040"
+      tag     = "#FFFF66"
+      file    = "#99FFFF"`
 
 	cmd.PrintHelpMSG(helpmsg)
 }

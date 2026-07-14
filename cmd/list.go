@@ -106,7 +106,7 @@ func formatListItems(todoSlice []TodoStruct, timeZone *time.Location, urgentPrio
 
 		// Print location, tag, timestamp and priority level
 		if row.File != "NO_FILE" {
-			listString.WriteString(makeLocationLine(row.File, row.Line, wipColor))
+			listString.WriteString(makeLocationLine(row.File, row.Line, fileColor))
 		}
 		if row.Tag != "NONE" {
 			listString.WriteString(makeTagLine(row.Tag))

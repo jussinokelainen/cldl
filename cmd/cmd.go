@@ -4,11 +4,12 @@ import (
 	"bufio"
 	"database/sql"
 	"fmt"
-	"golang.org/x/term"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
+
+	"golang.org/x/term"
 )
 
 var lineComments = map[string]string{
@@ -58,8 +59,9 @@ var (
 	contentColor string
 	borderColor  string
 
-	dimColor string
-	tagColor string
+	dimColor  string
+	tagColor  string
+	fileColor string
 )
 
 type TodoStruct struct {
@@ -132,6 +134,7 @@ type ColorConf struct {
 	Border  string
 	Dim     string
 	Tag     string
+	File    string
 }
 
 func DefaultConfig() Config {
@@ -171,6 +174,7 @@ func DefaultConfig() Config {
 	colors.Border = "#FF99FF"
 	colors.Dim = "#404040"
 	colors.Tag = "#FFFF66"
+	colors.File = "#99FFFF"
 	conf.Colors = colors
 
 	return conf
@@ -214,6 +218,11 @@ func setColorScheme(c ColorConf) {
 	tagColor, err = hexToRgbString(c.Tag)
 	if err != nil {
 		ERROR("Failed to parse tag color")
+		os.Exit(1)
+	}
+	fileColor, err = hexToRgbString(c.File)
+	if err != nil {
+		ERROR("Failed to parse file color")
 		os.Exit(1)
 	}
 }
