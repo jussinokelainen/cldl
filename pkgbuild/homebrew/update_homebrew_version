@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+# This script can be used to update the cldl.rb files in this directory,
+# and in the homebrew-cldl repository which should be cloned into this
+# directory.
+# The script takes the new version as an argument.
+#
+# Usage example, updating to version v1.2.3:
+# ./update_homebrew_version v1.2.3
+
 VERSION=$1
 shasum=$(curl -L https://github.com/jussinokelainen/cldl/archive/refs/tags/"$VERSION".tar.gz | sha256sum)
 shasum=${shasum%% *}
