@@ -335,6 +335,7 @@ func handle_add(args []string, flags flagger.Flagset, conf cmd.Config) {
 			}
 		case "t", "tag":
 			tag = flag[1]
+			conf.Add.Ask_tags = false
 		}
 	}
 
