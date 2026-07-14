@@ -1,6 +1,6 @@
 # Maintainer: Jussi Nokelainen <jussinoke@gmail.com>
 pkgname='cldl-git'
-pkgver=r58.c496e16
+pkgver=r59.b6df768
 pkgrel=1
 pkgdesc='Directory based cli todo lists'
 arch=('x86_64')
