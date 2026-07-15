@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+TAG=$(git describe --tags --abbrev=0 | sed 's/^v//')
+HASH=$(git rev-parse --short HEAD)
+REV_COUNT=$(git rev-list --count HEAD)
+VERSION="${TAG}+git-r${REV_COUNT}.${HASH}"
+
+PKGDIR="cldl_${VERSION}_amd64"
+
+mkdir -p "$PKGDIR"/DEBIAN
+mkdir -p "$PKGDIR"/usr/bin
+
+cp ../../build/cldl "$PKGDIR"/usr/bin/
+sed "s/@VERSION@/$VERSION/" ./control >"$PKGDIR/DEBIAN/control"
+
+dpkg-deb --root-owner-group --build "$PKGDIR" "${PKGDIR}.deb"
+
+sudo apt install "./${PKGDIR}.deb"
+
+rm -rf "$PKGDIR"

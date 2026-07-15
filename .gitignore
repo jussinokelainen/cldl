@@ -6,6 +6,7 @@ pkgbuild/arch/src/
 
 # Built packages
 pkgbuild/arch/*.pkg.tar.*
+pkgbuild/debian/*.deb
 
 # Cloned repositories
 pkgbuild/arch/cldl-git/

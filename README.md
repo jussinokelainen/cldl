@@ -11,6 +11,13 @@ cd cldl/pkgbuild/arch
 makepkg -si
 ```
 
+#### Debian:
+```bash
+git clone git@github.com:jussinokelainen/cldl.git
+cd cldl/pkgbuild/debian
+./install
+```
+
 #### macOS (homebrew):
 ```bash
 brew tap jussinokelainen/cldl

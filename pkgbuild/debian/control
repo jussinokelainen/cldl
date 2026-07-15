@@ -1,0 +1,7 @@
+Package: cldl
+Version: @VERSION@
+Architecture: amd64
+Maintainer: Jussi Nokelainen <jussinoke@gmail.com>
+Depends: less
+Homepage: https://github.com/jussinokelainen/cldl
+Description: Directory based todo lists
