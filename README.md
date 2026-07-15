@@ -11,6 +11,13 @@ cd cldl/pkgbuild/arch
 makepkg -si
 ```
 
+#### Void Linux:
+```bash
+git clone git@github.com:jussinokelainen/cldl.git
+cd cldl/pkgbuild/void
+./install
+```
+
 #### Debian:
 ```bash
 git clone git@github.com:jussinokelainen/cldl.git

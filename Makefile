@@ -6,34 +6,34 @@ EXTFLAGS := -buildvcs=false -a -installsuffix cgo -trimpath
 .PHONY: build release install clean
 
 build:
-	@printf "\e[36m==> \e[0mBuilding $(APP)...\n"
-	@printf "\e[36m==> \e[0mCreating required directories...\n"
+	@printf "\033[36m==> \033[0mBuilding $(APP)...\n"
+	@printf "\033[36m==> \033[0mCreating required directories...\n"
 	@mkdir -p $(BUILD_DIR)
 
-	@printf "\e[36m==> \e[0mCompiling binaries...\n"
+	@printf "\033[36m==> \033[0mCompiling binaries...\n"
 	go build -o ./$(BUILD_DIR)/$(APP) ./
-	@printf "[\e[32m OK \e[0m] Debug Build complete\n"
+	@printf "[\033[32m OK \033[0m] Debug Build complete\n"
 
 release:
-	@printf "\e[36m==> \e[0mBuilding $(APP)...\n"
-	@printf "\e[36m==> \e[0mCreating required directories...\n"
+	@printf "\033[36m==> \033[0mBuilding $(APP)...\n"
+	@printf "\033[36m==> \033[0mCreating required directories...\n"
 	@mkdir -p $(BUILD_DIR)
 
-	@printf "\e[36m==> \e[0mCompiling binaries...\n"
+	@printf "\033[36m==> \033[0mCompiling binaries...\n"
 	go build $(LDFLAGS) $(EXTFLAGS) -o ./$(BUILD_DIR)/$(APP) ./
-	@printf "[\e[32m OK \e[0m] Release Build complete\n"
+	@printf "[\033[32m OK \033[0m] Release Build complete\n"
 
 
 # Install probably isn't the correct name of this, it is just there
 # so i can easily copy the binary into my PATH if needed
 install: release
-	@printf "\e[32m==> \e[0mCopying required files and binaries...\n"
+	@printf "\033[32m==> \033[0mCopying required files and binaries...\n"
 	cp ./$(BUILD_DIR)/$(APP) ~/bin/$(APP)
 
-	@printf "[\e[32m OK \e[0m] Installing complete\n"
+	@printf "[\033[32m OK \033[0m] Installing complete\n"
 
 clean:
-	@printf "\e[32m==> \e[0mRemoving files and binaries...\n"
+	@printf "\033[32m==> \033[0mRemoving files and binaries...\n"
 	rm -rf ./$(BUILD_DIR)
 	rm ~/bin/$(APP)
-	@printf "[\e[32m OK \e[0m] Removing complete\n"
+	@printf "[\033[32m OK \033[0m] Removing complete\n"

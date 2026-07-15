@@ -3,6 +3,7 @@ build/
 
 pkgbuild/arch/pkg/
 pkgbuild/arch/src/
+pkgbuild/void/void-packages/
 
 # Built packages
 pkgbuild/arch/*.pkg.tar.*

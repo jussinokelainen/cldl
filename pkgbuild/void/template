@@ -1,0 +1,24 @@
+pkgname=cldl
+version=
+revision=1
+hostmakedepends="git go"
+makedepends=""
+depends="less"
+short_desc="CLI Todo lists."
+maintainer="Jussi Nokelainen <jussinoke@gmail.com>"
+license="MIT"
+homepage="https://github.com/jussinokelainen/cldl"
+nopie=yes
+
+do_fetch() {
+	git clone "https://github.com/jussinokelainen/cldl.git" "$wrksrc"
+}
+
+do_build() {
+	make release
+}
+
+do_install() {
+	mkdir -p "$DESTDIR"/usr/bin/
+	cp build/cldl "$DESTDIR"/usr/bin/cldl
+}

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+# TODO: make versioning 'correct' when this package
+# no longer needs to build the latest commit
+TAG=$(git describe --tags --abbrev=0 | sed 's/^v//')
+HASH=$(git rev-parse --short HEAD)
+REV_COUNT=$(git rev-list --count HEAD)
+VERSION="${TAG}+r${REV_COUNT}.${HASH}"
+
+if [[ ! -d "void-packages" ]]; then
+    echo "Looks like void-packages git repository does not exist. Cloning..."
+    git clone --depth=1 git@github.com:void-linux/void-packages.git
+    cd void-packages || exit 1
+    ./xbps-src binary-bootstrap
+    mkdir -p srcpkgs/cldl
+else
+    cd void-packages || exit 1
+fi
+
+sed "s/version=.*/version=$VERSION/" ../template >./srcpkgs/cldl/template
+./xbps-src pkg cldl
+sudo xi -f cldl
