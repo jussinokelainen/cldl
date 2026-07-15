@@ -33,16 +33,13 @@ brew install cldl
 ```
 
 #### Other:
-Run
 ```bash
-git clone git@github.com:jussinokelainen/cldl.git
-cd cldl
-make release
+sudo make install
 ```
-then copy the built binary from build/ to your PATH.
 
-Alternatively if ~/bin/ is in your PATH, run
+#### Uninstall:
+Uninstalling can be done through your package manager
+if it was used for installing, otherwise
 ```bash
-make install
+sudo make uninstall
 ```
-which builds the binary and copies it to ~/bin/

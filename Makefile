@@ -3,7 +3,7 @@ BUILD_DIR := build
 LDFLAGS := -ldflags "-w -s -X main.version=stripped -buildid= -extldflags=static"
 EXTFLAGS := -buildvcs=false -a -installsuffix cgo -trimpath
 
-.PHONY: build release install clean
+.PHONY: build release install clean uninstall
 
 build:
 	@printf "\033[36m==> \033[0mBuilding $(APP)...\n"
@@ -24,16 +24,19 @@ release:
 	@printf "[\033[32m OK \033[0m] Release Build complete\n"
 
 
-# Install probably isn't the correct name of this, it is just there
-# so i can easily copy the binary into my PATH if needed
 install: release
 	@printf "\033[32m==> \033[0mCopying required files and binaries...\n"
-	cp ./$(BUILD_DIR)/$(APP) ~/bin/$(APP)
+	mkdir -p /usr/share/cldl
+	cp ./$(BUILD_DIR)/$(APP) /usr/bin/$(APP)
+	cp ./default_config.toml /usr/share/cldl/default_config.toml
 
 	@printf "[\033[32m OK \033[0m] Installing complete\n"
+
+uninstall:
+	rm /usr/bin/$(APP)
+	rm -rf /usr/share/cldl
 
 clean:
 	@printf "\033[32m==> \033[0mRemoving files and binaries...\n"
 	rm -rf ./$(BUILD_DIR)
-	rm ~/bin/$(APP)
 	@printf "[\033[32m OK \033[0m] Removing complete\n"

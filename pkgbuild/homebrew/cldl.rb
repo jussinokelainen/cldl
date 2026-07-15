@@ -10,5 +10,6 @@ class Cldl < Formula
   def install
     system "make", "release"
     bin.install "build/cldl"
+    pkgshare.install "default_config.toml"
   end
 end

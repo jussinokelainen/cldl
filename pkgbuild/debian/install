@@ -9,8 +9,10 @@ PKGDIR="cldl_${VERSION}_amd64"
 
 mkdir -p "$PKGDIR"/DEBIAN
 mkdir -p "$PKGDIR"/usr/bin
+mkdir -p "$PKGDIR"/usr/share/cldl
 
 cp ../../build/cldl "$PKGDIR"/usr/bin/
+cp ../../default_config.toml "$PKGDIR"/usr/share/cldl/
 sed "s/@VERSION@/$VERSION/" ./control >"$PKGDIR/DEBIAN/control"
 
 dpkg-deb --root-owner-group --build "$PKGDIR" "${PKGDIR}.deb"

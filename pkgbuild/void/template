@@ -11,14 +11,16 @@ homepage="https://github.com/jussinokelainen/cldl"
 nopie=yes
 
 do_fetch() {
-	git clone "https://github.com/jussinokelainen/cldl.git" "$wrksrc"
+    git clone "https://github.com/jussinokelainen/cldl.git" "$wrksrc"
 }
 
 do_build() {
-	make release
+    make release
 }
 
 do_install() {
-	mkdir -p "$DESTDIR"/usr/bin/
-	cp build/cldl "$DESTDIR"/usr/bin/cldl
+    mkdir -p "$DESTDIR"/usr/bin/
+    mkdir -p "$DESTDIR"/usr/share/cldl/
+    cp build/cldl "$DESTDIR"/usr/bin/cldl
+    cp default_config.toml "$DESTDIR"/usr/share/cldl/default_config.toml
 }

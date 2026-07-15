@@ -4,6 +4,7 @@ import (
 	"cldl/cmd"
 	"cldl/flagger"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -53,6 +54,8 @@ func handle_parsing(conf cmd.Config) {
 	flags.Optional_value = []string{}
 
 	switch args[0] {
+	case "generate-configs":
+		generate_configs()
 	case "init":
 		handle_init(args, flags)
 	case "list", "ls":
@@ -89,6 +92,51 @@ func handle_parsing(conf cmd.Config) {
 			}
 		}
 	}
+}
+
+func generate_configs() {
+	configDir, err := os.UserHomeDir()
+	if err != nil {
+		cmd.ERROR("Failed to get config directory")
+		return
+	}
+
+	configFile := configDir + "/.config/cldl/config.toml"
+	if cmd.File_exists(configFile) {
+		cmd.INFO("Config file already exists, nothing to do.")
+		return
+	} else {
+		default_config_file := "/usr/share/cldl/default_config.toml"
+		copy_file(default_config_file, configFile)
+	}
+}
+
+func copy_file(src string, dest string) {
+	in, err := os.Open(src)
+	if err != nil {
+		cmd.ERROR("Default config file not found.")
+		return
+	}
+	defer in.Close()
+
+	out, err := os.Create(dest)
+	if err != nil {
+		cmd.ERROR("Error in creating config file.")
+		return
+	}
+	defer func() {
+		cerr := out.Close()
+		if err == nil {
+			err = cerr
+		}
+	}()
+	if _, err = io.Copy(out, in); err != nil {
+		cmd.ERROR("Error copying data to config file")
+		return
+	}
+
+	os.Chmod(dest, os.FileMode(0644))
+	err = out.Sync()
 }
 
 func handle_rename(args []string, flags flagger.Flagset, color_conf cmd.ColorConf) {
@@ -504,6 +552,7 @@ func main_help() {
       --help, -h           | Show this message
 
   Available commands:
+      generate-configs     | Generate a config file with default values
       set                  | Set some values of todo entries, see cldl set --help
       init                 | Create new todo in current directory
       check                | Check all locations saved by the program whether

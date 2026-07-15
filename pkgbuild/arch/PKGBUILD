@@ -1,6 +1,6 @@
 # Maintainer: Jussi Nokelainen <jussinoke@gmail.com>
 pkgname='cldl-git'
-pkgver=r63.4d241e2
+pkgver=r65.21acee1
 pkgrel=1
 pkgdesc='Directory based cli todo lists'
 arch=('x86_64')
@@ -25,4 +25,5 @@ build() {
 package() {
 	cd "$pkgname"
 	install -Dm755 ./build/cldl "$pkgdir/usr/bin/cldl"
+	install -Dm644 ./default_config.toml "$pkgdir/usr/share/cldl/default_config.toml"
 }
