@@ -2,6 +2,17 @@ CLDL
 ====
 Directory specific command line todo-lists.
 
+Configuring
+-----------
+Configuring cldl can be done through a config.toml file, which should
+be located at $HOME/.config/cldl/config.toml
+
+The file can be either created manually, or by running the command below
+to generate a config file containing the default settings.
+```bash
+cldl generate-configs
+```
+
 Installation
 ------------
 #### Arch Linux:
@@ -37,9 +48,15 @@ brew install cldl
 sudo make install
 ```
 
-#### Uninstall:
-Uninstalling can be done through your package manager
-if it was used for installing, otherwise
+Uninstalling
+------------
+Uninstalling can be done through your package manager, if it was
+used for installing. Otherwise:
 ```bash
 sudo make uninstall
+```
+Or manually:
+```bash
+sudo rm /usr/bin/cldl
+sudo rm -rf /usr/share/cldl
 ```
