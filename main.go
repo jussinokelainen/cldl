@@ -107,19 +107,28 @@ func generate_configs() {
 		cmd.INFO("Config file already exists, nothing to do.")
 		return
 	} else {
-		// CLDL-ENTRY: title: macOS filepath, priority: 9, tag: pkg
-		default_config_file := "/usr/share/cldl/default_config.toml"
-		err := os.MkdirAll(configDir, 0755)
+		default_config_file_locations := []string{
+			"/usr/share/cldl/default_config.toml",
+			"/opt/homebrew/share/cldl/default_config.toml",
+		}
+		err = os.MkdirAll(configDir, 0755)
 		if err != nil {
 			cmd.ERROR("Error creating config directory.")
 			os.Exit(1)
 		}
-		copy_file(default_config_file, configFile)
+		copy_file(default_config_file_locations, configFile)
 	}
 }
 
-func copy_file(src string, dest string) {
-	in, err := os.Open(src)
+func copy_file(src_locations []string, dest string) {
+	var in *os.File
+	var err error
+	for _, path := range src_locations {
+		in, err = os.Open(path)
+		if err == nil {
+			break
+		}
+	}
 	if err != nil {
 		cmd.ERROR("Default config file not found.")
 		os.Exit(1)
