@@ -87,11 +87,21 @@ func format_list_items(todoSlice []TodoStruct, timeZone *time.Location, urgentPr
 		} else {
 			priorityColor = defaultColor
 		}
-		fmt.Fprint(&out_str, "\n")
+
 		// Print title
-		titleSize := utf8.RuneCountInString(row.Title)
-		fmt.Fprint(&out_str, format_line(row.Title, &priorityColor))
-		fmt.Fprint(&out_str, format_line(add_line(titleSize+4), &priorityColor))
+		fmt.Fprint(&out_str, "\n")
+		title_wrapped := wordwrap.WrapString(row.Title, uint(maxWidth))
+		title_lines := strings.SplitSeq(title_wrapped, "\n")
+		longest_title_line := 0
+		for line := range title_lines {
+			line_size := utf8.RuneCountInString(line)
+			if line_size > longest_title_line {
+				longest_title_line = line_size
+			}
+			fmt.Fprint(&out_str, format_line(line, &priorityColor))
+		}
+		title_underline_size := min((longest_title_line + 4), maxWidth)
+		fmt.Fprint(&out_str, format_line(add_line(title_underline_size), &priorityColor))
 
 		// Print content
 		if row.Content != "[ EMPTY ]" {
@@ -107,7 +117,7 @@ func format_list_items(todoSlice []TodoStruct, timeZone *time.Location, urgentPr
 			fmt.Fprintf(&out_str, "%s║  %s  ║\033[0m\n", borderColor, add_space(maxWidth))
 		}
 
-		// Print location, tag, timestamp and priority level
+		// Print location
 		if row.File != "NO_FILE" {
 			loc_string := row.File + ":" + strconv.Itoa(row.Line)
 			titleSize := utf8.RuneCountInString(loc_string)
@@ -115,16 +125,20 @@ func format_list_items(todoSlice []TodoStruct, timeZone *time.Location, urgentPr
 			fmt.Fprint(&out_str, format_line(loc_string, &fileColor))
 			fmt.Fprint(&out_str, format_line(add_line(titleSize+4), &fileColor))
 		}
+
+		// Print tag
 		if row.Tag != "NONE" {
 			tagString := "Tag: " + row.Tag
 			fmt.Fprint(&out_str, format_line(tagString, &tagColor))
 		}
+
 		// Print Priority
 		if priorityColor == defaultColor {
 			priorityColor = dimColor
 		}
 		prioString := "Priority: " + fmt.Sprint(int(row.Priority))
 		fmt.Fprint(&out_str, format_line(prioString, &priorityColor))
+
 		// Print timestamp
 		timeString := "Created: " + time.Time.String(time.Unix(row.Time, 0).In(timeZone))
 		fmt.Fprint(&out_str, format_line(timeString, &dimColor))
