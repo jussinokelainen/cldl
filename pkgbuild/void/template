@@ -1,5 +1,5 @@
 pkgname=cldl
-version=
+version=@VERSION@
 revision=1
 hostmakedepends="git go"
 makedepends=""
@@ -15,12 +15,11 @@ do_fetch() {
 }
 
 do_build() {
-    make release
+    cd "$wrksrc"
+    make build
 }
 
 do_install() {
-    mkdir -p "$DESTDIR"/usr/bin/
-    mkdir -p "$DESTDIR"/usr/share/cldl/
-    cp build/cldl "$DESTDIR"/usr/bin/cldl
-    cp default_config.toml "$DESTDIR"/usr/share/cldl/default_config.toml
+    cd "$wrksrc"
+    make DESTDIR="$DESTDIR" install
 }

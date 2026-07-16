@@ -35,9 +35,7 @@ class Cldl < Formula
   depends_on "go" => :build
 
   def install
-    system "make", "release"
-    bin.install "build/cldl"
-    pkgshare.install "default_config.toml"
+    system "make", "install"
   end
 end
 EOF

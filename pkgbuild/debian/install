@@ -11,8 +11,10 @@ mkdir -p "$PKGDIR"/DEBIAN
 mkdir -p "$PKGDIR"/usr/bin
 mkdir -p "$PKGDIR"/usr/share/cldl
 
-cp ../../build/cldl "$PKGDIR"/usr/bin/
-cp ../../default_config.toml "$PKGDIR"/usr/share/cldl/
+cd ../.. || exit 1
+DESTDIR="pkgbuild/debian/$PKGDIR" make install
+cd - || exit 1
+
 sed "s/@VERSION@/$VERSION/" ./control >"$PKGDIR/DEBIAN/control"
 
 dpkg-deb --root-owner-group --build "$PKGDIR" "${PKGDIR}.deb"
