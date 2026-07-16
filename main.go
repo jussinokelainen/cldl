@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	configDir, err := os.UserHomeDir()
+	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		cmd.ERROR("Failed to get config directory")
 		return
@@ -23,10 +23,10 @@ func main() {
 	defer cmd.MasterDB.Close()
 
 	conf := cmd.Default_config()
-	configFile := configDir + "/.config/cldl/config.toml"
+	configFile := homeDir + "/.config/cldl/config.toml"
 	_, err = toml.DecodeFile(configFile, &conf)
 	if err != nil {
-		cmd.ERROR("Failed to get configs, using defaults")
+		cmd.INFO("No config file found.")
 		conf = cmd.Default_config()
 	}
 
@@ -95,18 +95,25 @@ func handle_parsing(conf cmd.Config) {
 }
 
 func generate_configs() {
-	configDir, err := os.UserHomeDir()
+	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		cmd.ERROR("Failed to get config directory")
 		return
 	}
 
-	configFile := configDir + "/.config/cldl/config.toml"
+	configDir := homeDir + "/.config/cldl/"
+	configFile := configDir + "config.toml"
 	if cmd.File_exists(configFile) {
 		cmd.INFO("Config file already exists, nothing to do.")
 		return
 	} else {
+		// CLDL-ENTRY: title: macOS filepath, priority: 9, tag: pkg
 		default_config_file := "/usr/share/cldl/default_config.toml"
+		err := os.MkdirAll(configDir, 0755)
+		if err != nil {
+			cmd.ERROR("Error creating config directory.")
+			os.Exit(1)
+		}
 		copy_file(default_config_file, configFile)
 	}
 }
@@ -115,28 +122,35 @@ func copy_file(src string, dest string) {
 	in, err := os.Open(src)
 	if err != nil {
 		cmd.ERROR("Default config file not found.")
-		return
+		os.Exit(1)
 	}
 	defer in.Close()
 
 	out, err := os.Create(dest)
 	if err != nil {
 		cmd.ERROR("Error in creating config file.")
-		return
+		os.Exit(1)
 	}
+
 	defer func() {
 		cerr := out.Close()
 		if err == nil {
 			err = cerr
 		}
 	}()
+
 	if _, err = io.Copy(out, in); err != nil {
 		cmd.ERROR("Error copying data to config file")
-		return
+		os.Exit(1)
 	}
 
 	os.Chmod(dest, os.FileMode(0644))
 	err = out.Sync()
+	if err != nil {
+		panic(err)
+	} else {
+		cmd.OK("Successfully generated config file.")
+	}
 }
 
 func handle_rename(args []string, flags flagger.Flagset, color_conf cmd.ColorConf) {
@@ -546,6 +560,7 @@ func main_usage() {
     Use cldl --help to see available commands
 `)
 }
+
 func main_help() {
 	const helpmsg = `Help for cldl:
   Flags:
