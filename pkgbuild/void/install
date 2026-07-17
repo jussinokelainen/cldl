@@ -5,6 +5,8 @@ if ! command -v xi >/dev/null; then
     exit 1
 fi
 
+git pull
+
 # TODO: make versioning 'correct' when this package
 # no longer needs to build the latest commit
 TAG=$(git describe --tags --abbrev=0 | sed 's/^v//')

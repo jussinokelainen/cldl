@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+git pull
+
 TAG=$(git describe --tags --abbrev=0 | sed 's/^v//')
 HASH=$(git rev-parse --short HEAD)
 REV_COUNT=$(git rev-list --count HEAD)

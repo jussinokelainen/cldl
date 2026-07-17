@@ -1,8 +1,8 @@
 class Cldl < Formula
   desc "Directory based cli todo lists"
   homepage "https://github.com/jussinokelainen/cldl"
-  url "https://github.com/jussinokelainen/cldl/archive/refs/tags/v0.2.7.tar.gz"
-  sha256 "70b33be07bef98c92745f6aeb05b96dd7626730f82127d04fd8c9d4ae3c47989"
+  url "https://github.com/jussinokelainen/cldl/archive/refs/tags/v0.3.0.tar.gz"
+  sha256 "b6a604c919cf36a2acd9ebc1d9784b1f672a39fa12e438e0eb15d2997690710e"
   license "MIT"
 
   depends_on "go" => :build
