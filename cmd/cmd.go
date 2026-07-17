@@ -440,6 +440,7 @@ func Todo_exists() bool {
 }
 
 // Check whether given file exists
+// (This function might be broken do not trust 100%)
 func File_exists(path string) bool {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return false

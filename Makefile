@@ -10,7 +10,7 @@ BINDIR := $(DESTDIR)$(PREFIX)/bin
 DATADIR := $(DESTDIR)$(PREFIX)/share/$(APP)
 
 LDFLAGS := -ldflags "-w -s -X main.version=stripped -buildid= -extldflags=static"
-EXTFLAGS := -buildvcs=false -a -installsuffix cgo -trimpath
+EXTFLAGS := -buildvcs=false -installsuffix cgo -trimpath
 
 .PHONY: build install uninstall clean
 
@@ -25,11 +25,11 @@ $(BIN): $(GOFILES) go.mod go.sum
 	@printf "[\033[32m OK \033[0m] Build complete\n"
 
 install: $(BIN)
-	mkdir -p $(BINDIR)
-	mkdir -p $(DATADIR)
-
 	@printf "\033[36m==> \033[0mInstalling files...\n"
+	mkdir -p $(BINDIR)
 	install -m755 $(BIN) $(BINDIR)/$(APP)
+
+	mkdir -p $(DATADIR)
 	install -m644 default_config.toml $(DATADIR)/default_config.toml
 	@printf "[\033[32m OK \033[0m] Installation complete\n"
 

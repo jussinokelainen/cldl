@@ -76,6 +76,8 @@ func handle_parsing(conf cmd.Config) {
 		handle_check(args, flags, conf.General)
 	case "relocate":
 		handle_relocate(args, flags, conf.General)
+	case "delete-lists":
+		handle_delete_lists()
 	default:
 		mainFlags, err := flagger.ParseFlags(args, flags)
 		if err != nil || (len(mainFlags.Flags) < 1 && len(mainFlags.ValueFlags) < 1) {
@@ -563,6 +565,10 @@ func handle_relocate(args []string, flags flagger.Flagset, general_conf cmd.Gene
 
 }
 
+func handle_delete_lists() {
+	cmd.Delete_saved_lists()
+}
+
 // NOTE: Main help and usage functions
 func main_usage() {
 	fmt.Print(`Usage: cldl [-h | --help] <command> [<args>]
@@ -580,8 +586,7 @@ func main_help() {
       set                  | Set some values of todo entries, see cldl set --help
       init                 | Create new todo in current directory
       check                | Check all locations saved by the program whether
-                           | the list actually exists. Also checks that a local
-                           | todo has the right columns
+                           | the list actually exists.
       relocate             | Add todo missing from location list
       list, ls             | List all todo list entries
       add                  | Add new entry into todo list
@@ -589,6 +594,8 @@ func main_help() {
       edit                 | Edit an existing todo entry
       fix                  | Fixes the todo table, useful after breaking changes
       rename               | Change the title of a todo entry
+      delete-lists         | delete all lists that have the locations saved.
+                           | Use with caution.
 
   For more info about commands, use 'cldl <command> --help'
 
@@ -601,40 +608,7 @@ func main_help() {
   If a panic error occurs, most likely something went wrong when interacting
   with the sqlite databases (although it is not the only way panics can occur)
 
-  Configuration expects a file '~/.config/cldl/config.toml'.
-
-  Default configs:
-    [general]
-      ask_rm_on_check = true
-      timezone        = "Local"
-      checkdirs       = []
-
-    [add]
-      auto_init    = false
-      ask_priority = false
-      ask_tags     = false
-
-    [edit]
-      keep_content = false
-
-    [priority]
-      default     = 0
-      urgent      = 10
-      in_progress = 100
-
-    [rm]
-      ask_full            = false
-      always_confirm_full = true
-
-    [colors]
-      default = "#99FFFF"
-      urgent  = "#FF8000"
-      wip     = "#66FF66"
-      content = "#FFFFFF"
-      border  = "#FF99FF"
-      dim     = "#404040"
-      tag     = "#FFFF66"
-      file    = "#99FFFF"`
+  Configuration expects a file '~/.config/cldl/config.toml'.`
 
 	cmd.Print_help_msg(helpmsg)
 }

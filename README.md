@@ -50,6 +50,12 @@ sudo make install
 
 Uninstalling
 ------------
+If you wish to remove all saved lists (that are listed in 'cldl ls -a'), run
+```bash
+cldl delete-lists
+```
+before uninstalling the package.
+
 Uninstalling can be done through your package manager, if it was
 used for installing. Otherwise:
 ```bash
