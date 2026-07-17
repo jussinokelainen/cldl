@@ -8,6 +8,6 @@ class Cldl < Formula
   depends_on "go" => :build
 
   def install
-    system "PREFIX=#{prefix}","make", "install"
+    system "make","PREFIX=#{prefix}", "install"
   end
 end
