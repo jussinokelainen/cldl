@@ -6,7 +6,7 @@ makedepends=""
 depends="less"
 short_desc="CLI Todo lists."
 maintainer="Jussi Nokelainen <jussinoke@gmail.com>"
-license="MIT"
+license="GPL-3.0-only"
 homepage="https://github.com/jussinokelainen/cldl"
 nopie=yes
 

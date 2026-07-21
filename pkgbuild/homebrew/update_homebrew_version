@@ -30,7 +30,7 @@ class Cldl < Formula
   homepage "https://github.com/jussinokelainen/cldl"
   url "https://github.com/jussinokelainen/cldl/archive/refs/tags/$VERSION.tar.gz"
   sha256 "$shasum"
-  license "MIT"
+  license "GPL-3.0-only"
 
   depends_on "go" => :build
 
