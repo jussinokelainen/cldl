@@ -54,6 +54,8 @@ func handle_parsing(conf cmd.Config) {
 	flags.Optional_value = []string{}
 
 	switch args[0] {
+	case "list-commands":
+		list_commands()
 	case "generate-configs":
 		generate_configs()
 	case "init":
@@ -93,6 +95,13 @@ func handle_parsing(conf cmd.Config) {
 				return
 			}
 		}
+	}
+}
+
+func list_commands() {
+	commands := []string{"--help", "add", "check", "done", "edit", "fix", "generate-configs", "init", "list", "ls", "relocate", "remove", "rename", "rm", "set"}
+	for _, command := range commands {
+		println(command)
 	}
 }
 
@@ -582,6 +591,7 @@ func main_help() {
       --help, -h           | Show this message
 
   Available commands:
+      list-commands        | list all available commands separated by newlines
       generate-configs     | Generate a config file with default values
       set                  | Set some values of todo entries, see cldl set --help
       init                 | Create new todo in current directory
