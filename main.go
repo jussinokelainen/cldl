@@ -101,7 +101,7 @@ func handle_parsing(conf cmd.Config) {
 func list_commands() {
 	commands := []string{"--help", "add", "check", "done", "edit", "fix", "generate-configs", "init", "list", "ls", "relocate", "remove", "rename", "rm", "set"}
 	for _, command := range commands {
-		println(command)
+		fmt.Println(command)
 	}
 }
 
