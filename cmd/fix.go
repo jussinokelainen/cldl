@@ -57,28 +57,28 @@ func Fix_todo_table(defaultPriority int) {
 		}
 	}
 	if !title {
-		_, err := todoDB.Exec(`ALTER TABLE todo ADD COLUMN title VARCHAR UNIQUE NOT NULL;`)
+		_, err := todoDB.Exec(`ALTER TABLE todo ADD COLUMN title VARCHAR UNIQUE NOT NULL DEFAULT "NONE";`)
 		if err != nil {
 			panic(err)
 		}
 		INFO("Added missing title column")
 	}
 	if !content {
-		_, err := todoDB.Exec(`ALTER TABLE todo ADD COLUMN content VARCHAR NOT NULL;`)
+		_, err := todoDB.Exec(`ALTER TABLE todo ADD COLUMN content VARCHAR NOT NULL DEFAULT "[ EMPTY ]";`)
 		if err != nil {
 			panic(err)
 		}
 		INFO("Added missing content column")
 	}
 	if !time {
-		_, err := todoDB.Exec(`ALTER TABLE todo ADD COLUMN time INTEGER NOT NULL;`)
+		_, err := todoDB.Exec(`ALTER TABLE todo ADD COLUMN time INTEGER NOT NULL DEFAULT 1;`)
 		if err != nil {
 			panic(err)
 		}
 		INFO("Added missing time column")
 	}
 	if !priority {
-		_, err := todoDB.Exec(`ALTER TABLE todo ADD COLUMN priority INTEGER NOT NULL;`)
+		_, err := todoDB.Exec(`ALTER TABLE todo ADD COLUMN priority INTEGER NOT NULL DEFAULT 1;`)
 		if err != nil {
 			panic(err)
 		}
